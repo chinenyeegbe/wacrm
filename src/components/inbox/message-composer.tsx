@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useCallback, KeyboardEvent } from "react";
-import { Send, LayoutTemplate } from "lucide-react";
+import { Send, LayoutTemplate, Sparkles, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ReplyQuote } from "./reply-quote";
@@ -32,6 +33,7 @@ export function MessageComposer({
 }: MessageComposerProps) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = useCallback(() => {
@@ -76,6 +78,41 @@ export function MessageComposer({
     [adjustHeight]
   );
 
+  // AI assist: with an empty box it suggests the next reply from the
+  // conversation history; with a draft already typed it rewrites it. The
+  // provider key lives server-side — we only ever receive the finished text.
+  const handleAI = useCallback(async () => {
+    if (aiLoading || sessionExpired) return;
+    const draft = text.trim();
+    setAiLoading(true);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          draft
+            ? { action: "improve", draft, mode: "rewrite" }
+            : { action: "suggest_reply", conversation_id: conversationId }
+        ),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(payload?.error || `AI failed: HTTP ${res.status}`);
+        return;
+      }
+      if (payload?.result) {
+        setText(payload.result);
+        // Value updates next render; resize once the DOM has it.
+        requestAnimationFrame(adjustHeight);
+        textareaRef.current?.focus();
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "AI request failed");
+    } finally {
+      setAiLoading(false);
+    }
+  }, [aiLoading, sessionExpired, text, conversationId, adjustHeight]);
+
   return (
     <div className="border-t border-slate-800 bg-slate-900 p-3">
       {replyTo && (
@@ -113,6 +150,25 @@ export function MessageComposer({
           title="Send template"
         >
           <LayoutTemplate className="h-4 w-4" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-9 w-9 shrink-0 p-0 text-violet-400 hover:text-violet-300 disabled:opacity-40"
+          onClick={handleAI}
+          disabled={aiLoading || sessionExpired}
+          title={
+            text.trim()
+              ? "AI: rewrite this draft"
+              : "AI: suggest a reply"
+          }
+        >
+          {aiLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
         </Button>
 
         <textarea

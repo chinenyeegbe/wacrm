@@ -29,6 +29,11 @@ clone or fork it to run your own CRM.
 - **No-code automations** — triggers on inbound messages, new
   contacts, keywords, or schedule; conditional branches, waits,
   tags, webhooks. Visual builder.
+- **AI assistant on free LLMs** — suggest the next reply, rewrite a
+  draft, and generate broadcast + social copy, all matched to the
+  customer's language. Runs on free models (OpenRouter / Nvidia
+  Nemotron) — one env var, $0 to start. See [`docs/ai.md`](./docs/ai.md)
+  and the growth plan in [`STRATEGY.md`](./STRATEGY.md).
 - **Real-time dashboard** — response times, daily volume, pipeline
   value, cross-module activity feed.
 - **Account management** — email, password, avatar, global sign-out.
