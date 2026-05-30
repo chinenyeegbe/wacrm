@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from 'crypto'
 import { createClient } from '@supabase/supabase-js'
 import { decrypt } from '@/lib/whatsapp/encryption'
 import { computePlatformFee } from '@/lib/payments/providers'
+import { splitCommission } from '@/lib/referrals/commission'
 import type { PaymentProvider } from '@/types'
 
 // Lazy admin client — mirrors the WhatsApp webhook so we don't crash at
@@ -130,7 +131,77 @@ export async function POST(
       .eq('id', pr.conversation_id)
   }
 
+  // Accrue a partner's referral earning, if this business was referred.
+  // Best-effort and isolated: a failure here must never fail the webhook
+  // (the payment is already confirmed). The merchant's bill is unchanged —
+  // the partner's share comes out of the platform fee.
+  await accrueReferralEarning(db, pr, feeMinor).catch((err) => {
+    console.error('[payments/webhook] referral accrual failed:', err)
+  })
+
   return NextResponse.json({ ok: true })
+}
+
+/**
+ * If the paying business's workspace was referred by a partner, write an
+ * immutable referral_earnings row for the partner's share of the platform
+ * fee, and bump the partner's denormalised lifetime stats.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function accrueReferralEarning(db: any, pr: any, feeMinor: number) {
+  if (feeMinor <= 0) return
+
+  // The merchant's workspace = the business that was referred. Use the
+  // owner's personal workspace (agency mode: a business is a workspace).
+  const { data: ws } = await db
+    .from('workspaces')
+    .select('id')
+    .eq('owner_id', pr.user_id)
+    .eq('kind', 'personal')
+    .maybeSingle()
+  if (!ws) return
+
+  const { data: referral } = await db
+    .from('referrals')
+    .select('id, partner_id, status')
+    .eq('workspace_id', ws.id)
+    .eq('status', 'active')
+    .maybeSingle()
+  if (!referral) return
+
+  const { data: partner } = await db
+    .from('partners')
+    .select('id, share_bps, status, total_earned_minor')
+    .eq('id', referral.partner_id)
+    .maybeSingle()
+  if (!partner || partner.status !== 'active') return
+
+  const split = splitCommission({
+    grossMinor: pr.amount_minor,
+    platformFeeMinor: feeMinor,
+    partnerShareBps: partner.share_bps ?? 0,
+  })
+  if (split.partnerMinor <= 0) return
+
+  await db.from('referral_earnings').insert({
+    partner_id: partner.id,
+    referral_id: referral.id,
+    payment_request_id: pr.id,
+    gross_minor: split.grossMinor,
+    platform_fee_minor: split.platformFeeMinor,
+    amount_minor: split.partnerMinor,
+    share_bps: partner.share_bps ?? 0,
+    currency: pr.currency,
+    status: 'accrued',
+  })
+
+  await db
+    .from('partners')
+    .update({
+      total_earned_minor:
+        (partner.total_earned_minor ?? 0) + split.partnerMinor,
+    })
+    .eq('id', partner.id)
 }
 
 function extractReference(

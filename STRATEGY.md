@@ -258,6 +258,19 @@ warm, non-pushy reconnect message, then hands the reply to a human. Next:
 a scheduled "haven't heard from these N contacts in 90 days → win-back"
 audience, and a small returning-customer offer mechanic.
 
+### 9b. The partner / reseller network (network effect) — BUILT (v1)
+Distribution in African markets is won by people and trust, not ad spend.
+So anyone can become a **partner**, sell wacrm to businesses in their
+network, and earn a **recurring share of every sale those businesses
+collect** — paid out of our commission, never added to the merchant's bill.
+Built: become-a-partner + shareable code/link, signup attribution,
+automatic earnings accrual in the payments webhook, a tiered reward ladder
+(20→50%), and a partner dashboard. Pure tested money math in
+`src/lib/referrals/` (migration 020). Next: payouts (mobile money/bank),
+leaderboards, and combining referral + operator income via agency mode.
+Full write-up + the "global relevance" and network-effect plan:
+[`docs/growth-network.md`](docs/growth-network.md).
+
 ### 10. Creator / skills marketplace
 Independent creators as first-class businesses on the platform:
 - **Sell automation templates** — automations are already portable data

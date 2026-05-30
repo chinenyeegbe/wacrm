@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { normalizeCode } from "@/lib/referrals/codes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MessageSquare, CheckCircle } from "lucide-react";
+import { MessageSquare, CheckCircle, Gift } from "lucide-react";
 
 export default function SignupPage() {
   const [fullName, setFullName] = useState("");
@@ -24,6 +26,14 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const supabase = createClient();
+
+  // Capture a partner referral code from the link (?ref=ADA-7K3Q). We stash
+  // it in the new user's metadata so it survives the email-confirmation
+  // round-trip; a server step later turns it into a referral row.
+  const searchParams = useSearchParams();
+  const referralCode = normalizeCode(
+    searchParams.get("ref") ?? searchParams.get("r") ?? "",
+  );
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +57,9 @@ export default function SignupPage() {
       options: {
         data: {
           full_name: fullName,
+          // Persisted so the referral can be attributed after the user
+          // confirms their email. Empty string when there's no referrer.
+          referral_code: referralCode || undefined,
         },
       },
     });
@@ -107,6 +120,14 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignup} className="flex flex-col gap-4">
+            {referralCode && (
+              <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary">
+                <Gift className="h-4 w-4 shrink-0" />
+                <span>
+                  You were invited by a wacrm partner — welcome! 🎉
+                </span>
+              </div>
+            )}
             {error && (
               <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
                 {error}

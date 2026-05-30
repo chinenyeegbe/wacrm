@@ -94,6 +94,51 @@ export interface WorkspaceMember {
   profile?: Profile;
 }
 
+// ============================================================
+// Partner / reseller network (migration 020)
+// ============================================================
+
+export type PartnerStatus = 'active' | 'suspended';
+
+export interface Partner {
+  id: string;
+  user_id: string;
+  /** Normalised shareable code (see lib/referrals/codes.ts). */
+  code: string;
+  share_bps: number;
+  referred_count: number;
+  total_earned_minor: number;
+  payout_details?: string | null;
+  status: PartnerStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Referral {
+  id: string;
+  partner_id: string;
+  workspace_id: string | null;
+  source?: string | null;
+  status: 'active' | 'churned';
+  created_at: string;
+}
+
+export type ReferralEarningStatus = 'accrued' | 'paid' | 'reversed';
+
+export interface ReferralEarning {
+  id: string;
+  partner_id: string;
+  referral_id: string | null;
+  payment_request_id: string | null;
+  gross_minor: number;
+  platform_fee_minor: number;
+  amount_minor: number;
+  share_bps: number;
+  currency: string;
+  status: ReferralEarningStatus;
+  created_at: string;
+}
+
 /**
  * How autonomous the AI is allowed to be. Human-in-the-loop is the
  * default and safest, but businesses choose their own structure:
