@@ -68,6 +68,10 @@ function validateOne(step: StepLike, path: string, issues: ValidationIssue[]): v
       // business context lives in ai_settings. Runtime checks (AI
       // configured, contact present) happen in the engine.
       break
+    case 'ai_classify':
+      // No config at all — it always emits the same fields. Runtime check
+      // (AI configured) happens in the engine.
+      break
     case 'add_tag':
     case 'remove_tag':
       if (!nonEmpty(c.tag_id)) {

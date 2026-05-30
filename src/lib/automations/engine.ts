@@ -17,7 +17,7 @@ import type {
 import { supabaseAdmin } from './admin-client'
 import { engineSendText, engineSendTemplate } from './meta-send'
 import { chatComplete, isAIConfigured } from '@/lib/ai/client'
-import { buildReplyPrompt } from '@/lib/ai/prompts'
+import { buildReplyPrompt, buildClassifyPrompt, parseClassification } from '@/lib/ai/prompts'
 import type { AIReplyStepConfig } from '@/types'
 
 // How many recent messages to feed the model for an automated reply.
@@ -427,6 +427,65 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
       return `AI reply sent via Meta (${whatsapp_message_id})`
     }
 
+    case 'ai_classify': {
+      // The qualifier/router. Reads the conversation, classifies it, and
+      // writes results into the run's context vars so downstream Condition
+      // steps can branch (subject 'variable'). Sends nothing to the
+      // customer — pure routing.
+      if (!isAIConfigured()) {
+        throw new Error('AI not configured (set OPENROUTER_API_KEY)')
+      }
+      const conversationId = await resolveConversationId(args)
+
+      const { data: aiSettings } = await db
+        .from('ai_settings')
+        .select('business_context')
+        .eq('user_id', args.automation.user_id)
+        .maybeSingle()
+
+      const { data: history } = await db
+        .from('messages')
+        .select('sender_type, content_text, content_type, created_at')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: false })
+        .limit(AI_REPLY_HISTORY_LIMIT)
+
+      const turns = (history ?? [])
+        .slice()
+        .reverse()
+        .filter((m) => m.content_text)
+        .map((m) => ({
+          fromCustomer: m.sender_type === 'customer',
+          text:
+            m.content_type === 'text'
+              ? (m.content_text as string)
+              : `[${m.content_type}] ${m.content_text}`,
+        }))
+
+      const { system, messages } = buildClassifyPrompt({
+        history: turns,
+        businessContext: aiSettings?.business_context ?? null,
+      })
+
+      // Low temperature — we want stable, repeatable labels, not creativity.
+      const raw = await chatComplete({ system, messages, temperature: 0, maxTokens: 200 })
+      const c = parseClassification(raw)
+
+      // Persist into context.vars so Condition steps (and webhooks) can read
+      // them via {{vars.ai_intent}} etc. Mutating args.context here flows to
+      // the nested executeStepsFrom calls, which pass the same context object.
+      args.context.vars = {
+        ...(args.context.vars ?? {}),
+        ai_intent: c.intent,
+        ai_sentiment: c.sentiment,
+        ai_hot_lead: String(c.hot_lead),
+        ai_needs_human: String(c.needs_human),
+        ai_summary: c.summary,
+      }
+
+      return `classified: intent=${c.intent}, sentiment=${c.sentiment}, hot_lead=${c.hot_lead}, needs_human=${c.needs_human}`
+    }
+
     case 'add_tag': {
       const cfg = step.step_config as TagStepConfig
       if (!args.contactId || !cfg.tag_id) throw new Error('add_tag needs contact + tag_id')
@@ -592,6 +651,16 @@ async function evaluateCondition(cfg: ConditionStepConfig, args: ExecuteArgs): P
     case 'message_content': {
       const text = (args.context.message_text ?? '').toString()
       return text.toLowerCase().includes((cfg.value ?? '').toLowerCase())
+    }
+    case 'variable': {
+      // Branch on a run variable (e.g. one written by an ai_classify step).
+      // operand = variable name (ai_intent, ai_hot_lead, …); value =
+      // expected value. Equality is case-insensitive string compare, so
+      // booleans stored as "true"/"false" and labels like "buying" both work.
+      if (!cfg.operand) return false
+      const actual = args.context.vars?.[cfg.operand]
+      if (actual == null) return false
+      return String(actual).toLowerCase() === String(cfg.value ?? '').toLowerCase()
     }
     case 'time_of_day': {
       // operand form "HH:mm-HH:mm" — true if now is within that window

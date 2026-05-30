@@ -12,6 +12,7 @@ import {
   MessageSquare,
   FileText,
   Sparkles,
+  Filter,
   Tag,
   TagIcon,
   UserCheck,
@@ -81,6 +82,7 @@ const STEP_META: Record<AutomationStepType, StepMeta> = {
   send_message: { label: "Send Message", icon: MessageSquare, border: "border-l-violet-500" },
   send_template: { label: "Send Template", icon: FileText, border: "border-l-violet-500" },
   ai_reply: { label: "AI Reply", icon: Sparkles, border: "border-l-fuchsia-500" },
+  ai_classify: { label: "AI Classify & Route", icon: Filter, border: "border-l-fuchsia-500" },
   add_tag: { label: "Add Tag", icon: Tag, border: "border-l-violet-500" },
   remove_tag: { label: "Remove Tag", icon: TagIcon, border: "border-l-violet-500" },
   assign_conversation: { label: "Assign Conversation", icon: UserCheck, border: "border-l-violet-500" },
@@ -96,6 +98,7 @@ const ADDABLE_STEPS: AutomationStepType[] = [
   "send_message",
   "send_template",
   "ai_reply",
+  "ai_classify",
   "add_tag",
   "remove_tag",
   "assign_conversation",
@@ -138,6 +141,8 @@ function blankConfig(type: AutomationStepType): Record<string, unknown> {
       return { template_name: "", language: "en_US" }
     case "ai_reply":
       return { instructions: "" }
+    case "ai_classify":
+      return {}
     case "add_tag":
     case "remove_tag":
       return { tag_id: "" }
@@ -767,6 +772,20 @@ function StepEditor({
           </p>
         </>
       )
+    case "ai_classify":
+      return (
+        <p className="rounded-md bg-fuchsia-500/10 px-3 py-2 text-[11px] leading-relaxed text-fuchsia-200/80">
+          Reads the conversation and tags it — no message is sent. It writes
+          variables you can branch on with a{" "}
+          <span className="font-medium">Condition</span> step
+          (subject &quot;Variable&quot;):{" "}
+          <code>ai_intent</code> (buying/question/support/complaint/spam/other),{" "}
+          <code>ai_sentiment</code>, <code>ai_hot_lead</code> (true/false),{" "}
+          <code>ai_needs_human</code> (true/false), <code>ai_summary</code>.
+          Put this <em>before</em> a Condition to route hot leads to a human
+          and let AI handle the rest. Requires <code>OPENROUTER_API_KEY</code>.
+        </p>
+      )
     case "add_tag":
     case "remove_tag":
       return (
@@ -897,6 +916,7 @@ function StepEditor({
               <option value="contact_field">Contact field</option>
               <option value="message_content">Message content</option>
               <option value="time_of_day">Time of day</option>
+              <option value="variable">Variable (e.g. AI result)</option>
             </select>
           </FieldBlock>
           <FieldBlock label="Operand">
@@ -908,6 +928,8 @@ function StepEditor({
                   ? "name / email / company"
                   : cfg.subject === "tag_presence"
                   ? "tag id"
+                  : cfg.subject === "variable"
+                  ? "ai_intent / ai_hot_lead / ai_needs_human"
                   : ""
               }
               value={(cfg.operand as string) ?? ""}
@@ -915,7 +937,9 @@ function StepEditor({
               className="bg-slate-800 text-white"
             />
           </FieldBlock>
-          {(cfg.subject === "contact_field" || cfg.subject === "message_content") && (
+          {(cfg.subject === "contact_field" ||
+            cfg.subject === "message_content" ||
+            cfg.subject === "variable") && (
             <FieldBlock label="Value">
               <Input
                 value={(cfg.value as string) ?? ""}
@@ -979,6 +1003,8 @@ function previewFor(step: BuilderStep): string {
       return (step.step_config.template_name as string) || "pick a template"
     case "ai_reply":
       return (step.step_config.instructions as string) || "AI drafts & sends the reply"
+    case "ai_classify":
+      return "AI tags intent, sentiment & hot-lead"
     case "wait":
       return `${step.step_config.amount ?? "?"} ${step.step_config.unit ?? ""}`
     case "condition":

@@ -69,26 +69,94 @@ unsupervised self-editing:
   copy — so the human operator (you) compounds improvements each week.
   Genuine autonomous code-change should stay gated behind human review.
 
-### 5. Two ways to make it a business
+### 5. How we make money
 
-**a) Sell to businesses (SaaS / managed):**
-Offer hosted wacrm with the AI on, tiered by message/AI volume. The free
-LLM layer keeps COGS near zero, so even a low monthly price is profitable.
-The self-host template stays MIT — it's the funnel.
+**The hard truth about African SMB monetization:** most merchants hate
+(or can't afford) subscriptions, but they'll happily share a commission
+*if you helped them earn it*. The trap is that a commission you can't
+**collect** is just a wish — payment usually happens off-platform (bank
+transfer, cash on delivery, mobile money), so most "rev-share" models
+can't see or take their cut.
 
-**b) An operator / agency network ("young Africans get paid"):**
+So the entire monetization design bends around one principle:
+
+> **To earn a commission we must sit in the payment flow. The AI doesn't
+> just close the sale — it collects the money.**
+
+#### Primary model: transaction commission ("we eat only when you eat")
+The AI, mid-conversation, generates a **payment request** (Paystack /
+Flutterwave / M-Pesa / mobile-money link or USSD push) for the agreed
+amount. The customer pays through it; settlement routes to the merchant
+**minus a small platform fee** (target ~1–3% of GMV, on top of the PSP's
+own fee). Because the money moves through our generated link, the
+commission is collected automatically — never invoiced, never chased.
+
+Why merchants accept it:
+- Zero upfront cost. No subscription. The fee only exists when a sale
+  closes — money they wouldn't have had if the lead went cold at 11pm.
+- It's framed as "the AI sold this for you," not "rent." Aligned, not
+  extractive.
+- They get instant proof of value: "wacrm closed ₦340k for you this week"
+  is the only sales pitch we ever need.
+
+This is the flywheel: **better AI → more closed sales → more GMV → more
+commission**, with our COGS still near zero (free LLMs).
+
+#### Secondary models (layer on once #1 works)
+- **Subscription — for those who prefer it.** Medium/large companies and
+  agencies often *want* a flat fee for predictability and will pay for
+  seats, volume, multi-number, analytics, and SLAs. Offer it as an
+  *option*, not the default. A merchant doing high GMV can also opt into a
+  flat plan to cap commission — both paths are profitable.
+- **Float / payments margin.** Standard PSP economics — a thin spread on
+  processing — once volume justifies negotiating rates.
+- **Value-added, pay-per-use.** Bulk broadcast credits, premium templates,
+  AI ad-creative generation, a "boost" that drafts and schedules a week of
+  marketing. Small à-la-carte spend Africans *do* tolerate (airtime-style).
+- **Capital, eventually.** Verified GMV history through our rails is an
+  underwriting signal — merchant cash advances ("borrow against next
+  week's sales"). High-trust, high-margin, and only possible *because* we
+  sit in the flow. Far-future, but it's where the real money is.
+
+#### The operator network's economics (ties to 5b below)
+Operators are paid **per closed-sale commission share**, not a salary —
+so their incentive is identical to ours and the merchant's: close more,
+earn more. The platform takes its cut of GMV, pays the operator their
+share, keeps the rest. Nobody pays a subscription; everybody gets paid
+when sales happen.
+
+#### What this requires us to build (priority order)
+1. **Payments module** — connect a merchant PSP, generate payment
+   requests, reconcile, take fee. *This is the unlock for the whole
+   model — the next big feature after AI routing.*
+2. An **`ai_payment_request` automation step** + an AI tool the responder
+   can call to raise a payment link when a deal is agreed.
+3. **Attribution** — tie each payment back to the conversation/deal so
+   "the AI closed this" is provable (and commission is auditable).
+
+> Sequencing note: ship the AI that *closes* (auto-responder ✅, qualifier
+> next), then the payments rail that *collects*. Closing without
+> collecting is a great demo; collecting is the business.
+
+### 5b. Two go-to-market motions
+
+**Sell to businesses (mostly commission, optional subscription):**
+Hosted wacrm with AI + payments on. Default to transaction commission;
+offer flat plans to companies that prefer them. The self-host template
+stays MIT — it's the top-of-funnel, not the revenue.
+
+**An operator / agency network ("young Africans get paid"):**
 Train young Africans as **CRM operators** who set up and run wacrm for
 local businesses (configure WhatsApp, write the knowledge base, manage
-broadcasts, watch the inbox). Each operator runs several businesses; the
-AI multiplies one person across many accounts. The platform takes a cut of
-each managed account and pays operators per account / per outcome. This is
-the path with the deepest moat and the most jobs created — and it needs a
-**multi-workspace / agency mode** (see next).
+broadcasts, watch the inbox, close sales). Each operator runs several
+businesses; the AI multiplies one person across many accounts. Operators
+earn a share of the commission they help generate. Deepest moat, most jobs
+created — needs **multi-workspace / agency mode** (see next).
 
-### 6. Multi-tenant / agency mode (enables #5b)
+### 6. Multi-tenant / agency mode (enables 5b)
 The schema is already per-`user_id` with RLS. The work: a workspace/team
 layer so one operator account can manage many business workspaces, with
-roles (owner / operator / agent) and billing per workspace.
+roles (owner / operator / agent) and commission accounting per workspace.
 
 ## Operating it independently (handoff)
 

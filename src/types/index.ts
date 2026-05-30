@@ -247,6 +247,7 @@ export type AutomationStepType =
   | 'send_message'
   | 'send_template'
   | 'ai_reply'
+  | 'ai_classify'
   | 'add_tag'
   | 'remove_tag'
   | 'assign_conversation'
@@ -297,6 +298,15 @@ export interface AIReplyStepConfig {
   instructions?: string;
 }
 
+/**
+ * AI classify step (the qualifier/router). Reads the conversation and
+ * writes results into the run's context vars so downstream Condition
+ * steps can branch on them. No config needed — it always emits the same
+ * fields (ai_intent, ai_sentiment, ai_hot_lead, ai_needs_human,
+ * ai_summary). Sends nothing to the customer.
+ */
+export type AIClassifyStepConfig = Record<string, never>;
+
 export interface SendTemplateStepConfig {
   template_name: string;
   language?: string;
@@ -333,7 +343,8 @@ export type ConditionSubject =
   | 'contact_field'
   | 'tag_presence'
   | 'message_content'
-  | 'time_of_day';
+  | 'time_of_day'
+  | 'variable';
 
 export interface ConditionStepConfig {
   subject: ConditionSubject;
@@ -353,6 +364,7 @@ export type AutomationStepConfig =
   | SendMessageStepConfig
   | SendTemplateStepConfig
   | AIReplyStepConfig
+  | AIClassifyStepConfig
   | TagStepConfig
   | AssignConversationStepConfig
   | UpdateContactFieldStepConfig

@@ -149,3 +149,114 @@ Include a strong hook, 2–4 relevant hashtags, and a clear call to action to ch
     ],
   };
 }
+
+// ============================================================
+// Classification / routing (the AI qualifier)
+// ============================================================
+
+/** The shape the qualifier returns. Kept small and stable so the
+ *  automation engine can branch on it deterministically. */
+export interface ConversationClassification {
+  /** What the customer is trying to do. */
+  intent:
+    | "buying"
+    | "question"
+    | "support"
+    | "complaint"
+    | "spam"
+    | "other";
+  /** Overall emotional tone of the latest customer message(s). */
+  sentiment: "positive" | "neutral" | "negative";
+  /** True when this looks like a real purchase opportunity worth a human. */
+  hot_lead: boolean;
+  /** Whether a human should step in (anger, high value, edge cases). */
+  needs_human: boolean;
+  /** One short line an operator can read at a glance. */
+  summary: string;
+}
+
+const CLASSIFY_SYSTEM = `You are a triage engine for a WhatsApp CRM used by African businesses. You read a conversation and classify it. You output STRICT JSON only — no prose, no markdown, no code fences. The JSON must match exactly:
+
+{"intent":"buying|question|support|complaint|spam|other","sentiment":"positive|neutral|negative","hot_lead":true|false,"needs_human":true|false,"summary":"one short sentence"}
+
+Rules:
+- "buying" = clear purchase intent (wants to order, asks to pay, confirms an item).
+- hot_lead = true when there is real, near-term purchase intent worth a human's time.
+- needs_human = true for anger, complaints, threats, refunds, or anything risky to automate.
+- summary = at most 12 words, plain text, the operator's quick read.
+- Output ONLY the JSON object.`;
+
+export function buildClassifyPrompt(ctx: ConversationContext): {
+  system: string;
+  messages: ChatMessage[];
+} {
+  const biz = ctx.businessContext
+    ? `\n\nBusiness context (for judging intent and value):\n${ctx.businessContext}`
+    : "";
+  const transcript = ctx.history
+    .map((m) => `${m.fromCustomer ? "Customer" : "Business"}: ${m.text}`)
+    .join("\n");
+
+  return {
+    system: CLASSIFY_SYSTEM,
+    messages: [
+      {
+        role: "user",
+        content: `Classify this WhatsApp conversation.${biz}
+
+Conversation:
+${transcript || "(no messages yet)"}
+
+Return ONLY the JSON object.`,
+      },
+    ],
+  };
+}
+
+/**
+ * Parse the model's classification output defensively. Free models
+ * sometimes wrap JSON in prose or code fences, so we extract the first
+ * balanced `{...}` and validate every field, falling back to safe
+ * defaults (route to a human) on anything unexpected.
+ */
+export function parseClassification(raw: string): ConversationClassification {
+  const fallback: ConversationClassification = {
+    intent: "other",
+    sentiment: "neutral",
+    hot_lead: false,
+    needs_human: true,
+    summary: "Could not classify — routed to a human.",
+  };
+
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) return fallback;
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(raw.slice(start, end + 1));
+  } catch {
+    return fallback;
+  }
+
+  const intents = ["buying", "question", "support", "complaint", "spam", "other"];
+  const sentiments = ["positive", "neutral", "negative"];
+
+  const intent = intents.includes(parsed.intent as string)
+    ? (parsed.intent as ConversationClassification["intent"])
+    : "other";
+  const sentiment = sentiments.includes(parsed.sentiment as string)
+    ? (parsed.sentiment as ConversationClassification["sentiment"])
+    : "neutral";
+
+  return {
+    intent,
+    sentiment,
+    hot_lead: parsed.hot_lead === true,
+    needs_human: parsed.needs_human === true,
+    summary:
+      typeof parsed.summary === "string" && parsed.summary.trim()
+        ? parsed.summary.trim().slice(0, 120)
+        : fallback.summary,
+  };
+}

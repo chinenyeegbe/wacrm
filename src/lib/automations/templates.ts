@@ -11,6 +11,7 @@ export type TemplateSlug =
   | 'lead_qualifier'
   | 'follow_up_reminder'
   | 'ai_responder'
+  | 'ai_smart_triage'
 
 export interface TemplateStepSeed {
   step_type: AutomationStepType
@@ -120,6 +121,47 @@ export const AUTOMATION_TEMPLATES: Record<TemplateSlug, AutomationTemplateDefini
           instructions:
             'Answer the customer’s question helpfully and move the sale forward. Use the business context for prices and details. If you truly don’t know, say a team member will follow up.',
         },
+      },
+    ],
+  },
+  ai_smart_triage: {
+    slug: 'ai_smart_triage',
+    name: 'AI Smart Triage',
+    description:
+      'AI reads every message, routes hot leads & complaints to a human, and auto-answers the rest. Your team only touches what matters.',
+    trigger_type: 'new_message_received',
+    trigger_config: {},
+    steps: [
+      // 1. Classify the conversation → writes ai_* vars into the run.
+      {
+        step_type: 'ai_classify',
+        step_config: {},
+      },
+      // 2. Does a human need to step in (hot lead, complaint, anger)?
+      {
+        step_type: 'condition',
+        step_config: {
+          subject: 'variable',
+          operand: 'ai_needs_human',
+          value: 'true',
+        },
+      },
+      // 2a. YES → hand to a human and notify them with the AI's summary.
+      {
+        step_type: 'assign_conversation',
+        step_config: { mode: 'round_robin' },
+        parent_index: 1,
+        branch: 'yes',
+      },
+      // 2b. NO → let the AI answer it, 24/7.
+      {
+        step_type: 'ai_reply',
+        step_config: {
+          instructions:
+            'Answer helpfully using the business context and move toward a sale. Keep it short and in the customer’s language.',
+        },
+        parent_index: 1,
+        branch: 'no',
       },
     ],
   },

@@ -16,6 +16,7 @@ import {
   Users,
   PhoneCall,
   Sparkles,
+  Filter,
   Loader2,
 } from "lucide-react"
 
@@ -43,6 +44,7 @@ import { triggerMeta, formatRelative } from "@/lib/automations/trigger-meta"
 import { cn } from "@/lib/utils"
 
 const TEMPLATE_ORDER: TemplateSlug[] = [
+  "ai_smart_triage",
   "ai_responder",
   "welcome_message",
   "out_of_office",
@@ -51,6 +53,7 @@ const TEMPLATE_ORDER: TemplateSlug[] = [
 ]
 
 const TEMPLATE_ICON: Record<TemplateSlug, typeof Zap> = {
+  ai_smart_triage: Filter,
   ai_responder: Sparkles,
   welcome_message: MessageCircle,
   out_of_office: Clock,
