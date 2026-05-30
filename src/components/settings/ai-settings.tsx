@@ -6,6 +6,7 @@ import { Loader2, Sparkles, CircleAlert } from 'lucide-react';
 
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -17,6 +18,29 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
+import type { AIAutonomy } from '@/types';
+
+const AUTONOMY_OPTIONS: {
+  value: AIAutonomy;
+  label: string;
+  hint: string;
+}[] = [
+  {
+    value: 'assist',
+    label: 'Assist only',
+    hint: 'AI just drafts replies for your team (the ✨ button). It never sends on its own.',
+  },
+  {
+    value: 'human_loop',
+    label: 'AI + human (recommended)',
+    hint: 'AI auto-answers routine chats and hands flagged ones — hot leads, complaints — to a person.',
+  },
+  {
+    value: 'autonomous',
+    label: 'AI only',
+    hint: 'AI handles everything itself, with no human routing. Best once you trust its replies.',
+  },
+];
 
 // Keep the context bounded — it's prepended to every AI prompt, and free
 // models have tight token windows. ~6k chars is plenty for a catalogue +
@@ -40,8 +64,13 @@ export function AISettings() {
   const [saving, setSaving] = useState(false);
   const [businessContext, setBusinessContext] = useState('');
   const [aiEnabled, setAiEnabled] = useState(true);
+  const [autonomy, setAutonomy] = useState<AIAutonomy>('human_loop');
   // Snapshot of the saved values so we can compute a dirty flag.
-  const [saved, setSaved] = useState({ businessContext: '', aiEnabled: true });
+  const [saved, setSaved] = useState({
+    businessContext: '',
+    aiEnabled: true,
+    autonomy: 'human_loop' as AIAutonomy,
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -49,7 +78,7 @@ export function AISettings() {
     (async () => {
       const { data, error } = await supabase
         .from('ai_settings')
-        .select('business_context, ai_enabled')
+        .select('business_context, ai_enabled, autonomy')
         .eq('user_id', user.id)
         .maybeSingle();
       if (cancelled) return;
@@ -59,9 +88,11 @@ export function AISettings() {
       }
       const ctx = data?.business_context ?? '';
       const enabled = data?.ai_enabled ?? true;
+      const auto = (data?.autonomy as AIAutonomy) ?? 'human_loop';
       setBusinessContext(ctx);
       setAiEnabled(enabled);
-      setSaved({ businessContext: ctx, aiEnabled: enabled });
+      setAutonomy(auto);
+      setSaved({ businessContext: ctx, aiEnabled: enabled, autonomy: auto });
       setLoading(false);
     })();
     return () => {
@@ -70,7 +101,9 @@ export function AISettings() {
   }, [user, supabase]);
 
   const dirty =
-    businessContext !== saved.businessContext || aiEnabled !== saved.aiEnabled;
+    businessContext !== saved.businessContext ||
+    aiEnabled !== saved.aiEnabled ||
+    autonomy !== saved.autonomy;
 
   const onSave = async () => {
     if (!user) return;
@@ -83,11 +116,12 @@ export function AISettings() {
           user_id: user.id,
           business_context: businessContext.trim() || null,
           ai_enabled: aiEnabled,
+          autonomy,
         },
         { onConflict: 'user_id' },
       );
       if (error) throw new Error(error.message);
-      setSaved({ businessContext, aiEnabled });
+      setSaved({ businessContext, aiEnabled, autonomy });
       toast.success('AI settings saved');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Save failed');
@@ -128,6 +162,59 @@ export function AISettings() {
             disabled={loading || saving}
             aria-label="Enable AI auto-replies"
           />
+        </div>
+
+        {/* Autonomy — how much the AI does on its own. Human-in-the-loop is
+            the default, but each business picks the structure it trusts. */}
+        <div className="space-y-2">
+          <Label className="text-slate-200">How should the AI work?</Label>
+          <p className="text-xs text-slate-500">
+            Human-in-the-loop is optional — pick the structure that fits your
+            team. You can change it anytime.
+          </p>
+          <div className="grid gap-2">
+            {AUTONOMY_OPTIONS.map((opt) => {
+              const selected = autonomy === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setAutonomy(opt.value)}
+                  disabled={loading || saving}
+                  className={cn(
+                    'rounded-lg border px-4 py-3 text-left transition-colors',
+                    selected
+                      ? 'border-primary bg-primary/10'
+                      : 'border-slate-800 bg-slate-900/60 hover:border-slate-700',
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        'flex size-4 items-center justify-center rounded-full border',
+                        selected
+                          ? 'border-primary'
+                          : 'border-slate-600',
+                      )}
+                    >
+                      {selected && (
+                        <span className="size-2 rounded-full bg-primary" />
+                      )}
+                    </span>
+                    <span
+                      className={cn(
+                        'text-sm font-medium',
+                        selected ? 'text-white' : 'text-slate-300',
+                      )}
+                    >
+                      {opt.label}
+                    </span>
+                  </div>
+                  <p className="mt-1 pl-6 text-xs text-slate-500">{opt.hint}</p>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Business context */}

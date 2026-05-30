@@ -66,11 +66,22 @@ export interface ContactNote {
   created_at: string;
 }
 
+/**
+ * How autonomous the AI is allowed to be. Human-in-the-loop is the
+ * default and safest, but businesses choose their own structure:
+ *  - 'assist'     — AI only drafts (inbox ✨); never auto-sends.
+ *  - 'human_loop' — AI auto-answers routine chats, routes flagged ones
+ *                   (hot leads, complaints) to a human. DEFAULT.
+ *  - 'autonomous' — AI handles everything itself, no human routing.
+ */
+export type AIAutonomy = 'assist' | 'human_loop' | 'autonomous';
+
 export interface AISettings {
   id: string;
   user_id: string;
   business_context?: string | null;
   ai_enabled: boolean;
+  autonomy: AIAutonomy;
   created_at: string;
   updated_at: string;
 }

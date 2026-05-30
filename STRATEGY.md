@@ -178,18 +178,51 @@ leaks one merchant's chats to another. Plan:
 Ship behind a flag, migrate existing single-user accounts to a personal
 workspace transparently.
 
-### 7. Human-in-the-loop is the product, not a fallback
-The AI is an **assistant to a human operator**, never an unattended bot.
-The loop we're building toward:
+### 7. Human-in-the-loop is the default, not a mandate
+Human-in-the-loop is the **default and recommended** structure — it builds
+trust and is safest — but it is **optional**. Each business picks its own
+shape via one setting (Settings → AI → "How should the AI work?"), stored
+as `ai_settings.autonomy` and enforced everywhere the AI runs:
+- **Assist only** — AI just drafts (inbox ✨ button); `ai_reply` steps are
+  skipped so nothing is ever auto-sent.
+- **AI + human** (default) — AI auto-answers routine chats and routes
+  flagged ones (hot leads, complaints) to the *right* person.
+- **AI only** — AI handles everything itself, no human routing, for teams
+  that trust its replies (or have no staff to spare).
+
+The loop we're building toward (for the human_loop and assist modes):
 - AI triages every inbound (`ai_classify`, shipped) and routes the ones
-  that need judgement to the *right* human (round-robin shipped; skills-
-  based routing next).
+  that need judgement to a human (round-robin shipped; skills-based routing
+  next).
 - The human oversees, edits, approves — and can hand sub-tasks to agents
   (their own staff, or marketplace operators) and gets paid out of the
   value created, paying helpers from the same flow. A self-sustaining
   circular market: the operator earns the spread between what the work is
   worth and what they pay to get it done — with AI doing most of the
   typing so that spread is wide.
+
+### Upstream sync policy (parent project: ArnasDon/wacrm)
+We periodically merge the parent template's `main` into our branch. The
+last sync pulled the **Flows** feature (interactive WhatsApp messages —
+a separate builder from our automations), WhatsApp **template Meta
+integration**, **color themes** (`violet-*` → `primary` token), and a
+**beta-features** flag. Notes for future syncs:
+- **Migrations**: the parent uses sequential numbers and has reached 016.
+  Keep ours **above** the parent's ceiling (currently 017 ai_settings,
+  018 payments) to avoid apply-order collisions. Renumber ours before
+  merging if the parent has caught up.
+- **Theming**: adopt the parent's `primary`/`primary-foreground` tokens for
+  shared surfaces; our AI/payment accents (fuchsia/emerald) stay distinct
+  on purpose.
+- **Flows vs Automations**: these are two separate engines. Our AI/payment
+  work lives in `automations`; don't entangle them. A future consolidation
+  is possible but is its own project.
+- **When to break away**: keep syncing while the parent ships genuinely
+  useful infra (WhatsApp/template/Meta plumbing, security fixes). Break
+  away cleanly once our divergence (agency mode, payments, AI engine)
+  makes merges cost more than they return — at that point fork hard,
+  cherry-picking only security patches. See the reply in chat for the
+  fuller heuristic.
 
 ### 8. Trust & safety (a feature, and a sellable skill)
 African SMB relationships run on trust; mishandling a customer's details

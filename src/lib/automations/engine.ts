@@ -371,15 +371,20 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
 
       const conversationId = await resolveConversationId(args)
 
-      // Respect the workspace master switch — lets an owner pause every
-      // auto-responder at once without editing each automation.
+      // Respect the workspace master switch and autonomy level. These let a
+      // business choose its own structure: the master switch pauses every
+      // auto-responder at once; 'assist' autonomy keeps AI as a draft-only
+      // helper (never auto-sends) while still powering the inbox ✨ button.
       const { data: aiSettings } = await db
         .from('ai_settings')
-        .select('business_context, ai_enabled')
+        .select('business_context, ai_enabled, autonomy')
         .eq('user_id', args.automation.user_id)
         .maybeSingle()
       if (aiSettings && aiSettings.ai_enabled === false) {
         return 'skipped: AI disabled for this workspace'
+      }
+      if (aiSettings?.autonomy === 'assist') {
+        return 'skipped: AI is in assist-only mode (drafts, never auto-sends)'
       }
 
       const { data: contact } = await db
