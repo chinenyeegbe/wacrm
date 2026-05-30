@@ -66,6 +66,34 @@ export interface ContactNote {
   created_at: string;
 }
 
+// ============================================================
+// Workspaces / agency mode (migration 019)
+// ============================================================
+
+export type WorkspaceKind = 'personal' | 'business';
+
+export interface Workspace {
+  id: string;
+  name: string;
+  owner_id: string | null;
+  kind: WorkspaceKind;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Mirrors the role union in src/lib/workspaces/roles.ts. */
+export type WorkspaceMemberRole = 'viewer' | 'agent' | 'operator' | 'owner';
+
+export interface WorkspaceMember {
+  id: string;
+  workspace_id: string;
+  user_id: string;
+  role: WorkspaceMemberRole;
+  created_at: string;
+  /** Joined from profiles when listing members. */
+  profile?: Profile;
+}
+
 /**
  * How autonomous the AI is allowed to be. Human-in-the-loop is the
  * default and safest, but businesses choose their own structure:

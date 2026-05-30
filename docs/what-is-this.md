@@ -277,6 +277,16 @@ flowchart LR
 - Our cost to run the AI is near **zero** (free models), so the math works
   even on tiny transactions.
 
+### The five income streams (most → least central)
+
+| # | Stream | How it works | Status |
+| --- | --- | --- | --- |
+| 1 | **Transaction commission** | A few % of every payment the AI collects, taken automatically because the money flows through a link we mint. We win only when the merchant wins. | ✅ Built (`platform_fee_bps`) |
+| 2 | **Optional subscription** | Flat monthly plan for bigger firms that prefer predictability (seats, volume, SLA). An *option*, not the default. | Planned |
+| 3 | **Operator commission-share** | Young Africans run wacrm for businesses and earn a slice of the sales their agents close; platform takes its cut of GMV. | Foundation in progress (agency mode) |
+| 4 | **Creator marketplace** | Sellable automation templates + domain "skills" (negotiation, certifications, sector nuance); we take a marketplace cut. | Phase 2 |
+| 5 | **Value-added & capital** | Broadcast/AI credits, ad-creative; eventually merchant cash advances underwritten on verified GMV — only possible because we sit in the payment flow. | Future |
+
 Full detail: [`../STRATEGY.md`](../STRATEGY.md) §5.
 
 ---

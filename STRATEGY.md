@@ -162,21 +162,35 @@ businesses; the AI multiplies one person across many accounts. Operators
 earn a share of the commission they help generate. Deepest moat, most jobs
 created — needs **multi-workspace / agency mode** (see next).
 
-### 6. Multi-tenant / agency mode (enables 5b) — NEXT
-The schema is already per-`user_id` with RLS. The work: a workspace/team
-layer so one operator account can manage many business workspaces, with
-roles (owner / operator / agent) and commission accounting per workspace.
+### 6. Multi-tenant / agency mode (enables 5b) — IN PROGRESS
+A workspace/team layer so one operator account can manage many business
+workspaces, with roles (owner / operator / agent / viewer) and commission
+accounting per workspace. This rewrites the RLS trust boundary (from "row
+owner = user" to "row belongs to a workspace the user is a member of"), so
+it ships in carefully separated, individually-verifiable phases.
 
-This is deliberately its **own** change set, not bundled with feature
-commits — it rewrites the RLS trust boundary (from "row owner = user" to
-"row belongs to a workspace the user is a member of"), and a mistake there
-leaks one merchant's chats to another. Plan:
-1. `workspaces` + `workspace_members(role)` tables; every tenant table
-   gains a `workspace_id`; backfill `workspace_id` from `user_id`.
-2. Swap RLS predicates to `workspace_id IN (my workspaces)`.
-3. A workspace switcher in the UI; invites; per-workspace commission split.
-Ship behind a flag, migrate existing single-user accounts to a personal
-workspace transparently.
+**Phase 1 — membership graph (DONE, migration 019 + lib/workspaces):**
+- `workspaces` + `workspace_members(role)` tables, RLS'd on membership.
+- `is_workspace_member()` / `has_workspace_role()` SECURITY DEFINER helpers
+  for use by phase-2 policies (defined now to keep 020 focused).
+- Backfill: every existing user gets a `personal` workspace they own; new
+  signups get one via an additive auth trigger. **Non-breaking** — existing
+  per-`user_id` RLS is untouched, so today's single-user behaviour is
+  identical.
+- `src/lib/workspaces/roles.ts`: the pure role→capability model (viewer <
+  agent < operator < owner), with `canAssignRole` privilege-escalation
+  guard. 12 unit tests.
+
+**Phase 2 — the RLS cutover (NEXT, migration 020):** add `workspace_id` to
+each tenant table, backfill it from the owner's personal workspace, then
+swap every policy predicate to `is_workspace_member(workspace_id)`. This is
+the dangerous part and must be validated against a real Postgres (a leak
+here crosses tenants), so it is its own migration + a manual RLS test plan,
+not bundled with app features.
+
+**Phase 3 — UX & commerce:** a workspace switcher, member invites, and
+per-workspace commission split so an operator's share of `platform_fee` is
+tracked and payable.
 
 ### 7. Human-in-the-loop is the default, not a mandate
 Human-in-the-loop is the **default and recommended** structure — it builds
