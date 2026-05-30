@@ -39,9 +39,9 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  // Matches the Moldlane background so the mobile browser chrome blends in.
-  themeColor: "#0b1614",
-  colorScheme: "dark",
+  // Matches the Moldlane bone canvas so the mobile browser chrome blends in.
+  themeColor: "#F7F5F0",
+  colorScheme: "light",
   // Mobile-first: lock the layout to the device width and allow safe-area
   // insets (notches / home indicators) to be read in CSS via env().
   width: "device-width",
@@ -94,14 +94,16 @@ export default function RootLayout({
       <body className="min-h-full bg-background text-foreground font-sans">
         <ThemeProvider>
           {children}
+          {/* Toaster styled from theme tokens so it follows the active
+              theme (light bone by default) instead of a hardcoded dark. */}
           <Toaster
-            theme="dark"
+            theme="light"
             position="top-right"
             toastOptions={{
               style: {
-                background: "rgb(30 41 59)",
-                border: "1px solid rgb(51 65 85)",
-                color: "white",
+                background: "var(--popover)",
+                border: "1px solid var(--border)",
+                color: "var(--popover-foreground)",
               },
             }}
           />

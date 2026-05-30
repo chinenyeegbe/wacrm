@@ -7,33 +7,49 @@
 
 **Moldlane** = the *lane* you *mould* your business into — a guided path
 from chaos (a phone full of chats) to a running machine (AI that sells and
-collects). The visual language should feel **calm, trustworthy, and
-money-adjacent** without shouting.
+collects). The visual language is **light, calm, and crafted** — Notion's
+paper-and-ink restraint, warmed up with earth tones. Hand-made, human,
+trustworthy; not another cold blue SaaS.
 
-## Color
+## Color — warm, earthy, minimal
 
-The signature is a **deep teal-green** — it reads as money, growth, and
-trust, and is deliberately offset from WhatsApp's bright green so we're
-*adjacent to* the channel, not pretending to be it.
+A **light** system on a bone canvas with **one** warm accent. Restraint is
+the rule: terracotta does the work, sage means "good things" (money /
+success), rust is terracotta's deep state, and everything else is warm
+neutral.
 
-| Token | Value (oklch) | Use |
-| --- | --- | --- |
-| `--primary` | `oklch(0.66 0.13 178)` | Buttons, active nav, links, focus rings |
-| `--primary-foreground` | `oklch(0.16 0.02 195)` | Text on primary (dark, for contrast on the bright teal) |
-| `--background` | `oklch(0.145 0.012 195)` | App base — near-black with a faint teal cast |
-| `--card` | `oklch(0.19 0.013 195)` | Cards, popovers |
-| `--chart-2` (gold) | `oklch(0.78 0.14 75)` | **Earnings / money highlights** — warm gold against the teal |
-| `--destructive` | `oklch(0.577 0.245 27.3)` | Errors, danger |
+| Role | Name | Hex | oklch token | Use |
+| --- | --- | --- | --- | --- |
+| Canvas | Bone | `#F7F5F0` | `--background` | App background |
+| Ink | Warm near-black | — | `--foreground` | Text (never pure black) |
+| **Primary** | **Terracotta** | `#C87A50` | `--primary` | Buttons, active nav, links, focus |
+| Primary deep | **Rust** | `#B3543A` | `--primary-hover` | Hover / active / emphasis |
+| **Secondary** | **Sage** | `#7A9A85` | `--chart-2` | **Positive / money / success** ("paid", earnings) |
+| Surface | Near-white | — | `--card` | Cards, popovers |
+| Muted | Warm taupe | — | `--muted`, `--border` | Surfaces, dividers, hints |
+| Error | Clear red | — | `--destructive` | Errors only — kept distinct from terracotta so "danger" never reads as "brand" |
 
-It's implemented as the **`moldlane` theme** (the default) in
-`src/app/globals.css`, alongside 5 alternate themes the user can pick in
-Settings → Appearance. All components consume tokens (`bg-primary`,
-`text-primary`, `border-primary`), never hard-coded colors, so theming is
-one CSS block.
+Why this split: you gave four colors, but they're really **one earthy
+family + a complement**. Terracotta (`#C87A50`) and rust (`#B3543A`) are
+light/deep shades of the *same* hue, so using rust as the hover/emphasis
+state keeps the look minimal instead of busy. Sage (`#7A9A85`) is the
+natural complement (green opposite orange) — reserved for positive/money
+signals so it carries *meaning*, not decoration. Bone is the Notion paper.
 
-**Accessibility:** primary-on-background and foreground-on-primary both
-target WCAG AA (≥4.5:1 for body text). The dark base + bright teal clears
-it comfortably; gold is reserved for large/non-essential highlights.
+Implemented as the **`moldlane` theme** (default) in `src/app/globals.css`;
+`:root` mirrors it for flash-free first paint. Five alternate themes remain
+in Settings → Appearance. Components consume tokens (`bg-primary`,
+`text-primary`, `bg-primary-soft`, `text-primary-hover`, `border-border`),
+never hard-coded colors — theming is one CSS block.
+
+**Accessibility:** warm-ink-on-bone is ~12:1; bone-white on terracotta and
+on rust both clear WCAG AA for buttons. Sage is used for emphasis/large
+text and status pills, paired with a label so colour isn't the only signal.
+
+**Note:** the rest of the app (dashboard, inbox, etc.) is still
+dark-hardcoded (`slate-*`) from the upstream template; the auth flow is
+converted to the light token system as the reference implementation. The
+dashboard sweep to tokens is the next design task.
 
 ## Typography
 
@@ -80,9 +96,10 @@ a mouse second.
 ## Iconography
 
 `lucide-react` throughout — one consistent stroke-based set. Feature
-accents: AI = `Sparkles`/`Filter` (fuchsia tint), Payments = `CreditCard`
-(emerald), Earn/partner = `Gift` (primary). These accent hues stay
-distinct from `--primary` on purpose, so feature areas are recognisable.
+accents reuse the palette so the app stays cohesive: Earn/partner = `Gift`
+(terracotta primary), Payments/money/success = sage (`--chart-2`), AI =
+`Sparkles` (terracotta). Avoid introducing new hues — the earth family +
+sage is the whole vocabulary.
 
 ## Voice & tone
 

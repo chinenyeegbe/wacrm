@@ -76,27 +76,25 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
-        <Card className="w-full max-w-md border-slate-800 bg-slate-900">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-md">
           <CardHeader className="items-center text-center">
-            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft">
               <CheckCircle className="h-6 w-6 text-primary" />
             </div>
-            <CardTitle className="text-xl text-white">
+            <CardTitle className="text-xl text-foreground">
               Check your email
             </CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardDescription className="text-muted-foreground">
               We&apos;ve sent a confirmation link to{" "}
-              <span className="text-white">{email}</span>. Please check your
-              inbox and click the link to verify your account.
+              <span className="font-medium text-foreground">{email}</span>.
+              Please check your inbox and click the link to verify your
+              account.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/login">
-              <Button
-                variant="outline"
-                className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
-              >
+              <Button variant="outline" className="w-full">
                 Back to sign in
               </Button>
             </Link>
@@ -107,113 +105,112 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
-      <Card className="w-full max-w-md border-slate-800 bg-slate-900">
-        <CardHeader className="items-center text-center">
-          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            <MessageSquare className="h-6 w-6 text-primary" />
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <MessageSquare className="h-5 w-5" />
           </div>
-          <CardTitle className="text-xl text-white">Create account</CardTitle>
-          <CardDescription className="text-slate-400">
-            Get started with Moldlane
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSignup} className="flex flex-col gap-4">
-            {referralCode && (
-              <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary">
-                <Gift className="h-4 w-4 shrink-0" />
-                <span>
-                  You were invited by a wacrm partner — welcome! 🎉
-                </span>
+          <span className="text-lg font-semibold tracking-tight text-foreground">
+            Moldlane
+          </span>
+        </div>
+        <Card className="w-full">
+          <CardHeader className="items-center text-center">
+            <CardTitle className="text-xl text-foreground">
+              Create account
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Get started with Moldlane
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSignup} className="flex flex-col gap-4">
+              {referralCode && (
+                <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary-soft px-4 py-3 text-sm text-primary">
+                  <Gift className="h-4 w-4 shrink-0" />
+                  <span>You were invited by a Moldlane partner — welcome! 🎉</span>
+                </div>
+              )}
+              {error && (
+                <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="fullName">Full name</Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="John Doe"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  className="h-10"
+                />
               </div>
-            )}
-            {error && (
-              <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                {error}
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="h-10"
+                />
               </div>
-            )}
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="fullName" className="text-slate-300">
-                Full name
-              </Label>
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="John Doe"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="At least 6 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="h-10"
+                />
+              </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email" className="text-slate-300">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="confirmPassword">Confirm password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Repeat your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="h-10"
+                />
+              </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password" className="text-slate-300">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="mt-2 h-10 w-full"
+              >
+                {loading ? "Creating account..." : "Create account"}
+              </Button>
+            </form>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="confirmPassword" className="text-slate-300">
-                Confirm password
-              </Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Repeat your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="mt-2 h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            >
-              {loading ? "Creating account..." : "Create account"}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-slate-400">
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className="text-primary hover:text-primary/80"
-            >
-              Sign in
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="font-medium text-primary hover:text-primary-hover"
+              >
+                Sign in
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

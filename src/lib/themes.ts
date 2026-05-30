@@ -45,8 +45,8 @@ export const THEMES: ReadonlyArray<ThemeMeta> = [
   {
     id: "moldlane",
     name: "Moldlane",
-    tagline: "The brand — teal-green for money, growth, and trust.",
-    swatch: "oklch(0.66 0.13 178)",
+    tagline: "The brand — warm terracotta on bone, calm and crafted.",
+    swatch: "oklch(0.645 0.105 52)",
   },
   {
     id: "violet",
