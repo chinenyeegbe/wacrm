@@ -56,9 +56,10 @@
  * at runtime by setting `document.documentElement.dataset.theme`
  * — see ThemeProvider + the inline boot script in layout.tsx.
  *
- * `:root` mirrors Violet so default visitors render correctly
- * before JS runs. `[data-theme="violet"]` is included for the
- * explicit-select path (settings UI sets it after a pick).
+ * `:root` mirrors Moldlane (the brand default) so first-paint
+ * renders correctly before JS runs. Each `[data-theme="..."]`
+ * block (including moldlane) is the explicit-select path the
+ * settings UI sets after a pick.
  *
  * The three `--primary-*` extras (hover / soft / soft-2) are
  * new — used for hovered primary buttons and tinted-primary
@@ -69,7 +70,6 @@
  * project/Color Themes.html — change one, change the other.
  * ============================================================ */
 
-:root,
 html[data-theme="violet"] {
   --background: oklch(0.13 0.01 260);
   --foreground: oklch(0.985 0 0);
@@ -254,6 +254,54 @@ html[data-theme="rose"] {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.28 0.012 15);
   --sidebar-ring: oklch(0.645 0.22 16);
+}
+
+/* ------------------------------------------------------------
+ * Moldlane — the brand theme (default). A deep teal-green that
+ * reads as money / growth / trust, deliberately offset from
+ * WhatsApp's bright green (hue ~175, lower chroma, darker base).
+ * Warm gold (chart-2) is the secondary accent for earnings /
+ * highlights. The slate base carries a faint teal cast so the
+ * whole surface feels of-a-piece with the brand, not just the
+ * buttons.
+ * ------------------------------------------------------------ */
+:root,
+html[data-theme="moldlane"] {
+  --background: oklch(0.145 0.012 195);
+  --foreground: oklch(0.985 0.002 180);
+  --card: oklch(0.19 0.013 195);
+  --card-foreground: oklch(0.985 0.002 180);
+  --popover: oklch(0.19 0.013 195);
+  --popover-foreground: oklch(0.985 0.002 180);
+  --primary: oklch(0.66 0.13 178);
+  --primary-foreground: oklch(0.16 0.02 195);
+  --primary-hover: oklch(0.72 0.13 178);
+  --primary-soft: oklch(0.66 0.13 178 / 0.12);
+  --primary-soft-2: oklch(0.66 0.13 178 / 0.22);
+  --secondary: oklch(0.23 0.013 195);
+  --secondary-foreground: oklch(0.985 0.002 180);
+  --muted: oklch(0.23 0.013 195);
+  --muted-foreground: oklch(0.66 0.012 195);
+  --accent: oklch(0.23 0.013 195);
+  --accent-foreground: oklch(0.985 0.002 180);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.29 0.013 195);
+  --input: oklch(0.29 0.013 195);
+  --ring: oklch(0.66 0.13 178);
+  --chart-1: oklch(0.66 0.13 178);
+  --chart-2: oklch(0.78 0.14 75);
+  --chart-3: oklch(0.6 0.1 220);
+  --chart-4: oklch(0.45 0.02 195);
+  --chart-5: oklch(0.3 0.015 195);
+  --radius: 0.7rem;
+  --sidebar: oklch(0.17 0.013 195);
+  --sidebar-foreground: oklch(0.985 0.002 180);
+  --sidebar-primary: oklch(0.66 0.13 178);
+  --sidebar-primary-foreground: oklch(0.16 0.02 195);
+  --sidebar-accent: oklch(0.23 0.013 195);
+  --sidebar-accent-foreground: oklch(0.985 0.002 180);
+  --sidebar-border: oklch(0.29 0.013 195);
+  --sidebar-ring: oklch(0.66 0.13 178);
 }
 
 @layer base {

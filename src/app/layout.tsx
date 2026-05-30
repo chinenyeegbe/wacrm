@@ -13,10 +13,17 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "wacrm",
-    template: "%s — wacrm",
+    default: "Moldlane",
+    template: "%s — Moldlane",
   },
-  description: "Self-hostable CRM template for WhatsApp.",
+  description:
+    "Moldlane — the AI employee that runs your WhatsApp: replies, sells, and collects payment 24/7.",
+  applicationName: "Moldlane",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Moldlane",
+  },
   robots: {
     index: false,
     follow: false,
@@ -32,8 +39,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#020617",
+  // Matches the Moldlane background so the mobile browser chrome blends in.
+  themeColor: "#0b1614",
   colorScheme: "dark",
+  // Mobile-first: lock the layout to the device width and allow safe-area
+  // insets (notches / home indicators) to be read in CSS via env().
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 // Inline boot script — runs before React hydrates so the user's

@@ -14,6 +14,7 @@
  */
 
 export const THEME_IDS = [
+  "moldlane",
   "violet",
   "emerald",
   "cobalt",
@@ -23,9 +24,9 @@ export const THEME_IDS = [
 
 export type ThemeId = (typeof THEME_IDS)[number];
 
-export const DEFAULT_THEME: ThemeId = "violet";
+export const DEFAULT_THEME: ThemeId = "moldlane";
 
-export const STORAGE_KEY = "wacrm.theme";
+export const STORAGE_KEY = "moldlane.theme";
 
 export interface ThemeMeta {
   id: ThemeId;
@@ -42,9 +43,15 @@ export interface ThemeMeta {
 
 export const THEMES: ReadonlyArray<ThemeMeta> = [
   {
+    id: "moldlane",
+    name: "Moldlane",
+    tagline: "The brand — teal-green for money, growth, and trust.",
+    swatch: "oklch(0.66 0.13 178)",
+  },
+  {
     id: "violet",
     name: "Violet",
-    tagline: "The default — confident, slightly playful.",
+    tagline: "Confident, slightly playful.",
     swatch: "oklch(0.526 0.247 293)",
   },
   {

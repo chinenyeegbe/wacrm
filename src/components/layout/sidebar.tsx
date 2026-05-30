@@ -129,8 +129,8 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <MessageSquare className="h-4 w-4" />
             </div>
-            <span className="text-sm font-semibold text-white">
-              CRM Template for WhatsApp
+            <span className="text-base font-semibold tracking-tight text-white">
+              Moldlane
             </span>
           </Link>
           <button
