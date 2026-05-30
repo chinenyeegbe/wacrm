@@ -63,6 +63,11 @@ function validateOne(step: StepLike, path: string, issues: ValidationIssue[]): v
         issues.push({ path: `${path}.template_name`, message: 'template name is required' })
       }
       break
+    case 'ai_reply':
+      // No required config — instructions are optional and the workspace
+      // business context lives in ai_settings. Runtime checks (AI
+      // configured, contact present) happen in the engine.
+      break
     case 'add_tag':
     case 'remove_tag':
       if (!nonEmpty(c.tag_id)) {

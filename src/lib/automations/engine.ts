@@ -16,6 +16,14 @@ import type {
 } from '@/types'
 import { supabaseAdmin } from './admin-client'
 import { engineSendText, engineSendTemplate } from './meta-send'
+import { chatComplete, isAIConfigured } from '@/lib/ai/client'
+import { buildReplyPrompt } from '@/lib/ai/prompts'
+import type { AIReplyStepConfig } from '@/types'
+
+// How many recent messages to feed the model for an automated reply.
+// Matches the inbox suggest_reply budget — enough context, safely inside
+// free-tier token limits.
+const AI_REPLY_HISTORY_LIMIT = 15
 
 // ------------------------------------------------------------
 // Public API
@@ -345,6 +353,78 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
         params,
       })
       return `template sent via Meta (${whatsapp_message_id})`
+    }
+
+    case 'ai_reply': {
+      const cfg = step.step_config as AIReplyStepConfig
+      if (!args.contactId) throw new Error('ai_reply needs a contact')
+      if (!isAIConfigured()) {
+        throw new Error('AI not configured (set OPENROUTER_API_KEY)')
+      }
+
+      const conversationId = await resolveConversationId(args)
+
+      // Respect the workspace master switch — lets an owner pause every
+      // auto-responder at once without editing each automation.
+      const { data: aiSettings } = await db
+        .from('ai_settings')
+        .select('business_context, ai_enabled')
+        .eq('user_id', args.automation.user_id)
+        .maybeSingle()
+      if (aiSettings && aiSettings.ai_enabled === false) {
+        return 'skipped: AI disabled for this workspace'
+      }
+
+      const { data: contact } = await db
+        .from('contacts')
+        .select('name, company')
+        .eq('id', args.contactId)
+        .maybeSingle()
+
+      const { data: history } = await db
+        .from('messages')
+        .select('sender_type, content_text, content_type, created_at')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: false })
+        .limit(AI_REPLY_HISTORY_LIMIT)
+
+      const turns = (history ?? [])
+        .slice()
+        .reverse()
+        .filter((m) => m.content_text)
+        .map((m) => ({
+          fromCustomer: m.sender_type === 'customer',
+          text:
+            m.content_type === 'text'
+              ? (m.content_text as string)
+              : `[${m.content_type}] ${m.content_text}`,
+        }))
+
+      // Per-step instructions are appended to the workspace context so a
+      // single automation can be scoped ("only answer FAQs") without
+      // touching the global catalogue.
+      const businessContext = [aiSettings?.business_context, cfg.instructions]
+        .filter((s): s is string => !!s && s.trim().length > 0)
+        .join('\n\n')
+
+      const { system, messages } = buildReplyPrompt({
+        contactName: contact?.name,
+        contactCompany: contact?.company,
+        history: turns,
+        businessContext: businessContext || null,
+      })
+
+      const reply = await chatComplete({ system, messages, temperature: 0.6 })
+      const text = reply.trim()
+      if (!text) throw new Error('AI returned an empty reply')
+
+      const { whatsapp_message_id } = await engineSendText({
+        userId: args.automation.user_id,
+        conversationId,
+        contactId: args.contactId,
+        text,
+      })
+      return `AI reply sent via Meta (${whatsapp_message_id})`
     }
 
     case 'add_tag': {

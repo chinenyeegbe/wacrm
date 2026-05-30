@@ -58,6 +58,15 @@ export interface ContactNote {
   created_at: string;
 }
 
+export interface AISettings {
+  id: string;
+  user_id: string;
+  business_context?: string | null;
+  ai_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export type ConversationStatus = 'open' | 'pending' | 'closed';
 
 export interface Conversation {
@@ -237,6 +246,7 @@ export type AutomationTriggerType =
 export type AutomationStepType =
   | 'send_message'
   | 'send_template'
+  | 'ai_reply'
   | 'add_tag'
   | 'remove_tag'
   | 'assign_conversation'
@@ -274,6 +284,17 @@ export type AutomationTriggerConfig =
 
 export interface SendMessageStepConfig {
   text: string;
+}
+
+/**
+ * AI reply step (migration 010). Generates the next reply from the
+ * conversation history using a free LLM and sends it via WhatsApp —
+ * a true 24/7 auto-responder. `instructions` steers the model for this
+ * specific automation (e.g. "only answer FAQs, never quote prices");
+ * the workspace-wide catalogue/prices live in ai_settings.business_context.
+ */
+export interface AIReplyStepConfig {
+  instructions?: string;
 }
 
 export interface SendTemplateStepConfig {
@@ -331,6 +352,7 @@ export interface SendWebhookStepConfig {
 export type AutomationStepConfig =
   | SendMessageStepConfig
   | SendTemplateStepConfig
+  | AIReplyStepConfig
   | TagStepConfig
   | AssignConversationStepConfig
   | UpdateContactFieldStepConfig

@@ -99,6 +99,14 @@ export async function POST(request: Request) {
           ? conversation.contact[0]
           : conversation.contact;
 
+        // Pull the workspace business context so the inbox suggestion and
+        // the AI Reply automation step share one source of truth.
+        const { data: aiSettings } = await supabase
+          .from("ai_settings")
+          .select("business_context")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
         const history = (messages ?? [])
           .slice()
           .reverse()
@@ -115,6 +123,7 @@ export async function POST(request: Request) {
           contactName: contact?.name,
           contactCompany: contact?.company,
           history,
+          businessContext: aiSettings?.business_context ?? null,
         });
 
         const result = await chatComplete({

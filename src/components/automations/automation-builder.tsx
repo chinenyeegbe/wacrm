@@ -11,6 +11,7 @@ import {
   GripVertical,
   MessageSquare,
   FileText,
+  Sparkles,
   Tag,
   TagIcon,
   UserCheck,
@@ -79,6 +80,7 @@ interface StepMeta {
 const STEP_META: Record<AutomationStepType, StepMeta> = {
   send_message: { label: "Send Message", icon: MessageSquare, border: "border-l-violet-500" },
   send_template: { label: "Send Template", icon: FileText, border: "border-l-violet-500" },
+  ai_reply: { label: "AI Reply", icon: Sparkles, border: "border-l-fuchsia-500" },
   add_tag: { label: "Add Tag", icon: Tag, border: "border-l-violet-500" },
   remove_tag: { label: "Remove Tag", icon: TagIcon, border: "border-l-violet-500" },
   assign_conversation: { label: "Assign Conversation", icon: UserCheck, border: "border-l-violet-500" },
@@ -93,6 +95,7 @@ const STEP_META: Record<AutomationStepType, StepMeta> = {
 const ADDABLE_STEPS: AutomationStepType[] = [
   "send_message",
   "send_template",
+  "ai_reply",
   "add_tag",
   "remove_tag",
   "assign_conversation",
@@ -133,6 +136,8 @@ function blankConfig(type: AutomationStepType): Record<string, unknown> {
       return { text: "" }
     case "send_template":
       return { template_name: "", language: "en_US" }
+    case "ai_reply":
+      return { instructions: "" }
     case "add_tag":
     case "remove_tag":
       return { tag_id: "" }
@@ -741,6 +746,27 @@ function StepEditor({
           </FieldBlock>
         </>
       )
+    case "ai_reply":
+      return (
+        <>
+          <FieldBlock label="Instructions for the AI (optional)">
+            <Textarea
+              value={(cfg.instructions as string) ?? ""}
+              onChange={(e) => set({ instructions: e.target.value })}
+              placeholder="e.g. Answer product questions, share the price list, and offer to book a call. Never promise a delivery date."
+              className="min-h-24 bg-slate-800 text-white"
+            />
+          </FieldBlock>
+          <p className="rounded-md bg-fuchsia-500/10 px-3 py-2 text-[11px] leading-relaxed text-fuchsia-200/80">
+            Generates the next reply from the conversation history using a
+            free LLM and sends it automatically — a 24/7 responder that
+            matches the customer&apos;s language. Add your catalogue, prices
+            and hours under{" "}
+            <span className="font-medium">Settings → AI</span> so replies
+            stay accurate. Requires <code>OPENROUTER_API_KEY</code>.
+          </p>
+        </>
+      )
     case "add_tag":
     case "remove_tag":
       return (
@@ -951,6 +977,8 @@ function previewFor(step: BuilderStep): string {
       return (step.step_config.text as string) || "no text yet"
     case "send_template":
       return (step.step_config.template_name as string) || "pick a template"
+    case "ai_reply":
+      return (step.step_config.instructions as string) || "AI drafts & sends the reply"
     case "wait":
       return `${step.step_config.amount ?? "?"} ${step.step_config.unit ?? ""}`
     case "condition":

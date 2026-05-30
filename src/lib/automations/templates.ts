@@ -10,6 +10,7 @@ export type TemplateSlug =
   | 'out_of_office'
   | 'lead_qualifier'
   | 'follow_up_reminder'
+  | 'ai_responder'
 
 export interface TemplateStepSeed {
   step_type: AutomationStepType
@@ -102,6 +103,23 @@ export const AUTOMATION_TEMPLATES: Record<TemplateSlug, AutomationTemplateDefini
       {
         step_type: 'assign_conversation',
         step_config: { mode: 'round_robin' },
+      },
+    ],
+  },
+  ai_responder: {
+    slug: 'ai_responder',
+    name: 'AI Auto-Responder',
+    description:
+      'Let AI answer every incoming message instantly, 24/7, in the customer’s own language. Add your catalogue and prices under Settings → AI.',
+    trigger_type: 'new_message_received',
+    trigger_config: {},
+    steps: [
+      {
+        step_type: 'ai_reply',
+        step_config: {
+          instructions:
+            'Answer the customer’s question helpfully and move the sale forward. Use the business context for prices and details. If you truly don’t know, say a team member will follow up.',
+        },
       },
     ],
   },
