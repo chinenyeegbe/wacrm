@@ -72,6 +72,14 @@ function validateOne(step: StepLike, path: string, issues: ValidationIssue[]): v
       // No config at all — it always emits the same fields. Runtime check
       // (AI configured) happens in the engine.
       break
+    case 'request_payment':
+      // Amount is required. It may be a literal ("15000") or an
+      // interpolation token ("{{vars.amount}}") resolved at runtime, so we
+      // only assert presence here, not numeric parseability.
+      if (!nonEmpty(c.amount)) {
+        issues.push({ path: `${path}.amount`, message: 'amount is required' })
+      }
+      break
     case 'add_tag':
     case 'remove_tag':
       if (!nonEmpty(c.tag_id)) {

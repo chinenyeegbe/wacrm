@@ -17,6 +17,7 @@ import {
   PhoneCall,
   Sparkles,
   Filter,
+  CreditCard,
   Loader2,
 } from "lucide-react"
 
@@ -46,6 +47,8 @@ import { cn } from "@/lib/utils"
 const TEMPLATE_ORDER: TemplateSlug[] = [
   "ai_smart_triage",
   "ai_responder",
+  "ai_collect_payment",
+  "win_back",
   "welcome_message",
   "out_of_office",
   "lead_qualifier",
@@ -55,6 +58,8 @@ const TEMPLATE_ORDER: TemplateSlug[] = [
 const TEMPLATE_ICON: Record<TemplateSlug, typeof Zap> = {
   ai_smart_triage: Filter,
   ai_responder: Sparkles,
+  ai_collect_payment: CreditCard,
+  win_back: Sparkles,
   welcome_message: MessageCircle,
   out_of_office: Clock,
   lead_qualifier: Users,

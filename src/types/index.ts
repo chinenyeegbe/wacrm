@@ -67,6 +67,60 @@ export interface AISettings {
   updated_at: string;
 }
 
+// ============================================================
+// Payments (migration 011) — the commission rail
+// ============================================================
+
+export type PaymentProvider = 'paystack' | 'flutterwave' | 'manual';
+
+export interface PaymentConfig {
+  id: string;
+  user_id: string;
+  provider: PaymentProvider;
+  /** Secret key, encrypted at rest (AES-256-GCM) exactly like WhatsApp tokens. */
+  secret_key?: string | null;
+  /** For 'manual': bank/mobile-money instructions sent verbatim to the customer. */
+  manual_instructions?: string | null;
+  /** Default ISO-4217 currency for new requests. */
+  default_currency: string;
+  /**
+   * Platform commission in basis points (1% = 100 bps) taken on collected
+   * payments. The whole monetization model lives here: 0 means "off"
+   * (self-hosters keep 100%); a hosted deployment sets it per its pricing.
+   */
+  platform_fee_bps: number;
+  status: 'connected' | 'disconnected';
+  created_at: string;
+  updated_at: string;
+}
+
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled';
+
+export interface PaymentRequest {
+  id: string;
+  user_id: string;
+  contact_id: string | null;
+  conversation_id: string | null;
+  /** Set when an automation raised the request, for attribution. */
+  automation_id?: string | null;
+  provider: PaymentProvider;
+  /** Provider-side reference (Paystack/Flutterwave tx ref). Idempotency key. */
+  reference: string;
+  /** Minor units (kobo/cents) to avoid float drift, like Stripe/Paystack. */
+  amount_minor: number;
+  currency: string;
+  description?: string | null;
+  /** The hosted checkout URL we send to the customer. */
+  checkout_url?: string | null;
+  status: PaymentStatus;
+  /** Commission captured at settlement, in minor units. */
+  platform_fee_minor: number;
+  paid_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  contact?: Contact;
+}
+
 export type ConversationStatus = 'open' | 'pending' | 'closed';
 
 export interface Conversation {
@@ -248,6 +302,7 @@ export type AutomationStepType =
   | 'send_template'
   | 'ai_reply'
   | 'ai_classify'
+  | 'request_payment'
   | 'add_tag'
   | 'remove_tag'
   | 'assign_conversation'
@@ -307,6 +362,23 @@ export interface AIReplyStepConfig {
  */
 export type AIClassifyStepConfig = Record<string, never>;
 
+/**
+ * Request-payment step (migration 011). Generates a payment link via the
+ * merchant's connected provider and sends it to the customer on WhatsApp.
+ * This is the rail that makes commission collectable: money moves through
+ * a link we mint, so the platform fee is taken at settlement instead of
+ * invoiced. `amount` and `description` may use {{vars.x}} interpolation so
+ * an AI step upstream can set the agreed price.
+ */
+export interface RequestPaymentStepConfig {
+  /** Numeric string or {{vars.amount}}. Parsed to a number at runtime. */
+  amount: string;
+  /** ISO 4217, e.g. NGN, KES, GHS, ZAR. Falls back to provider default. */
+  currency?: string;
+  /** What the customer is paying for — shown on the link + the message. */
+  description?: string;
+}
+
 export interface SendTemplateStepConfig {
   template_name: string;
   language?: string;
@@ -365,6 +437,7 @@ export type AutomationStepConfig =
   | SendTemplateStepConfig
   | AIReplyStepConfig
   | AIClassifyStepConfig
+  | RequestPaymentStepConfig
   | TagStepConfig
   | AssignConversationStepConfig
   | UpdateContactFieldStepConfig

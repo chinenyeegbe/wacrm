@@ -13,6 +13,7 @@ import {
   FileText,
   Sparkles,
   Filter,
+  CreditCard,
   Tag,
   TagIcon,
   UserCheck,
@@ -83,6 +84,7 @@ const STEP_META: Record<AutomationStepType, StepMeta> = {
   send_template: { label: "Send Template", icon: FileText, border: "border-l-violet-500" },
   ai_reply: { label: "AI Reply", icon: Sparkles, border: "border-l-fuchsia-500" },
   ai_classify: { label: "AI Classify & Route", icon: Filter, border: "border-l-fuchsia-500" },
+  request_payment: { label: "Request Payment", icon: CreditCard, border: "border-l-emerald-500" },
   add_tag: { label: "Add Tag", icon: Tag, border: "border-l-violet-500" },
   remove_tag: { label: "Remove Tag", icon: TagIcon, border: "border-l-violet-500" },
   assign_conversation: { label: "Assign Conversation", icon: UserCheck, border: "border-l-violet-500" },
@@ -99,6 +101,7 @@ const ADDABLE_STEPS: AutomationStepType[] = [
   "send_template",
   "ai_reply",
   "ai_classify",
+  "request_payment",
   "add_tag",
   "remove_tag",
   "assign_conversation",
@@ -143,6 +146,8 @@ function blankConfig(type: AutomationStepType): Record<string, unknown> {
       return { instructions: "" }
     case "ai_classify":
       return {}
+    case "request_payment":
+      return { amount: "", currency: "", description: "" }
     case "add_tag":
     case "remove_tag":
       return { tag_id: "" }
@@ -786,6 +791,45 @@ function StepEditor({
           and let AI handle the rest. Requires <code>OPENROUTER_API_KEY</code>.
         </p>
       )
+    case "request_payment":
+      return (
+        <>
+          <div className="grid grid-cols-2 gap-2">
+            <FieldBlock label="Amount">
+              <Input
+                value={(cfg.amount as string) ?? ""}
+                onChange={(e) => set({ amount: e.target.value })}
+                placeholder="15000 or {{vars.amount}}"
+                className="bg-slate-800 text-white"
+              />
+            </FieldBlock>
+            <FieldBlock label="Currency (optional)">
+              <Input
+                value={(cfg.currency as string) ?? ""}
+                onChange={(e) => set({ currency: e.target.value })}
+                placeholder="NGN"
+                className="bg-slate-800 text-white"
+              />
+            </FieldBlock>
+          </div>
+          <FieldBlock label="What is it for? (optional)">
+            <Input
+              value={(cfg.description as string) ?? ""}
+              onChange={(e) => set({ description: e.target.value })}
+              placeholder="2 ankara gowns"
+              className="bg-slate-800 text-white"
+            />
+          </FieldBlock>
+          <p className="rounded-md bg-emerald-500/10 px-3 py-2 text-[11px] leading-relaxed text-emerald-200/80">
+            Mints a payment link via your connected provider and sends it to
+            the customer on WhatsApp — the AI doesn&apos;t just close the sale,
+            it collects. Connect Paystack, Flutterwave, or bank/mobile-money
+            instructions under <span className="font-medium">Settings →
+            Payments</span>. Amount can read a value an earlier AI step set,
+            e.g. <code>{"{{vars.amount}}"}</code>.
+          </p>
+        </>
+      )
     case "add_tag":
     case "remove_tag":
       return (
@@ -1005,6 +1049,10 @@ function previewFor(step: BuilderStep): string {
       return (step.step_config.instructions as string) || "AI drafts & sends the reply"
     case "ai_classify":
       return "AI tags intent, sentiment & hot-lead"
+    case "request_payment":
+      return (step.step_config.amount as string)
+        ? `collect ${step.step_config.amount}`
+        : "send a payment link"
     case "wait":
       return `${step.step_config.amount ?? "?"} ${step.step_config.unit ?? ""}`
     case "condition":

@@ -18,7 +18,14 @@ import { supabaseAdmin } from './admin-client'
 import { engineSendText, engineSendTemplate } from './meta-send'
 import { chatComplete, isAIConfigured } from '@/lib/ai/client'
 import { buildReplyPrompt, buildClassifyPrompt, parseClassification } from '@/lib/ai/prompts'
-import type { AIReplyStepConfig } from '@/types'
+import {
+  createCheckout,
+  paymentMessage,
+  computePlatformFee,
+} from '@/lib/payments/providers'
+import { parseAmountToMinor, generateReference } from '@/lib/payments/amount'
+import { decrypt } from '@/lib/whatsapp/encryption'
+import type { AIReplyStepConfig, RequestPaymentStepConfig } from '@/types'
 
 // How many recent messages to feed the model for an automated reply.
 // Matches the inbox suggest_reply budget — enough context, safely inside
@@ -484,6 +491,95 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
       }
 
       return `classified: intent=${c.intent}, sentiment=${c.sentiment}, hot_lead=${c.hot_lead}, needs_human=${c.needs_human}`
+    }
+
+    case 'request_payment': {
+      // The commission rail: mint a payment link via the merchant's PSP,
+      // persist it with attribution (conversation + automation), and send
+      // it to the customer on WhatsApp. The platform fee is recorded now
+      // and confirmed at settlement by the PSP webhook.
+      const cfg = step.step_config as RequestPaymentStepConfig
+      if (!args.contactId) throw new Error('request_payment needs a contact')
+
+      const amountMinor = parseAmountToMinor(interpolate(cfg.amount ?? '', args))
+      if (amountMinor == null) {
+        throw new Error(`request_payment: invalid amount "${cfg.amount}"`)
+      }
+
+      const { data: payCfg } = await db
+        .from('payment_config')
+        .select('*')
+        .eq('user_id', args.automation.user_id)
+        .maybeSingle()
+      if (!payCfg) {
+        throw new Error('payments not configured (Settings → Payments)')
+      }
+
+      const { data: contact } = await db
+        .from('contacts')
+        .select('id, email')
+        .eq('id', args.contactId)
+        .eq('user_id', args.automation.user_id)
+        .maybeSingle()
+      if (!contact) throw new Error('contact not found for this user')
+
+      const conversationId = await resolveConversationId(args)
+      const currency = cfg.currency || payCfg.default_currency
+      const description = cfg.description
+        ? interpolate(cfg.description, args)
+        : undefined
+      const reference = generateReference()
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://wacrm.tech'
+
+      const checkout = await createCheckout({
+        provider: payCfg.provider,
+        secretKey: payCfg.secret_key ? decrypt(payCfg.secret_key) : null,
+        amountMinor,
+        currency,
+        reference,
+        // PSPs require an email; synthesise a stable placeholder when the
+        // contact has none (common for WhatsApp-only customers).
+        email: contact.email || `${reference}@pay.wacrm.tech`,
+        description,
+        callbackUrl: `${siteUrl}/pay/return`,
+        manualInstructions: payCfg.manual_instructions ?? undefined,
+      })
+
+      const platformFeeMinor = computePlatformFee(
+        amountMinor,
+        payCfg.platform_fee_bps ?? 0,
+      )
+
+      await db.from('payment_requests').insert({
+        user_id: args.automation.user_id,
+        contact_id: args.contactId,
+        conversation_id: conversationId,
+        automation_id: args.automation.id,
+        provider: payCfg.provider,
+        reference: checkout.providerReference,
+        amount_minor: amountMinor,
+        currency,
+        description: description ?? null,
+        checkout_url: checkout.checkoutUrl,
+        status: 'pending',
+        platform_fee_minor: platformFeeMinor,
+      })
+
+      const text = paymentMessage(checkout, { amountMinor, currency, description })
+      const { whatsapp_message_id } = await engineSendText({
+        userId: args.automation.user_id,
+        conversationId,
+        contactId: args.contactId,
+        text,
+      })
+
+      // Expose the reference downstream (e.g. webhook/condition use).
+      args.context.vars = {
+        ...(args.context.vars ?? {}),
+        payment_reference: checkout.providerReference,
+      }
+
+      return `payment request ${checkout.providerReference} sent via Meta (${whatsapp_message_id})`
     }
 
     case 'add_tag': {

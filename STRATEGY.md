@@ -126,13 +126,22 @@ share, keeps the rest. Nobody pays a subscription; everybody gets paid
 when sales happen.
 
 #### What this requires us to build (priority order)
-1. **Payments module** — connect a merchant PSP, generate payment
-   requests, reconcile, take fee. *This is the unlock for the whole
-   model — the next big feature after AI routing.*
-2. An **`ai_payment_request` automation step** + an AI tool the responder
-   can call to raise a payment link when a deal is agreed.
-3. **Attribution** — tie each payment back to the conversation/deal so
-   "the AI closed this" is provable (and commission is auditable).
+1. **Payments module** — ✅ shipped. PSP-agnostic provider layer
+   (Paystack, Flutterwave, manual bank/mobile-money), `payment_config` +
+   `payment_requests` tables (migration 011, RLS'd, fee in basis points),
+   a signed PSP webhook that flips pending→paid and mirrors a confirmation
+   into the inbox, and a Settings → Payments UI (encrypted keys).
+2. **`request_payment` automation step** — ✅ shipped. Mints a link via the
+   merchant's provider and sends it on WhatsApp; amount can read
+   `{{vars.amount}}` set by an upstream AI step. Plus an "AI Close &
+   Collect" template (classify → buying? → confirm → link).
+3. **Attribution** — ✅ shipped. Each `payment_request` stores
+   `conversation_id` + `automation_id` and the `platform_fee_minor` taken,
+   so "the AI closed this" and the commission are provable and auditable.
+
+Still open: a **commission ledger / payout** view aggregating
+`platform_fee_minor` per period, and **operator split** accounting (needs
+agency mode, below).
 
 > Sequencing note: ship the AI that *closes* (auto-responder ✅, qualifier
 > next), then the payments rail that *collects*. Closing without
@@ -153,10 +162,71 @@ businesses; the AI multiplies one person across many accounts. Operators
 earn a share of the commission they help generate. Deepest moat, most jobs
 created — needs **multi-workspace / agency mode** (see next).
 
-### 6. Multi-tenant / agency mode (enables 5b)
+### 6. Multi-tenant / agency mode (enables 5b) — NEXT
 The schema is already per-`user_id` with RLS. The work: a workspace/team
 layer so one operator account can manage many business workspaces, with
 roles (owner / operator / agent) and commission accounting per workspace.
+
+This is deliberately its **own** change set, not bundled with feature
+commits — it rewrites the RLS trust boundary (from "row owner = user" to
+"row belongs to a workspace the user is a member of"), and a mistake there
+leaks one merchant's chats to another. Plan:
+1. `workspaces` + `workspace_members(role)` tables; every tenant table
+   gains a `workspace_id`; backfill `workspace_id` from `user_id`.
+2. Swap RLS predicates to `workspace_id IN (my workspaces)`.
+3. A workspace switcher in the UI; invites; per-workspace commission split.
+Ship behind a flag, migrate existing single-user accounts to a personal
+workspace transparently.
+
+### 7. Human-in-the-loop is the product, not a fallback
+The AI is an **assistant to a human operator**, never an unattended bot.
+The loop we're building toward:
+- AI triages every inbound (`ai_classify`, shipped) and routes the ones
+  that need judgement to the *right* human (round-robin shipped; skills-
+  based routing next).
+- The human oversees, edits, approves — and can hand sub-tasks to agents
+  (their own staff, or marketplace operators) and gets paid out of the
+  value created, paying helpers from the same flow. A self-sustaining
+  circular market: the operator earns the spread between what the work is
+  worth and what they pay to get it done — with AI doing most of the
+  typing so that spread is wide.
+
+### 8. Trust & safety (a feature, and a sellable skill)
+African SMB relationships run on trust; mishandling a customer's details
+breaks it instantly. Shipped this batch:
+- **PII / sensitive-content detection** (`src/lib/safety/pii.ts`):
+  card numbers (Luhn-checked), emails, phones, long ID numbers. Pure and
+  synchronous — cheap enough to run on every inbound message.
+- **Redaction before any LLM call** — the AI prompt builders now strip PII
+  from the transcript, so a customer's card/BVN never leaves the box even
+  though replies are drafted by an external model.
+Next: surface a "⚠ sensitive info" flag on flagged messages in the inbox,
+an `ai_classify`-style `flag_sensitive` signal automations can branch on,
+and per-business rules ("never share a customer's phone with X").
+
+### 9. Re-engagement / win-back
+Dormant clients are the cheapest revenue a business has. Shipped: a
+**Win-Back** template — tag a past customer `win-back` and the AI sends a
+warm, non-pushy reconnect message, then hands the reply to a human. Next:
+a scheduled "haven't heard from these N contacts in 90 days → win-back"
+audience, and a small returning-customer offer mechanic.
+
+### 10. Creator / skills marketplace
+Independent creators as first-class businesses on the platform:
+- **Sell automation templates** — automations are already portable data
+  and the install-from-template plumbing exists; needs a user-authored
+  registry + a safety review (templates can contain `send_webhook` /
+  `request_payment`, so listing must be gated).
+- **Sell skills** — reusable, domain-deep prompt packs that plug into
+  `ai_reply` / `ai_classify`: negotiation, specific government
+  certification/paperwork flows, sector and cultural nuances that differ by
+  business and region. These are where real expertise (and pricing power)
+  live.
+- **Earn commission on outcomes** — a creator runs agents for merchants and
+  is paid a share of what those agents *collect* (the payments rail makes
+  this measurable). Needs agency mode (#6) + a commission ledger.
+The marketplace is phase-2; its prerequisites are payments (done) and
+agency mode (next).
 
 ## Operating it independently (handoff)
 

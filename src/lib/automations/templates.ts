@@ -12,6 +12,8 @@ export type TemplateSlug =
   | 'follow_up_reminder'
   | 'ai_responder'
   | 'ai_smart_triage'
+  | 'ai_collect_payment'
+  | 'win_back'
 
 export interface TemplateStepSeed {
   step_type: AutomationStepType
@@ -162,6 +164,50 @@ export const AUTOMATION_TEMPLATES: Record<TemplateSlug, AutomationTemplateDefini
         },
         parent_index: 1,
         branch: 'no',
+      },
+    ],
+  },
+  win_back: {
+    slug: 'win_back',
+    name: 'Win-Back Dormant Clients',
+    description:
+      'Re-warm a customer you haven’t heard from in a while. Tag a contact "win-back" (or run on a schedule) and the AI sends a personal, non-pushy reconnect message — then hands replies to you.',
+    // Fired by tagging a contact 'win-back' — gives the owner manual control
+    // over exactly who gets re-engaged (and avoids messaging active clients).
+    trigger_type: 'tag_added',
+    trigger_config: { tag_id: '' },
+    steps: [
+      {
+        step_type: 'ai_reply',
+        step_config: {
+          instructions:
+            'This is a past customer we have not heard from in a while. Write a warm, personal reconnect message — reference that it has been a while, ask how they are, and gently invite them back with a reason to return (new stock, a small returning-customer offer if appropriate). Do NOT be salesy or guilt-trip them. One short message.',
+        },
+      },
+    ],
+  },
+  ai_collect_payment: {
+    // Listed under the AI cluster — closes AND collects in one flow.
+    slug: 'ai_collect_payment',
+    name: 'AI Close & Collect',
+    description:
+      'When a customer signals they want to buy, the AI confirms the order and sends a payment link automatically. The rail that turns chats into collected cash.',
+    trigger_type: 'new_message_received',
+    trigger_config: {},
+    steps: [
+      { step_type: 'ai_classify', step_config: {} },
+      {
+        step_type: 'condition',
+        step_config: { subject: 'variable', operand: 'ai_intent', value: 'buying' },
+      },
+      {
+        step_type: 'ai_reply',
+        step_config: {
+          instructions:
+            'The customer wants to buy. Confirm exactly what they are ordering and the total price from the business context in one short message, then tell them a secure payment link is coming.',
+        },
+        parent_index: 1,
+        branch: 'yes',
       },
     ],
   },

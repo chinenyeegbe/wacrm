@@ -9,6 +9,7 @@
  */
 
 import type { ChatMessage } from "./client";
+import { redact } from "@/lib/safety/pii";
 
 export interface ConversationContext {
   contactName?: string | null;
@@ -41,8 +42,11 @@ export function buildReplyPrompt(ctx: ConversationContext): {
     ? `\n\nAbout your business (use this, do not contradict it):\n${ctx.businessContext}`
     : "";
 
+  // Redact PII (card numbers, emails, phones, IDs) before the transcript
+  // ever leaves the box for an external LLM. The model doesn't need a
+  // customer's card to draft a reply.
   const transcript = ctx.history
-    .map((m) => `${m.fromCustomer ? "Customer" : "You"}: ${m.text}`)
+    .map((m) => `${m.fromCustomer ? "Customer" : "You"}: ${redact(m.text)}`)
     .join("\n");
 
   return {
@@ -194,7 +198,7 @@ export function buildClassifyPrompt(ctx: ConversationContext): {
     ? `\n\nBusiness context (for judging intent and value):\n${ctx.businessContext}`
     : "";
   const transcript = ctx.history
-    .map((m) => `${m.fromCustomer ? "Customer" : "Business"}: ${m.text}`)
+    .map((m) => `${m.fromCustomer ? "Customer" : "Business"}: ${redact(m.text)}`)
     .join("\n");
 
   return {
