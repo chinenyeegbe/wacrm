@@ -76,7 +76,7 @@ export function AISettings() {
     if (!user) return;
     setSaving(true);
     try {
-      // Upsert keyed on the unique user_id (migration 010). One row per
+      // Upsert keyed on the unique user_id (migration 017). One row per
       // workspace; RLS confines it to the current user.
       const { error } = await supabase.from('ai_settings').upsert(
         {

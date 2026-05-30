@@ -68,7 +68,7 @@ export interface AISettings {
 }
 
 // ============================================================
-// Payments (migration 011) — the commission rail
+// Payments (migration 018) — the commission rail
 // ============================================================
 
 export type PaymentProvider = 'paystack' | 'flutterwave' | 'manual';
@@ -343,7 +343,7 @@ export interface SendMessageStepConfig {
 }
 
 /**
- * AI reply step (migration 010). Generates the next reply from the
+ * AI reply step (migration 017). Generates the next reply from the
  * conversation history using a free LLM and sends it via WhatsApp —
  * a true 24/7 auto-responder. `instructions` steers the model for this
  * specific automation (e.g. "only answer FAQs, never quote prices");
@@ -363,7 +363,7 @@ export interface AIReplyStepConfig {
 export type AIClassifyStepConfig = Record<string, never>;
 
 /**
- * Request-payment step (migration 011). Generates a payment link via the
+ * Request-payment step (migration 018). Generates a payment link via the
  * merchant's connected provider and sends it to the customer on WhatsApp.
  * This is the rail that makes commission collectable: money moves through
  * a link we mint, so the platform fee is taken at settlement instead of
