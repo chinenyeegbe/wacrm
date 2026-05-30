@@ -136,7 +136,23 @@ export interface ReferralEarning {
   share_bps: number;
   currency: string;
   status: ReferralEarningStatus;
+  /** Set once the earning is claimed into a payout (migration 021). */
+  payout_id?: string | null;
   created_at: string;
+}
+
+export type PartnerPayoutStatus = 'pending' | 'paid' | 'rejected';
+
+export interface PartnerPayout {
+  id: string;
+  partner_id: string;
+  amount_minor: number;
+  currency: string;
+  destination?: string | null;
+  status: PartnerPayoutStatus;
+  note?: string | null;
+  requested_at: string;
+  resolved_at?: string | null;
 }
 
 /**

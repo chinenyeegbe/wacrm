@@ -61,7 +61,7 @@ export function MobileNav({ onOpenMore }: { onOpenMore?: () => void }) {
                   "relative flex h-14 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
                   isActive
                     ? "text-primary"
-                    : "text-slate-400 active:text-white",
+                    : "text-muted-foreground active:text-foreground",
                 )}
               >
                 <span className="relative">
@@ -83,7 +83,7 @@ export function MobileNav({ onOpenMore }: { onOpenMore?: () => void }) {
             type="button"
             onClick={onOpenMore}
             aria-label="More"
-            className="flex h-14 w-full flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-slate-400 transition-colors active:text-white"
+            className="flex h-14 w-full flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted-foreground transition-colors active:text-foreground"
           >
             <MoreHorizontal className="h-5 w-5" />
             More

@@ -97,7 +97,7 @@ Why it works and what makes it work:
 | Attribution at signup | So credit is fair | ✅ built |
 | Recurring earnings ledger | So the promise is real | ✅ built |
 | Earnings dashboard | So partners trust it | ✅ built |
-| Payouts (mobile money/bank) | So they actually get paid | next |
+| Payouts (mobile money/bank) | So they actually get paid | ✅ built — "Cash out" requests a payout that atomically claims the accrued balance (`request_partner_payout` RPC, migration 021); an operator marks it paid |
 | Operator tools (agency mode) | A partner who also *runs* the CRM for many shops earns far more — combines referral + operator income | foundation built (migration 019) |
 | Leaderboards / status | Gamify the super-connector | later |
 | Training / certification | Turn selling into a teachable job | later (ties to skills marketplace) |
