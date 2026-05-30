@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendTemplateMessage } from '@/lib/whatsapp/meta-api'
 import { decrypt } from '@/lib/whatsapp/encryption'
+import type { SendTimeParams } from '@/lib/whatsapp/template-send-builder'
+import { isMessageTemplate } from '@/lib/whatsapp/template-row-guard'
 import {
   sanitizePhoneForMeta,
   isValidE164,
@@ -45,7 +47,15 @@ interface BroadcastResult {
  */
 interface NewRecipient {
   phone: string
+  /** Body variable values, one per {{N}}. Legacy field. */
   params?: string[]
+  /**
+   * Structured per-send values (header text variable, media URL
+   * override, URL/COPY_CODE button values). When set, takes
+   * precedence over `params` for the body too — see
+   * sendTemplateMessage for the merge rules.
+   */
+  messageParams?: SendTimeParams
 }
 
 export async function POST(request: Request) {
@@ -125,6 +135,29 @@ export async function POST(request: Request) {
 
     const accessToken = decrypt(config.access_token)
 
+    // Load the template row once so sendTemplateMessage can build
+    // header + button components on each iteration. Loading inside
+    // the loop would N+1 against Supabase for every recipient.
+    // Guard against a malformed local row crashing every send in
+    // the loop with the same opaque TypeError — fail loudly once.
+    const { data: rawTemplateRow } = await supabase
+      .from('message_templates')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('name', template_name)
+      .eq('language', template_language || 'en_US')
+      .maybeSingle()
+    if (rawTemplateRow && !isMessageTemplate(rawTemplateRow)) {
+      return NextResponse.json(
+        {
+          error:
+            'Template row is malformed locally — run "Sync from Meta" in Settings to repair it before broadcasting.',
+        },
+        { status: 500 },
+      )
+    }
+    const templateRow = rawTemplateRow ?? null
+
     const results: BroadcastResult[] = []
     let sentCount = 0
     let failedCount = 0
@@ -156,6 +189,8 @@ export async function POST(request: Request) {
             to: variant,
             templateName: template_name,
             language: template_language || 'en_US',
+            template: templateRow ?? undefined,
+            messageParams: recipient.messageParams,
             params: recipient.params ?? [],
           })
           sentMessageId = result.messageId

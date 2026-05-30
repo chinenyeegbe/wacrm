@@ -20,6 +20,7 @@ import {
   Check,
   Clock,
   ArrowLeft,
+  RefreshCw,
 } from "lucide-react";
 import { format, isToday, isYesterday, differenceInHours } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +71,22 @@ interface MessageThreadProps {
    * mobile only.
    */
   onBack?: () => void;
+  /**
+   * Increment to force the messages + reactions fetch effects to refire.
+   * Parent bumps this on realtime reconnect / tab visibility → visible
+   * so the open thread catches up on any events sent while the WS was
+   * disconnected or the tab was throttled. Optional so existing callers
+   * keep working.
+   */
+  resyncToken?: number;
+  /**
+   * Fired by the manual-refresh button in the thread header. The parent
+   * typically bumps the same `resyncToken` it controls — this gives the
+   * user a way to force a refetch when they suspect realtime missed an
+   * event (or they're impatient). Optional so existing callers keep
+   * working; the button is only rendered when this is provided.
+   */
+  onRefresh?: () => void;
 }
 
 function formatDateSeparator(dateStr: string): string {
@@ -97,10 +114,22 @@ function groupMessagesByDate(messages: Message[]) {
 }
 
 const STATUS_OPTIONS: { label: string; value: ConversationStatus; color: string }[] = [
-  { label: "Open", value: "open", color: "text-violet-400" },
+  { label: "Open", value: "open", color: "text-primary" },
   { label: "Pending", value: "pending", color: "text-amber-400" },
   { label: "Closed", value: "closed", color: "text-slate-400" },
 ];
+
+/**
+ * WhatsApp-style doodle background applied to the chat area (both the
+ * active thread and the empty state). The SVG tile lives at
+ * `/public/inbox-doodle.svg`; the slate-950 colour sits underneath so
+ * the doodles read as a subtle pattern rather than a stark grid.
+ *
+ * Defined once at module scope so the two render paths can't drift —
+ * if we ever switch the asset, both spots update together.
+ */
+const DOODLE_BG_CLASSES =
+  "bg-slate-950 bg-[url('/inbox-doodle.svg')] bg-repeat";
 
 export function MessageThread({
   conversation,
@@ -112,6 +141,8 @@ export function MessageThread({
   onStatusChange,
   onAssignChange,
   onBack,
+  resyncToken = 0,
+  onRefresh,
 }: MessageThreadProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -119,6 +150,28 @@ export function MessageThread({
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [reactions, setReactions] = useState<MessageReaction[]>([]);
+  // Purely visual spin state for the manual-refresh button. The actual
+  // refetch is fire-and-forget through `onRefresh` (which bumps the
+  // parent's resyncToken); the 700ms spin is just feedback so the click
+  // doesn't feel like a no-op. Cleared via the timer ref on unmount.
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current !== null) {
+        clearTimeout(refreshTimerRef.current);
+      }
+    };
+  }, []);
+  const handleRefreshClick = useCallback(() => {
+    if (isRefreshing || !onRefresh) return;
+    setIsRefreshing(true);
+    onRefresh();
+    refreshTimerRef.current = setTimeout(() => {
+      setIsRefreshing(false);
+      refreshTimerRef.current = null;
+    }, 700);
+  }, [isRefreshing, onRefresh]);
   const [replyTo, setReplyTo] = useState<ReplyDraft | null>(null);
 
   // Profiles are bounded by RLS to rows the current user is allowed to
@@ -219,12 +272,16 @@ export function MessageThread({
     return () => {
       cancelled = true;
     };
-  }, [conversationId]);
+    // `resyncToken` is included so the parent can force a refetch when
+    // the realtime channel reconnects or the tab regains focus —
+    // realtime is best-effort and any message events sent while the WS
+    // was disconnected or throttled are otherwise lost.
+  }, [conversationId, resyncToken]);
 
-  // Reactions: fetch + realtime per conversation. Subscribing here (not at
-  // the page level) keeps the channel scoped to the visible conversation,
-  // matching the message fetch effect above and avoiding cross-conversation
-  // chatter on a busy inbox.
+  // Reactions fetch — pulls the current state from the DB. Kept separate
+  // from the channel subscription below so a `resyncToken` bump just
+  // refetches the rows without also tearing down and rebuilding the
+  // realtime channel.
   useEffect(() => {
     if (!conversationId) {
       setReactions([]);
@@ -245,6 +302,18 @@ export function MessageThread({
       }
       setReactions((data as MessageReaction[]) ?? []);
     })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [conversationId, resyncToken]);
+
+  // Reactions realtime subscription per conversation. Subscribing here
+  // (not at the page level) keeps the channel scoped to the visible
+  // conversation and avoids cross-conversation chatter on a busy inbox.
+  useEffect(() => {
+    if (!conversationId) return;
+    const supabase = createClient();
 
     const channel = supabase
       .channel(`reactions:${conversationId}`)
@@ -308,7 +377,6 @@ export function MessageThread({
       .subscribe();
 
     return () => {
-      cancelled = true;
       supabase.removeChannel(channel);
     };
   }, [conversationId]);
@@ -425,10 +493,17 @@ export function MessageThread({
   }, []);
 
   const handleSendTemplate = useCallback(
-    async (template: MessageTemplate, params: string[]) => {
+    async (
+      template: MessageTemplate,
+      values: {
+        body: string[];
+        headerText?: string;
+        buttonParams?: Record<number, string>;
+      },
+    ) => {
       if (!conversation) return;
 
-      const renderedBody = renderTemplateBody(template.body_text, params);
+      const renderedBody = renderTemplateBody(template.body_text, values.body);
       const tempId = `temp-${Date.now()}`;
 
       const optimisticMsg: Message = {
@@ -451,7 +526,17 @@ export function MessageThread({
             conversation_id: conversation.id,
             message_type: "template",
             template_name: template.name,
-            template_params: params,
+            template_language: template.language,
+            // Structured params drive the new send-builder path
+            // (header media + URL button substitution). Body values
+            // are mirrored under both shapes so the route can fall
+            // back if the template row isn't found locally.
+            template_message_params: {
+              body: values.body,
+              headerText: values.headerText,
+              buttonParams: values.buttonParams,
+            },
+            template_params: values.body,
             content_text: renderedBody,
           }),
         });
@@ -605,10 +690,12 @@ export function MessageThread({
     [conversation, onAssignChange],
   );
 
-  // Empty state
+  // Empty state — same WhatsApp-style doodle background as the active
+  // thread below, so swapping between empty/selected doesn't change the
+  // pattern under the user's eye.
   if (!conversation || !contact) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center bg-slate-950">
+      <div className={cn("flex flex-1 flex-col items-center justify-center", DOODLE_BG_CLASSES)}>
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-800">
           <MessageSquare className="h-8 w-8 text-slate-600" />
         </div>
@@ -634,8 +721,9 @@ export function MessageThread({
     : "Assign";
 
   return (
-    <div className="flex flex-1 flex-col bg-slate-950">
-      {/* Header */}
+    <div className={cn("flex flex-1 flex-col", DOODLE_BG_CLASSES)}>
+      {/* Header — solid bg-slate-900 sits on top of the doodle so the
+          name/avatar/dropdowns stay legible. */}
       <div className="flex items-center justify-between gap-2 border-b border-slate-800 bg-slate-900 px-3 py-3 sm:px-4">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           {/* Back-to-list button — mobile only. Hidden on lg+ where the
@@ -663,7 +751,7 @@ export function MessageThread({
             variant="outline"
             className={cn(
               "ml-1 hidden gap-1 border-slate-700 text-[10px] sm:inline-flex sm:ml-2",
-              sessionInfo.expired ? "text-red-400" : "text-violet-400"
+              sessionInfo.expired ? "text-red-400" : "text-primary"
             )}
           >
             <Clock className="h-3 w-3" />
@@ -672,6 +760,28 @@ export function MessageThread({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Manual refresh — forces a refetch of the messages + the
+              conversation list (the parent bumps its resyncToken). Useful
+              when realtime missed an event or the agent just wants to be
+              sure nothing's stale. Only rendered when the parent wires
+              up `onRefresh`. */}
+          {onRefresh && (
+            <button
+              type="button"
+              onClick={handleRefreshClick}
+              disabled={isRefreshing}
+              aria-label="Refresh conversation"
+              title="Refresh"
+              className={cn(
+                "inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-800 hover:text-white disabled:opacity-60",
+              )}
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")}
+              />
+            </button>
+          )}
+
           {/* Status dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger className={cn(
@@ -702,7 +812,7 @@ export function MessageThread({
             <DropdownMenuTrigger
               className={cn(
                 "inline-flex items-center justify-center h-7 gap-1 px-2 text-xs rounded-md hover:bg-slate-800",
-                assignedAgentId ? "text-violet-400" : "text-slate-400"
+                assignedAgentId ? "text-primary" : "text-slate-400"
               )}
             >
               <UserPlus className="h-3 w-3" />
@@ -726,7 +836,7 @@ export function MessageThread({
                       onClick={() => handleAssignChange(p.user_id)}
                       className={cn(
                         "text-sm",
-                        isSelected ? "text-violet-400" : "text-slate-300"
+                        isSelected ? "text-primary" : "text-slate-300"
                       )}
                     >
                       <span className="flex-1">
@@ -758,7 +868,7 @@ export function MessageThread({
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">

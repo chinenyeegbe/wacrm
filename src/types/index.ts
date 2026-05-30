@@ -5,6 +5,14 @@ export interface Profile {
   email: string;
   avatar_url?: string;
   role: string;
+  /**
+   * Opted-in beta feature keys for this account. The column survives
+   * for future beta gates; no current feature reads it (Flows was
+   * the last user and went to soft-GA in PR #134). Defaults to `[]`
+   * for every profile; toggled per-account via a direct UPDATE on
+   * the `profiles` row.
+   */
+  beta_features?: string[];
   created_at: string;
 }
 
@@ -138,7 +146,16 @@ export interface Conversation {
 }
 
 export type SenderType = 'customer' | 'agent' | 'bot';
-export type ContentType = 'text' | 'image' | 'document' | 'audio' | 'video' | 'location' | 'template';
+export type ContentType =
+  | 'text'
+  | 'image'
+  | 'document'
+  | 'audio'
+  | 'video'
+  | 'location'
+  | 'template'
+  /** Customer tapped a reply button or list row on a message we sent. */
+  | 'interactive';
 export type MessageStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
 
 export interface Message {
@@ -154,6 +171,13 @@ export interface Message {
   status: MessageStatus;
   created_at: string;
   reply_to_message_id?: string;
+  /**
+   * Only set when `content_type === 'interactive'` — the stable id of
+   * the button or list row the customer tapped. The Flows engine uses
+   * this to route the next node; the inbox bubble uses it as a styling
+   * cue (renders with a "↩ button reply" affordance).
+   */
+  interactive_reply_id?: string;
 }
 
 export type ReactionActor = 'customer' | 'agent';
@@ -177,6 +201,41 @@ export interface WhatsAppConfig {
   verify_token?: string;
   status: 'connected' | 'disconnected';
   connected_at?: string;
+  /**
+   * Set when POST /{phone_number_id}/register last succeeded. NULL
+   * means the number was saved but never actually subscribed for
+   * webhooks on Meta's side — inbound events will be silently lost.
+   */
+  registered_at?: string;
+  /** Set when POST /{waba_id}/subscribed_apps last succeeded. */
+  subscribed_apps_at?: string;
+  /** Last error from /register; cleared on success. */
+  last_registration_error?: string;
+}
+
+// Raw Meta status enum. We persist this verbatim from Meta (sync + webhook)
+// rather than collapsing to a local TitleCase set — distinctions like
+// PAUSED vs DISABLED vs IN_APPEAL drive the edit/resubmit/delete flows.
+// DRAFT is the local-only state before the row is submitted to Meta.
+export type MessageTemplateStatus =
+  | 'DRAFT'
+  | 'PENDING'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'PAUSED'
+  | 'DISABLED'
+  | 'IN_APPEAL'
+  | 'PENDING_DELETION';
+
+export type TemplateButton =
+  | { type: 'QUICK_REPLY'; text: string }
+  | { type: 'URL'; text: string; url: string; example?: string }
+  | { type: 'PHONE_NUMBER'; text: string; phone_number: string }
+  | { type: 'COPY_CODE'; text: string; example: string };
+
+export interface TemplateSampleValues {
+  body?: string[];
+  header?: string[];
 }
 
 export interface MessageTemplate {
@@ -187,10 +246,18 @@ export interface MessageTemplate {
   language?: string;
   header_type?: 'text' | 'image' | 'video' | 'document';
   header_content?: string;
+  header_handle?: string;
+  header_media_url?: string;
   body_text: string;
   footer_text?: string;
-  buttons?: Record<string, unknown>[];
-  status?: 'Draft' | 'Pending' | 'Approved' | 'Rejected';
+  buttons?: TemplateButton[];
+  sample_values?: TemplateSampleValues;
+  status?: MessageTemplateStatus;
+  meta_template_id?: string;
+  rejection_reason?: string;
+  quality_score?: 'GREEN' | 'YELLOW' | 'RED';
+  submission_error?: string;
+  last_submitted_at?: string;
   created_at: string;
 }
 

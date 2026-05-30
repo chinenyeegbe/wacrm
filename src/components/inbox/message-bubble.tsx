@@ -12,6 +12,7 @@ import {
   MapPin,
   LayoutTemplate,
   ImageOff,
+  CornerDownLeft,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ReplyQuote } from "./reply-quote";
@@ -100,7 +101,7 @@ function MediaImage({ url, alt }: { url: string; alt: string }) {
   if (loading) {
     return (
       <div className="flex h-40 w-60 items-center justify-center rounded-lg bg-slate-700">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
   }
@@ -192,7 +193,7 @@ function MessageContent({ message }: { message: Message }) {
     case "template":
       return (
         <div>
-          <span className="mb-1 inline-flex items-center gap-1 rounded bg-violet-500/20 px-1.5 py-0.5 text-[10px] font-medium text-violet-400">
+          <span className="mb-1 inline-flex items-center gap-1 rounded bg-primary/20 px-1.5 py-0.5 text-[10px] font-medium text-primary">
             <LayoutTemplate className="h-3 w-3" />
             Template
           </span>
@@ -211,6 +212,25 @@ function MessageContent({ message }: { message: Message }) {
           <span>{message.content_text || "Location shared"}</span>
         </div>
       );
+
+    case "interactive": {
+      // Customer tapped a reply button or list row on a message the bot
+      // sent. We show the tapped option's title (already in content_text,
+      // set by parseMessageContent in the webhook) with a small affordance
+      // so agents reading the inbox can tell at a glance that this is a
+      // tap rather than the customer typing the same words.
+      return (
+        <div className="flex flex-col gap-0.5">
+          <span className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+            <CornerDownLeft className="h-3 w-3" />
+            Button reply
+          </span>
+          <p className="whitespace-pre-wrap break-words text-sm">
+            {message.content_text || "[Interactive reply]"}
+          </p>
+        </div>
+      );
+    }
 
     default:
       return (
@@ -244,7 +264,7 @@ export function MessageBubble({
         className={cn(
           "relative rounded-2xl px-3 py-2",
           isAgent
-            ? "rounded-br-md bg-violet-600 text-white"
+            ? "rounded-br-md bg-primary text-primary-foreground"
             : "rounded-bl-md bg-slate-800 text-slate-100",
         )}
       >
