@@ -17,6 +17,12 @@ The marketing site and self-host docs live in a separate repo:
 ([wacrm.tech](https://wacrm.tech)). This repo is the product —
 clone or fork it to run your own CRM.
 
+> **New here / feeling lost?** Read
+> **[docs/what-is-this.md](./docs/what-is-this.md)** first — a plain-English
+> explainer with journey maps and flowcharts of how the whole system fits
+> together (the AI employee, payments, and how it makes money). The growth
+> plan is in [`STRATEGY.md`](./STRATEGY.md).
+
 ## What you get out of the box
 
 - **Shared inbox** on the official WhatsApp Business API — multiple
