@@ -40,7 +40,10 @@ export default function PartnerPage() {
   const [partner, setPartner] = useState<Partner | null>(null);
   const [referralUrl, setReferralUrl] = useState<string>('');
   const [earnings, setEarnings] = useState<ReferralEarning[]>([]);
+  const [payouts, setPayouts] = useState<PartnerPayout[]>([]);
   const [copied, setCopied] = useState(false);
+  const [payoutDetails, setPayoutDetails] = useState('');
+  const [cashingOut, setCashingOut] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,14 +55,25 @@ export default function PartnerPage() {
         if (body?.partner) {
           setPartner(body.partner);
           setReferralUrl(body.referral_url ?? '');
-          // Earnings are readable directly via RLS (partner owns them).
+          setPayoutDetails(body.partner.payout_details ?? '');
+          // Earnings + payouts are readable directly via RLS (partner owns them).
           const supabase = createClient();
-          const { data } = await supabase
-            .from('referral_earnings')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(50);
-          if (!cancelled) setEarnings((data as ReferralEarning[]) ?? []);
+          const [{ data: earn }, { data: pay }] = await Promise.all([
+            supabase
+              .from('referral_earnings')
+              .select('*')
+              .order('created_at', { ascending: false })
+              .limit(50),
+            supabase
+              .from('partner_payouts')
+              .select('*')
+              .order('requested_at', { ascending: false })
+              .limit(20),
+          ]);
+          if (!cancelled) {
+            setEarnings((earn as ReferralEarning[]) ?? []);
+            setPayouts((pay as PartnerPayout[]) ?? []);
+          }
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -81,7 +95,7 @@ export default function PartnerPage() {
       }
       setPartner(body.partner);
       setReferralUrl(body.referral_url ?? '');
-      toast.success('You are now a wacrm partner! 🎉');
+      toast.success('You are now a Moldlane partner! 🎉');
     } finally {
       setJoining(false);
     }
@@ -95,6 +109,36 @@ export default function PartnerPage() {
       setTimeout(() => setCopied(false), 1500);
     } catch {
       toast.error('Could not copy — long-press to copy the link');
+    }
+  };
+
+  const cashOut = async () => {
+    if (!payoutDetails.trim()) {
+      toast.error('Add where to send the money first (bank or mobile money).');
+      return;
+    }
+    setCashingOut(true);
+    try {
+      const res = await fetch('/api/partners/payouts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payout_details: payoutDetails.trim() }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(body?.error || 'Could not request payout');
+        return;
+      }
+      // Optimistically reflect: accrued → paid, new pending payout on top.
+      setPayouts((prev) => [body.payout as PartnerPayout, ...prev]);
+      setEarnings((prev) =>
+        prev.map((e) =>
+          e.status === 'accrued' ? { ...e, status: 'paid' as const } : e,
+        ),
+      );
+      toast.success('Payout requested — we’ll send it to your account.');
+    } finally {
+      setCashingOut(false);
     }
   };
 
