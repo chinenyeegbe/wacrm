@@ -15,6 +15,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { Faq } from "@/components/marketing/faq";
 import { RotatingText } from "@/components/marketing/rotating-text";
+import { Reveal } from "@/components/marketing/reveal";
 import { BUSINESS_HERO } from "@/lib/marketing/hero-variants";
 
 const FAQ_ITEMS = [
@@ -127,14 +128,15 @@ export default async function HomePage() {
               title: "Bring people back",
               body: "It reminds quiet customers to come back. The marketing you never have time to do.",
             },
-          ].map((item) => (
-            <div
+          ].map((item, i) => (
+            <Reveal
               key={item.title}
+              delayMs={i * 80}
               className="rounded-xl border border-border bg-card p-5"
             >
               <p className="font-semibold text-foreground">{item.title}</p>
               <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -164,9 +166,10 @@ export default async function HomePage() {
               title: "Get back to work",
               body: "Your customers are looked after all day. You step in only when you want to.",
             },
-          ].map((step) => (
-            <div
+          ].map((step, i) => (
+            <Reveal
               key={step.n}
+              delayMs={i * 80}
               className="rounded-xl border border-border bg-card p-6"
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
@@ -174,7 +177,7 @@ export default async function HomePage() {
               </span>
               <h3 className="mt-4 font-semibold">{step.title}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{step.body}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -217,9 +220,10 @@ export default async function HomePage() {
                 title: "Sounds like you",
                 body: "Friendly, human replies. Your customers' details stay private.",
               },
-            ].map((f) => (
-              <div
+            ].map((f, i) => (
+              <Reveal
                 key={f.title}
+                delayMs={(i % 3) * 80}
                 className="rounded-xl border border-border bg-card p-5"
               >
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-soft text-primary">
@@ -227,7 +231,7 @@ export default async function HomePage() {
                 </span>
                 <h3 className="mt-3 font-semibold">{f.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{f.body}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>

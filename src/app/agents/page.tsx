@@ -13,6 +13,7 @@ import {
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { Faq } from "@/components/marketing/faq";
 import { RotatingText } from "@/components/marketing/rotating-text";
+import { Reveal } from "@/components/marketing/reveal";
 import { AGENT_HERO } from "@/lib/marketing/hero-variants";
 import { DEFAULT_PARTNER_TIERS } from "@/lib/referrals/commission";
 
@@ -122,9 +123,10 @@ export default function AgentsPage() {
               title: "Earn more over time",
               body: "The more businesses you bring, the bigger your share.",
             },
-          ].map((item) => (
-            <div
+          ].map((item, i) => (
+            <Reveal
               key={item.title}
+              delayMs={i * 80}
               className="rounded-xl border border-border bg-card p-5"
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-soft text-primary">
@@ -132,7 +134,7 @@ export default function AgentsPage() {
               </span>
               <h3 className="mt-3 font-semibold">{item.title}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -162,9 +164,10 @@ export default function AgentsPage() {
               title: "Cash out",
               body: "Earn from their sales and withdraw to your bank or mobile money.",
             },
-          ].map((step) => (
-            <div
+          ].map((step, i) => (
+            <Reveal
               key={step.n}
+              delayMs={i * 80}
               className="rounded-xl border border-border bg-card p-6"
             >
               <div className="flex items-center gap-3">
@@ -175,7 +178,7 @@ export default function AgentsPage() {
               </div>
               <h3 className="mt-4 font-semibold">{step.title}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{step.body}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>

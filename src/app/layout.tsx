@@ -60,6 +60,10 @@ export const viewport: Viewport = {
 // silently break the boot path.
 const THEME_BOOT_SCRIPT = `
 (function(){
+  // Mark that JS is on, BEFORE first paint. Scroll-reveal hides its content
+  // only under html.js, so with JS off the content is simply visible (no
+  // flash, SEO/no-JS safe).
+  document.documentElement.classList.add('js');
   try {
     var STORAGE_KEY = ${JSON.stringify(STORAGE_KEY)};
     var DEFAULT = ${JSON.stringify(DEFAULT_THEME)};
