@@ -13,6 +13,38 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
+import { Faq } from "@/components/marketing/faq";
+
+const FAQ_ITEMS = [
+  {
+    q: "Will it sound like a robot to my customers?",
+    a: "No. The replies are warm and human, in the customer's own language. If you want, you can read and approve every message before it goes out.",
+  },
+  {
+    q: "Do my customers need to download anything?",
+    a: "No. They keep chatting on the same WhatsApp they already use. Nothing changes for them.",
+  },
+  {
+    q: "What does it cost?",
+    a: "It is free to start and free to set up. You pay a small fee only when a sale is paid through Moldlane. No monthly fee.",
+  },
+  {
+    q: "What if it replies with the wrong thing?",
+    a: "You are always in control. Start by checking every reply yourself, then let it do more as you trust it. You can pause it any time.",
+  },
+  {
+    q: "Is my customers' information safe?",
+    a: "Yes. Your customers' details stay private, and card numbers are hidden. Your data is yours.",
+  },
+  {
+    q: "How long does it take to set up?",
+    a: "About an afternoon. You add your number, your prices, and your hours once, and you are ready.",
+  },
+  {
+    q: "Can my staff use it too?",
+    a: "Yes. You and your team share one number, with notes, tags, and a simple sales board so nothing slips.",
+  },
+];
 
 // Business landing. One audience only: the shop / business owner.
 //
@@ -197,6 +229,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* FAQ / objection handling */}
+      <Faq title="Questions people ask" items={FAQ_ITEMS} />
 
       {/* Pricing promise */}
       <section className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6">

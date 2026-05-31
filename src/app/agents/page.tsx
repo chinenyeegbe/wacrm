@@ -11,7 +11,39 @@ import {
   Smartphone,
 } from "lucide-react";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
+import { Faq } from "@/components/marketing/faq";
 import { DEFAULT_PARTNER_TIERS } from "@/lib/referrals/commission";
+
+const FAQ_ITEMS = [
+  {
+    q: "Is it free to join?",
+    a: "Yes. Joining is free. There are no fees and no targets. You only ever earn, you never pay.",
+  },
+  {
+    q: "When do I get paid?",
+    a: "You earn every time a business you signed up makes a paid sale, every month they keep using Moldlane.",
+  },
+  {
+    q: "How do I get my money?",
+    a: "When you are ready, you cash out your earnings to your bank account or mobile money.",
+  },
+  {
+    q: "Is this one of those schemes?",
+    a: "No. You earn from real sales only. There is no joining fee, and you are not paid for recruiting other people.",
+  },
+  {
+    q: "Do I need experience?",
+    a: "No. If you know local businesses and you are good with people, you can do this. We show you how.",
+  },
+  {
+    q: "What do I actually have to do?",
+    a: "Share your link, and help a shop get started. That is it. The tool does the work of answering and selling.",
+  },
+  {
+    q: "How much can I earn?",
+    a: "It grows with how many businesses you bring. The more active businesses you sign up, the bigger your share of every sale.",
+  },
+];
 
 // Agent landing. One audience only: the person who wants to earn by bringing
 // local businesses onto Moldlane. Plain, simple English. The business pitch
@@ -216,6 +248,9 @@ export default function AgentsPage() {
           </div>
         </div>
       </section>
+
+      {/* FAQ / objection handling */}
+      <Faq title="Questions people ask" items={FAQ_ITEMS} />
 
       {/* Final CTA */}
       <section className="border-t border-border/60">
