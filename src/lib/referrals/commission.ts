@@ -3,16 +3,16 @@
  *
  * When a business pays through a wacrm payment link, the platform takes a
  * fee (payment_config.platform_fee_bps). If that business was referred by a
- * partner, the partner earns a SHARE of that platform fee — recurring, for
+ * partner, the partner earns a SHARE of that platform fee, recurring, for
  * the life of the referral (or a configured window). This module is the
  * pure math that turns "a payment happened" into "who is owed what".
  *
  * All amounts are integer MINOR units (kobo/cents). All splits are integer
- * basis points (10000 = 100%). No floats — money never rounds by accident.
+ * basis points (10000 = 100%). No floats, money never rounds by accident.
  *
  * The split is taken out of the PLATFORM's fee, not added on top, so the
  * business pays exactly the same whether or not a partner is involved. The
- * network is funded from our margin — aligned, not extractive.
+ * network is funded from our margin, aligned, not extractive.
  */
 
 export interface SplitInput {
@@ -42,7 +42,7 @@ export interface SplitResult {
  *
  * Invariants (all asserted by tests):
  *   - partnerMinor + platformNetMinor === platformFeeMinor (never loses a
- *     unit — platform absorbs any rounding remainder).
+ *     unit, platform absorbs any rounding remainder).
  *   - 0 ≤ partnerMinor ≤ platformFeeMinor.
  *   - partnerShareBps is clamped to [0, 10000].
  */

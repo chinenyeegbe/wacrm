@@ -35,7 +35,7 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
-  /* Deep state (rust) + tinted surfaces — exposes the existing
+  /* Deep state (rust) + tinted surfaces, exposes the existing
      --primary-* tokens as Tailwind utilities (bg-primary-hover,
      text-primary-hover, bg-primary-soft, …). */
   --color-primary-hover: var(--primary-hover);
@@ -60,7 +60,7 @@
  * 5 dark themes sharing structure, swapping only the primary
  * accent (and a tiny hue rotation on the slate base). Switched
  * at runtime by setting `document.documentElement.dataset.theme`
- * — see ThemeProvider + the inline boot script in layout.tsx.
+ *, see ThemeProvider + the inline boot script in layout.tsx.
  *
  * `:root` mirrors Moldlane (the brand default) so first-paint
  * renders correctly before JS runs. Each `[data-theme="..."]`
@@ -68,12 +68,12 @@
  * settings UI sets after a pick.
  *
  * The three `--primary-*` extras (hover / soft / soft-2) are
- * new — used for hovered primary buttons and tinted-primary
+ * new, used for hovered primary buttons and tinted-primary
  * surfaces (sidebar active pill, validation badges). Components
  * that don't use them remain backward-compatible.
  *
  * Token shapes come straight from the design handoff at
- * project/Color Themes.html — change one, change the other.
+ * project/Color Themes.html, change one, change the other.
  * ============================================================ */
 
 html[data-theme="violet"] {
@@ -263,7 +263,7 @@ html[data-theme="rose"] {
 }
 
 /* ------------------------------------------------------------
- * Moldlane — the brand theme (default). A LIGHT, Notion-esque,
+ * Moldlane, the brand theme (default). A LIGHT, Notion-esque,
  * earthy system:
  *   bone  #F7F5F0  → canvas (--background)
  *   ink   warm near-black → text (--foreground)
@@ -298,7 +298,7 @@ html[data-theme="moldlane"] {
   --input: oklch(0.89 0.008 80);
   --ring: oklch(0.645 0.105 52);
   --chart-1: oklch(0.645 0.105 52);             /* terracotta */
-  --chart-2: oklch(0.62 0.045 158);             /* sage — positive / money */
+  --chart-2: oklch(0.62 0.045 158);             /* sage, positive / money */
   --chart-3: oklch(0.52 0.125 38);              /* rust */
   --chart-4: oklch(0.74 0.09 75);               /* warm ochre */
   --chart-5: oklch(0.55 0.02 65);               /* warm gray */

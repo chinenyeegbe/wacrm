@@ -59,7 +59,7 @@ export default function NewBroadcastPage() {
       });
       router.push(`/broadcasts/${broadcastId}`);
     } catch (err) {
-      // Previously swallowed with console.error — the wizard would
+      // Previously swallowed with console.error, the wizard would
       // just no-op, leaving the user confused. Surface the reason.
       const message = err instanceof Error ? err.message : 'Broadcast failed';
       console.error('Broadcast failed:', err);
@@ -68,7 +68,7 @@ export default function NewBroadcastPage() {
   }
 
   /**
-   * Writes a draft broadcast row — no recipients, no sending. The user
+   * Writes a draft broadcast row, no recipients, no sending. The user
    * can revisit it via the list page to finish the flow later. We
    * don't persist the in-progress audience/variable config here
    * because the current schema doesn't carry it past `audience_filter`

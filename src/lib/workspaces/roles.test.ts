@@ -65,7 +65,7 @@ describe("capability inheritance", () => {
   });
 });
 
-describe("canAssignRole — privilege-escalation guard", () => {
+describe("canAssignRole, privilege-escalation guard", () => {
   it("owner can assign any role below owner", () => {
     expect(canAssignRole("owner", "operator")).toBe(true);
     expect(canAssignRole("owner", "agent")).toBe(true);

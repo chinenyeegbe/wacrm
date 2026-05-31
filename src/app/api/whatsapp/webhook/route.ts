@@ -40,7 +40,7 @@ interface WhatsAppMessage {
   /**
    * Set when the customer taps a button or list row on an interactive
    * message we sent. `button_reply.id` / `list_reply.id` is whatever id
-   * we put on the button/row when sending — the Flows engine uses this
+   * we put on the button/row when sending, the Flows engine uses this
    * to advance the per-contact run.
    */
   interactive?: {
@@ -118,7 +118,7 @@ export async function GET(request: Request) {
           break
         }
       } catch {
-        // Malformed / wrong-key token row — skip it and keep checking.
+        // Malformed / wrong-key token row, skip it and keep checking.
       }
     }
 
@@ -167,7 +167,7 @@ export async function POST(request: Request) {
   const signature = request.headers.get('x-hub-signature-256')
 
   if (!verifyMetaWebhookSignature(rawBody, signature)) {
-    // 401 (not 200) — we want Meta's delivery dashboard to show failures
+    // 401 (not 200), we want Meta's delivery dashboard to show failures
     // loudly if a misconfiguration causes signatures to stop matching,
     // rather than silently eating events.
     console.warn('[webhook] rejected request with invalid signature')
@@ -196,7 +196,7 @@ async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {
     for (const change of entry.changes) {
       // Template-lifecycle events (status / quality / components
       // updates from Meta) come in on a different change.field and
-      // have a different value shape — route them through the
+      // have a different value shape, route them through the
       // dedicated handler. Skip the messaging branches below so we
       // don't try to read message-shaped fields off a template event.
       if (isTemplateWebhookField(change.field)) {
@@ -222,7 +222,7 @@ async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {
       const phoneNumberId = value.metadata.phone_number_id
 
       // Find user's config by phone_number_id. `.single()` returns
-      // PGRST116 for both 0 rows AND ≥2 rows — distinguish them so
+      // PGRST116 for both 0 rows AND ≥2 rows, distinguish them so
       // operators see the real cause in logs. ≥2 rows shouldn't happen
       // post-migration 013 (UNIQUE constraint), but a row created
       // before the constraint, or a race, would still surface here.
@@ -249,7 +249,7 @@ async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {
         console.error(
           `Multiple configs (${configRows.length}) found for phone_number_id:`,
           phoneNumberId,
-          '— inbound message dropped. Resolve duplicates so each number maps to a single user.',
+          ', inbound message dropped. Resolve duplicates so each number maps to a single user.',
           'Owners:',
           configRows.map((r: { user_id: string }) => r.user_id)
         )
@@ -275,12 +275,12 @@ async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {
   }
 }
 
-// The happy-path status ladder — pending → sent → delivered → read →
+// The happy-path status ladder, pending → sent → delivered → read →
 // replied. Webhook replays must never regress a recipient back down
 // this ladder.
 //
 // `failed` is NOT on this ladder. It's a terminal side branch that is
-// only valid from the early states (pending / sent) — once Meta has
+// only valid from the early states (pending / sent), once Meta has
 // delivered or the user has read or replied, a later "failed" status
 // event is a bug in Meta's pipeline or a spoof attempt and must be
 // ignored.
@@ -313,7 +313,7 @@ function isValidStatusTransition(current: string, incoming: string): boolean {
   const ci = ladderLevel(current)
   const ii = ladderLevel(incoming)
   if (ii < 0) return false // unknown incoming status
-  if (ci < 0) return true // unknown current — accept anything on the ladder
+  if (ci < 0) return true // unknown current, accept anything on the ladder
   return ii > ci
 }
 
@@ -323,7 +323,7 @@ async function handleStatusUpdate(status: {
   timestamp: string
   recipient_id: string
 }) {
-  // 1) Mirror onto messages (legacy behavior) — Meta's status values
+  // 1) Mirror onto messages (legacy behavior), Meta's status values
   //    already match the CHECK constraint on messages.status.
   const { error: msgErr } = await supabaseAdmin()
     .from('messages')
@@ -350,9 +350,9 @@ async function handleStatusUpdate(status: {
     console.error('Error fetching broadcast recipient:', recFetchErr)
     return
   }
-  if (!recipient) return // message wasn't part of a broadcast — fine
+  if (!recipient) return // message wasn't part of a broadcast, fine
 
-  // Guard transitions — forward-only on the success ladder, and
+  // Guard transitions, forward-only on the success ladder, and
   // `failed` only from pre-delivered states.
   if (!isValidStatusTransition(recipient.status, status.status)) return
 
@@ -376,7 +376,7 @@ async function handleStatusUpdate(status: {
  * broadcast_recipients row, flip it to `replied` so the reply count
  * advances on the parent broadcast.
  *
- * Runs on a best-effort basis — failures here must not break the
+ * Runs on a best-effort basis, failures here must not break the
  * main inbound-message flow, so errors are swallowed with a log.
  */
 async function flagBroadcastReplyIfAny(userId: string, contactId: string) {
@@ -430,7 +430,7 @@ async function lookupInternalIdByMetaId(
 }
 
 /**
- * Persist an inbound reaction. WhatsApp reactions are not new messages —
+ * Persist an inbound reaction. WhatsApp reactions are not new messages, 
  * they're per-(target, actor) state. We upsert / delete on
  * `message_reactions`, never write a row into `messages`.
  *
@@ -513,7 +513,7 @@ async function processMessage(
   )
   if (!conversation) return
 
-  // Reactions short-circuit here — they aren't messages. We never insert
+  // Reactions short-circuit here, they aren't messages. We never insert
   // into `messages`, never bump unread_count, never update last_message_text.
   // Done before parseMessageContent so the media-URL fetch is skipped.
   if (message.type === 'reaction') {
@@ -525,7 +525,7 @@ async function processMessage(
   const { contentText, mediaUrl, mediaType, interactiveReplyId } =
     await parseMessageContent(message, accessToken)
 
-  // Resolve swipe-reply context if present. A missing parent is fine —
+  // Resolve swipe-reply context if present. A missing parent is fine, 
   // we just store NULL and the UI renders the message without a quote.
   let replyToInternalId: string | null = null
   if (message.context?.id) {
@@ -541,11 +541,11 @@ async function processMessage(
     }
   }
 
-  // Insert message — field names MUST match the messages table schema
+  // Insert message, field names MUST match the messages table schema
   // (see supabase/migrations/001_initial_schema.sql):
   //   conversation_id, sender_type, content_type, content_text,
   //   media_url, template_name, message_id, status, created_at
-  // `mediaType` is intentionally unused — the schema has no media_type
+  // `mediaType` is intentionally unused, the schema has no media_type
   // column; the MIME type is only used to construct the proxy URL during
   // parseMessageContent. Silence the unused-var warning:
   void mediaType
@@ -568,7 +568,7 @@ async function processMessage(
   // Determine whether this is the contact's very first inbound message
   // BEFORE we insert, so the count is accurate. Covers the case where
   // the contact row already exists (manual add / CSV import) but they've
-  // never messaged us before — which new_contact_created wouldn't catch.
+  // never messaged us before, which new_contact_created wouldn't catch.
   const { count: priorCustomerMsgCount } = await supabaseAdmin()
     .from('messages')
     .select('id', { count: 'exact', head: true })
@@ -627,7 +627,7 @@ async function processMessage(
   // that should fork into automations.
   //
   // The relationship-level triggers (`new_contact_created`,
-  // `first_inbound_message`) still fire even when consumed — those
+  // `first_inbound_message`) still fire even when consumed, those
   // are about WHO is messaging, not what they said.
   //
   // Awaited (not fire-and-forget) because we need the `consumed`
@@ -659,7 +659,7 @@ async function processMessage(
 
   // Fire any automations that react to this webhook event. All dispatches
   // run here (not earlier) so the contact, conversation, and inbound
-  // message all exist before any step — including send_message — runs.
+  // message all exist before any step, including send_message, runs.
   // Fire-and-forget: a slow or failing automation must not block the
   // webhook's 200 OK response to Meta.
   const inboundText = contentText ?? message.text?.body ?? ''
@@ -670,13 +670,13 @@ async function processMessage(
     | 'keyword_match'
   )[] = []
   // Content-level triggers are suppressed when a flow consumed the
-  // message — see the comment block above.
+  // message, see the comment block above.
   if (!flowConsumed) {
     automationTriggers.push('new_message_received', 'keyword_match')
   }
   // new_contact_created fires only when the webhook just auto-created the
   // contact row. first_inbound_message fires whenever this is the contact's
-  // first-ever customer-sent message — a superset that also catches
+  // first-ever customer-sent message, a superset that also catches
   // manually-imported contacts sending for the first time. We dispatch both
   // so users can pick whichever semantic they want; an automation that
   // listens to only one trigger runs only when that trigger matches.
@@ -711,7 +711,7 @@ async function parseMessageContent(
    */
   interactiveReplyId: string | null
 }> {
-  // getMediaUrl signature is (mediaId, accessToken) — earlier code had
+  // getMediaUrl signature is (mediaId, accessToken), earlier code had
   // the args swapped, so every verification hit an invalid Meta URL and
   // fell through to the catch block, leaving mediaUrl as null. That's
   // why images showed up as empty bubbles in the inbox.
@@ -730,7 +730,7 @@ async function parseMessageContent(
     }
   }
 
-  // Default shape — each case overrides only the fields it cares about.
+  // Default shape, each case overrides only the fields it cares about.
   // Keeps the new `interactiveReplyId` field DRY across every return site.
   const empty = {
     contentText: null,

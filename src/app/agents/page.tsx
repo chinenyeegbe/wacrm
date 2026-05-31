@@ -13,13 +13,13 @@ import {
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { DEFAULT_PARTNER_TIERS } from "@/lib/referrals/commission";
 
-// Agent landing — speaks ONLY to the earner persona (someone who wants to
-// make money by bringing local businesses onto Moldlane). The merchant story
-// lives on / so each page converts one audience.
+// Agent landing. One audience only: the person who wants to earn by bringing
+// local businesses onto Moldlane. Plain, simple English. The business pitch
+// lives on / so each page converts a single audience.
 export const metadata: Metadata = {
-  title: "Earn with Moldlane — get paid to grow local businesses",
+  title: "Earn with Moldlane: get paid to grow local businesses",
   description:
-    "Sign up shops and businesses you know. Earn a share of every sale they make through Moldlane — every month, for as long as they stay. No cost to start.",
+    "Sign up shops you know. Earn a share of every sale they make through Moldlane, every month, for as long as they stay. Free to join. All you need is your phone.",
   robots: { index: true, follow: true },
 };
 
@@ -28,7 +28,7 @@ const CTA = { label: "Start earning", href: "/signup" };
 export default function AgentsPage() {
   return (
     <MarketingShell persona="agent" cta={CTA}>
-      {/* ---------- Hero ---------- */}
+      {/* Hero */}
       <section className="mx-auto w-full max-w-5xl px-4 pt-14 pb-10 sm:px-6 sm:pt-20 sm:pb-16">
         <div className="mx-auto max-w-2xl text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
@@ -36,13 +36,13 @@ export default function AgentsPage() {
             Moldlane Partners
           </span>
           <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl">
-            Get paid to help businesses{" "}
-            <span className="text-primary">near you grow</span>
+            Earn money helping{" "}
+            <span className="text-primary">local businesses</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
-            Show a shop owner how Moldlane runs their WhatsApp and collects their
-            money. When they make sales, you earn a slice — every month, for as
-            long as they stay. Your phone is all you need.
+            Show shops you know how Moldlane works. When they make sales, you
+            earn a share. Every month, for as long as they stay. All you need is
+            your phone.
           </p>
           <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
@@ -59,32 +59,38 @@ export default function AgentsPage() {
             </Link>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">
-            Free to join. <span className="font-medium text-foreground">No fees, no targets, no risk.</span>
+            Free to join.{" "}
+            <span className="font-medium text-foreground">
+              No fees. No targets.
+            </span>
           </p>
         </div>
       </section>
 
-      {/* ---------- Why it pays ---------- */}
+      {/* Why it pays */}
       <section className="border-y border-border/60 bg-card/40">
         <div className="mx-auto grid w-full max-w-5xl gap-4 px-4 py-10 sm:grid-cols-3 sm:px-6">
           {[
             {
               icon: Wallet,
-              title: "Recurring income",
-              body: "Not a one-off bonus. You earn every time your businesses get paid — month after month.",
+              title: "Money every month",
+              body: "Not a one-time bonus. You earn each time your businesses get paid.",
             },
             {
               icon: Smartphone,
               title: "Sell from your phone",
-              body: "Share a link on WhatsApp status, in groups, or face-to-face. Setup takes minutes.",
+              body: "Share a link on WhatsApp or in person. Setup takes minutes.",
             },
             {
               icon: TrendingUp,
-              title: "Earn more as you grow",
-              body: "The more businesses you bring, the bigger your share of every sale.",
+              title: "Earn more over time",
+              body: "The more businesses you bring, the bigger your share.",
             },
           ].map((item) => (
-            <div key={item.title} className="rounded-xl border border-border bg-card p-5">
+            <div
+              key={item.title}
+              className="rounded-xl border border-border bg-card p-5"
+            >
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-soft text-primary">
                 <item.icon className="h-5 w-5" />
               </span>
@@ -95,7 +101,7 @@ export default function AgentsPage() {
         </div>
       </section>
 
-      {/* ---------- How it works ---------- */}
+      {/* How it works */}
       <section id="how" className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6">
         <h2 className="text-center text-2xl font-bold sm:text-3xl">
           Three steps to your first payout
@@ -105,23 +111,26 @@ export default function AgentsPage() {
             {
               n: "1",
               icon: Share2,
-              title: "Grab your link",
-              body: "Join free and get your own invite link and code in seconds.",
+              title: "Get your link",
+              body: "Join free and get your own invite link in seconds.",
             },
             {
               n: "2",
               icon: Users,
               title: "Sign up businesses",
-              body: "Share it with shops you know. They start free — an easy yes.",
+              body: "Share it with shops you know. They start free, so it is an easy yes.",
             },
             {
               n: "3",
               icon: Wallet,
               title: "Cash out",
-              body: "Earn a share of their sales and withdraw to your bank or mobile money.",
+              body: "Earn from their sales and withdraw to your bank or mobile money.",
             },
           ].map((step) => (
-            <div key={step.n} className="rounded-xl border border-border bg-card p-6">
+            <div
+              key={step.n}
+              className="rounded-xl border border-border bg-card p-6"
+            >
               <div className="flex items-center gap-3">
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
                   {step.n}
@@ -135,20 +144,20 @@ export default function AgentsPage() {
         </div>
       </section>
 
-      {/* ---------- Earnings ladder ---------- */}
+      {/* Earnings ladder */}
       <section className="border-t border-border/60 bg-card/40">
         <div className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6">
           <h2 className="text-center text-2xl font-bold sm:text-3xl">
             The more you bring, the more you keep
           </h2>
           <p className="mx-auto mt-2 max-w-lg text-center text-muted-foreground">
-            Your share of the platform fee grows with the number of active
-            businesses you&apos;ve signed up. It never costs them more.
+            Your share grows with the number of businesses you sign up. It never
+            costs them more.
           </p>
           <div className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
             {DEFAULT_PARTNER_TIERS.map((t, i) => {
               const next = DEFAULT_PARTNER_TIERS[i + 1];
-              const range = next ? `${t.min}–${next.min - 1}` : `${t.min}+`;
+              const range = next ? `${t.min} to ${next.min - 1}` : `${t.min}+`;
               return (
                 <div
                   key={t.min}
@@ -167,49 +176,48 @@ export default function AgentsPage() {
         </div>
       </section>
 
-      {/* ---------- Who it's for ---------- */}
-      <section className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6">
-        <div className="mx-auto max-w-xl">
-          <h2 className="text-center text-2xl font-bold sm:text-3xl">
-            Perfect if you&apos;re…
+      {/* Use it for your own business too */}
+      <section className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-2xl font-bold sm:text-3xl">
+            Got a small business too?
           </h2>
-          <ul className="mt-6 flex flex-col gap-3">
-            {[
-              "A student or hustler who knows lots of local businesses",
-              "Already helping shops with their phones or social media",
-              "Looking for income you can earn from your own phone",
-              "Good at talking to people in your community",
-            ].map((line) => (
-              <li
-                key={line}
-                className="flex items-start gap-3 rounded-xl border border-border bg-card p-4"
-              >
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <span className="text-sm">{line}</span>
-              </li>
-            ))}
-          </ul>
+          <p className="mt-3 text-muted-foreground">
+            Sell hair, clothes, food, or run a service on the side? Use Moldlane
+            for your own customers too. Answer faster, sell more, and bring
+            people back. Same account. No extra cost.
+          </p>
         </div>
       </section>
 
-      {/* ---------- Use it for your own hustle too ---------- */}
+      {/* Who it's for */}
       <section className="border-t border-border/60 bg-card/40">
-        <div className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-2xl font-bold sm:text-3xl">
-              Got a small hustle of your own?
+        <div className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6">
+          <div className="mx-auto max-w-xl">
+            <h2 className="text-center text-2xl font-bold sm:text-3xl">
+              This is for you if
             </h2>
-            <p className="mt-3 text-muted-foreground">
-              Sell hair, jewellery, snacks, or run a service on the side? Use
-              Moldlane to look after your <span className="font-medium text-foreground">own</span>{" "}
-              customers too — answer faster, sell more, and win back the regulars
-              who forgot to come back. Same account, no extra cost.
-            </p>
+            <ul className="mt-6 flex flex-col gap-3">
+              {[
+                "You know a lot of local businesses",
+                "You already help shops with their phones or social media",
+                "You want money you can earn from your phone",
+                "You are good with people",
+              ].map((line) => (
+                <li
+                  key={line}
+                  className="flex items-start gap-3 rounded-xl border border-border bg-card p-4"
+                >
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <span className="text-sm">{line}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* ---------- Final CTA ---------- */}
+      {/* Final CTA */}
       <section className="border-t border-border/60">
         <div className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6">
           <div className="mx-auto max-w-xl rounded-2xl border border-primary/20 bg-primary-soft p-8 text-center">

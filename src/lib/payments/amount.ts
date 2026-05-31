@@ -1,7 +1,7 @@
 /**
  * Amount parsing for payment requests.
  *
- * Merchants and AI steps type amounts as humans do — "3,500", "₦15,000",
+ * Merchants and AI steps type amounts as humans do, "3,500", "₦15,000",
  * "15000.50". We normalise to integer MINOR units (kobo/cents) so all
  * downstream math is float-free.
  */
@@ -18,7 +18,7 @@ export function parseAmountToMinor(raw: string | number): number | null {
   }
   if (typeof raw !== "string") return null;
 
-  // Reject explicit negatives up front — stripping the sign below would
+  // Reject explicit negatives up front, stripping the sign below would
   // otherwise turn "-100" into a positive 100.
   if (/-\s*\d/.test(raw)) return null;
 

@@ -39,7 +39,7 @@ const KIND_THEME: Record<ActivityKind, KindTheme> = {
 }
 
 export function ActivityFeed({ items, loading }: ActivityFeedProps) {
-  // Start at 5 — a quick scan of the most recent events without
+  // Start at 5, a quick scan of the most recent events without
   // dominating vertical real estate. User expands explicitly via the
   // footer control when they want deeper history.
   const [pageSize, setPageSize] = useState<PageSize>(5)
@@ -85,7 +85,7 @@ export function ActivityFeed({ items, loading }: ActivityFeedProps) {
             {visible.map((it, i) => {
               const theme = KIND_THEME[it.kind]
               const Icon = theme.icon
-              // Alternating row background for scanability — dark-theme
+              // Alternating row background for scanability, dark-theme
               // translation of the spec's white / #f9fafb stripes.
               const stripe = i % 2 === 0 ? 'bg-transparent' : 'bg-slate-900/40'
               const row = (

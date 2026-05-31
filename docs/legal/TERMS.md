@@ -1,6 +1,6 @@
-# Moldlane — Terms of Service (TEMPLATE / DRAFT)
+# Moldlane, Terms of Service (TEMPLATE / DRAFT)
 
-> **Draft template — not yet legally reviewed. Do not publish as-is.**
+> **Draft template, not yet legally reviewed. Do not publish as-is.**
 > Hand this to a qualified lawyer in each operating country. Bracketed
 > `[…]` fields must be completed. See `LIABILITY.md` for the rationale
 > behind each clause.
@@ -44,7 +44,7 @@ accounts that do.
 [Describe pricing.] Where a transaction commission applies, it is a
 percentage of payments collected through Moldlane, taken via the payment
 provider's settlement. The **partner programme** pays affiliate commission
-for real revenue from businesses you refer — it is **not** an investment,
+for real revenue from businesses you refer, it is **not** an investment,
 security, or recruitment scheme, requires no buy-in, and pays only on
 genuine referred activity. Partners are responsible for their own taxes.
 

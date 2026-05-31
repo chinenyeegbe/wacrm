@@ -3,14 +3,14 @@
 /**
  * Reusable field components shared across every per-node form.
  *
- * `NodeKeySelect` — picks a node from the flow's node list, rendered
+ * `NodeKeySelect`, picks a node from the flow's node list, rendered
  * with the source node's icon so the dropdown reads as
  * "destination = ◇ menu" rather than an opaque slug.
  *
- * `NextNodeRow` — wraps NodeKeySelect with a label; the most common
+ * `NextNodeRow`, wraps NodeKeySelect with a label; the most common
  * per-node form row ("after this node, advance to…").
  *
- * `TextRow` — wraps Input or Textarea behind a label. Pure UI sugar
+ * `TextRow`, wraps Input or Textarea behind a label. Pure UI sugar
  * to keep per-node forms uncluttered.
  *
  * Lives in src/components/flows/forms/ so both the list view's
@@ -111,10 +111,10 @@ export function NodeKeySelect({
       onValueChange={(v) => onChange(v === "__none__" ? null : v)}
     >
       <SelectTrigger className={cn("bg-slate-800", className)}>
-        <SelectValue placeholder={placeholder ?? "—"} />
+        <SelectValue placeholder={placeholder ?? "Select"} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="__none__">— None —</SelectItem>
+        <SelectItem value="__none__">None</SelectItem>
         {options.map((n) => {
           const Icon = NODE_META[n.node_type].icon;
           return (

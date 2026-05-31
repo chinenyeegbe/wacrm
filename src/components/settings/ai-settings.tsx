@@ -33,7 +33,7 @@ const AUTONOMY_OPTIONS: {
   {
     value: 'human_loop',
     label: 'AI + human (recommended)',
-    hint: 'AI auto-answers routine chats and hands flagged ones — hot leads, complaints — to a person.',
+    hint: 'AI auto-answers routine chats and hands flagged ones, hot leads, complaints, to a person.',
   },
   {
     value: 'autonomous',
@@ -42,7 +42,7 @@ const AUTONOMY_OPTIONS: {
   },
 ];
 
-// Keep the context bounded — it's prepended to every AI prompt, and free
+// Keep the context bounded, it's prepended to every AI prompt, and free
 // models have tight token windows. ~6k chars is plenty for a catalogue +
 // prices + policies while staying cheap and fast.
 const MAX_CONTEXT_CHARS = 6000;
@@ -83,7 +83,7 @@ export function AISettings() {
         .maybeSingle();
       if (cancelled) return;
       if (error) {
-        // A missing row is fine (first visit) — only surface real errors.
+        // A missing row is fine (first visit), only surface real errors.
         console.error('Failed to load AI settings:', error);
       }
       const ctx = data?.business_context ?? '';
@@ -138,8 +138,8 @@ export function AISettings() {
           AI assistant
         </CardTitle>
         <CardDescription className="text-slate-400">
-          Teach the AI about your business so its replies — in the inbox and in
-          your <span className="font-medium">AI Reply</span> automations — quote
+          Teach the AI about your business so its replies, in the inbox and in
+          your <span className="font-medium">AI Reply</span> automations, quote
           real prices and stay on-brand. Runs on free models; never makes up
           facts you didn&apos;t give it.
         </CardDescription>
@@ -152,7 +152,7 @@ export function AISettings() {
             <Label className="text-slate-200">Enable AI auto-replies</Label>
             <p className="mt-1 text-xs text-slate-500">
               When off, your <span className="font-medium">AI Reply</span>{' '}
-              automation steps are skipped — a fast kill-switch without editing
+              automation steps are skipped, a fast kill-switch without editing
               each automation. The inbox ✨ button still works on demand.
             </p>
           </div>
@@ -164,12 +164,12 @@ export function AISettings() {
           />
         </div>
 
-        {/* Autonomy — how much the AI does on its own. Human-in-the-loop is
+        {/* Autonomy, how much the AI does on its own. Human-in-the-loop is
             the default, but each business picks the structure it trusts. */}
         <div className="space-y-2">
           <Label className="text-slate-200">How should the AI work?</Label>
           <p className="text-xs text-slate-500">
-            Human-in-the-loop is optional — pick the structure that fits your
+            Human-in-the-loop is optional, pick the structure that fits your
             team. You can change it anytime.
           </p>
           <div className="grid gap-2">

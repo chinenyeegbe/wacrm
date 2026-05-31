@@ -62,7 +62,7 @@ export function PaymentsConfig() {
           setFeeBps(cfg.platform_fee_bps ?? 0);
         }
       } catch {
-        // First-time / no config — fine.
+        // First-time / no config, fine.
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -119,7 +119,7 @@ export function PaymentsConfig() {
           )}
         </CardTitle>
         <CardDescription className="text-slate-400">
-          Let the CRM send payment links right inside the chat — so the AI
+          Let the CRM send payment links right inside the chat, so the AI
           doesn&apos;t just close the sale, it collects. Connect a gateway, or
           start with manual bank / mobile-money instructions.
         </CardDescription>
@@ -160,7 +160,7 @@ export function PaymentsConfig() {
               className="bg-slate-800 font-mono text-white"
             />
             <p className="text-xs text-slate-500">
-              Encrypted (AES-256-GCM) before it&apos;s stored — same as your
+              Encrypted (AES-256-GCM) before it&apos;s stored, same as your
               WhatsApp token. We never show it again after saving.
             </p>
           </div>

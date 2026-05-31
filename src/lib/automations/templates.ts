@@ -96,7 +96,7 @@ export const AUTOMATION_TEMPLATES: Record<TemplateSlug, AutomationTemplateDefini
         step_type: 'send_message',
         step_config: {
           text:
-            "Great — happy to help with pricing! Quick question: roughly how many seats are you looking for?",
+            "Great, happy to help with pricing! Quick question: roughly how many seats are you looking for?",
         },
       },
       {
@@ -171,8 +171,8 @@ export const AUTOMATION_TEMPLATES: Record<TemplateSlug, AutomationTemplateDefini
     slug: 'win_back',
     name: 'Win-Back Dormant Clients',
     description:
-      'Re-warm a customer you haven’t heard from in a while. Tag a contact "win-back" (or run on a schedule) and the AI sends a personal, non-pushy reconnect message — then hands replies to you.',
-    // Fired by tagging a contact 'win-back' — gives the owner manual control
+      'Re-warm a customer you haven’t heard from in a while. Tag a contact "win-back" (or run on a schedule) and the AI sends a personal, non-pushy reconnect message, then hands replies to you.',
+    // Fired by tagging a contact 'win-back', gives the owner manual control
     // over exactly who gets re-engaged (and avoids messaging active clients).
     trigger_type: 'tag_added',
     trigger_config: { tag_id: '' },
@@ -181,13 +181,13 @@ export const AUTOMATION_TEMPLATES: Record<TemplateSlug, AutomationTemplateDefini
         step_type: 'ai_reply',
         step_config: {
           instructions:
-            'This is a past customer we have not heard from in a while. Write a warm, personal reconnect message — reference that it has been a while, ask how they are, and gently invite them back with a reason to return (new stock, a small returning-customer offer if appropriate). Do NOT be salesy or guilt-trip them. One short message.',
+            'This is a past customer we have not heard from in a while. Write a warm, personal reconnect message, reference that it has been a while, ask how they are, and gently invite them back with a reason to return (new stock, a small returning-customer offer if appropriate). Do NOT be salesy or guilt-trip them. One short message.',
         },
       },
     ],
   },
   ai_collect_payment: {
-    // Listed under the AI cluster — closes AND collects in one flow.
+    // Listed under the AI cluster, closes AND collects in one flow.
     slug: 'ai_collect_payment',
     name: 'AI Close & Collect',
     description:
@@ -226,7 +226,7 @@ export const AUTOMATION_TEMPLATES: Record<TemplateSlug, AutomationTemplateDefini
         step_type: 'send_message',
         step_config: {
           text:
-            "Just circling back — did you have any other questions for us? Happy to help!",
+            "Just circling back, did you have any other questions for us? Happy to help!",
         },
       },
     ],

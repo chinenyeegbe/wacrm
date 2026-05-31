@@ -91,7 +91,7 @@ export function Step2SelectAudience({
   const [loadingCount, setLoadingCount] = useState(false);
 
   // Tags are used both by the primary "Filter by Tags" audience type
-  // AND by the exclude-list below — so always load once on mount.
+  // AND by the exclude-list below, so always load once on mount.
   useEffect(() => {
     async function fetchTags() {
       setLoadingTags(true);
@@ -130,11 +130,11 @@ export function Step2SelectAudience({
     try {
       const supabase = createClient();
 
-      // Base query — produces the superset before exclude is applied.
+      // Base query, produces the superset before exclude is applied.
       let baseIds: Set<string> | null = null; // null means "all contacts"
 
       if (audience.type === 'all') {
-        // Handled below — full-table count adjusted by excludes.
+        // Handled below, full-table count adjusted by excludes.
       } else if (
         audience.type === 'tags' &&
         audience.tagIds &&
@@ -168,7 +168,7 @@ export function Step2SelectAudience({
         setEstimatedCount(audience.csvContacts.length);
         return;
       } else {
-        // Partially-configured audience — wait for the user to finish.
+        // Partially-configured audience, wait for the user to finish.
         setEstimatedCount(null);
         return;
       }
@@ -189,7 +189,7 @@ export function Step2SelectAudience({
         );
         setEstimatedCount(effective.length);
       } else {
-        // "All" — fetch the total, then subtract exclude set if any.
+        // "All", fetch the total, then subtract exclude set if any.
         const { count } = await supabase
           .from('contacts')
           .select('*', { count: 'exact', head: true });
@@ -389,7 +389,7 @@ export function Step2SelectAudience({
         </div>
       )}
 
-      {/* Exclude list — applies regardless of audience type */}
+      {/* Exclude list, applies regardless of audience type */}
       <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
         <div className="mb-3 flex items-center gap-2">
           <X className="h-4 w-4 text-red-400" />

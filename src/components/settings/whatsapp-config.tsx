@@ -57,7 +57,7 @@ export function WhatsAppConfig() {
 
   // True once /register has succeeded on Meta's side (timestamp set
   // in the row). When false, the saved config is metadata-only and
-  // Meta will silently drop every inbound event — that's the
+  // Meta will silently drop every inbound event, that's the
   // multi-number bug that prompted this work.
   const isRegistered = Boolean(config?.registered_at);
   const lastRegistrationError = config?.last_registration_error ?? null;
@@ -167,7 +167,7 @@ export function WhatsAppConfig() {
     try {
       setSaving(true);
 
-      // Always POST through the API — it verifies with Meta and encrypts
+      // Always POST through the API, it verifies with Meta and encrypts
       // the access_token server-side with ENCRYPTION_KEY. Skipping this
       // and writing direct to Supabase stores the token in plaintext,
       // which then fails decryption on every subsequent health check.
@@ -175,7 +175,7 @@ export function WhatsAppConfig() {
         phone_number_id: phoneNumberId.trim(),
         waba_id: wabaId.trim() || null,
         verify_token: verifyToken.trim() || null,
-        // Optional — only sent when the user filled it in. The server
+        // Optional, only sent when the user filled it in. The server
         // requires it on first save or when changing numbers; for a
         // simple token rotation, leaving it blank skips re-register.
         pin: pin.trim() || null,
@@ -184,7 +184,7 @@ export function WhatsAppConfig() {
       if (tokenEdited && accessToken !== MASKED_TOKEN && accessToken.trim()) {
         payload.access_token = accessToken.trim();
       } else if (config) {
-        // Existing config — reuse stored encrypted token by decrypting on the
+        // Existing config, reuse stored encrypted token by decrypting on the
         // server. But our POST handler requires an access_token to verify
         // with Meta. If the user didn't change the token, we need to signal
         // that. Simplest: require token re-entry if they're updating.
@@ -221,7 +221,7 @@ export function WhatsAppConfig() {
       } else {
         toast.success(
           data.phone_info?.verified_name
-            ? `Live — ${data.phone_info.verified_name} can now receive events.`
+            ? `Live, ${data.phone_info.verified_name} can now receive events.`
             : 'WhatsApp connected. Events will start flowing within a minute.',
         );
         // Clear the PIN so subsequent saves don't accidentally
@@ -279,7 +279,7 @@ export function WhatsAppConfig() {
       const data = (await res.json()) as RegistrationProbe;
       setRegistrationProbe(data);
       if (data.live) {
-        toast.success('Number is fully wired — Meta is delivering events.');
+        toast.success('Number is fully wired, Meta is delivering events.');
       } else {
         toast.error(
           'Number is not fully registered. See the checks below for which step failed.',
@@ -402,7 +402,7 @@ export function WhatsAppConfig() {
           </AlertDescription>
         </Alert>
 
-        {/* Registration Status — the "is it actually live?" check.
+        {/* Registration Status, the "is it actually live?" check.
             Credentials being valid is necessary but not sufficient;
             without a successful /register call the number won't
             receive inbound events. Surface this dimension separately
@@ -428,8 +428,8 @@ export function WhatsAppConfig() {
                   }
                 >
                   {isRegistered
-                    ? 'Registered — Meta will deliver events to wacrm'
-                    : 'Not registered — Meta will not deliver events'}
+                    ? 'Registered, Meta will deliver events to wacrm'
+                    : 'Not registered, Meta will not deliver events'}
                 </AlertTitle>
               </div>
               <Button
@@ -479,7 +479,7 @@ export function WhatsAppConfig() {
             {registrationProbe && (
               <div className="mt-3 rounded border border-slate-700 bg-slate-900/60 px-3 py-2 space-y-1.5 text-[11px]">
                 <p className="font-medium text-slate-200">
-                  Diagnostic — last run: {' '}
+                  Diagnostic, last run: {' '}
                   <span className={registrationProbe.live ? 'text-emerald-400' : 'text-amber-400'}>
                     {registrationProbe.live ? 'live' : 'not live'}
                   </span>
@@ -612,7 +612,7 @@ export function WhatsAppConfig() {
                   Numbers → Two-step verification
                 </strong>
                 . Without this PIN, Meta saves your credentials but
-                won&apos;t actually route inbound messages to wacrm —
+                won&apos;t actually route inbound messages to wacrm, 
                 the symptom that hits second numbers under a shared
                 WABA. Leave blank to keep an existing registration
                 untouched.

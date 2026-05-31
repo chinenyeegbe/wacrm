@@ -79,7 +79,7 @@ export async function PATCH(
 
   // If this PATCH leaves the automation active (either explicitly
   // activating it OR editing an already-active one), validate the
-  // merged configuration first. Activation is the natural gate — drafts
+  // merged configuration first. Activation is the natural gate, drafts
   // are still allowed to be incomplete.
   const willBeActive =
     typeof update.is_active === 'boolean' ? update.is_active : existing.is_active

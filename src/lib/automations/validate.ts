@@ -4,7 +4,7 @@ import type { AutomationTriggerType } from '@/types'
 // Pre-flight config validation for automations about to be activated.
 //
 // Activating a broken automation (e.g. an add_tag step with tag_id="")
-// used to succeed silently — every trigger then produced a failed log
+// used to succeed silently, every trigger then produced a failed log
 // row with a cryptic "add_tag needs contact + tag_id" message, and
 // users often didn't notice until reviewing logs. This module lets
 // the API refuse activation with a useful 400 response instead.
@@ -64,12 +64,12 @@ function validateOne(step: StepLike, path: string, issues: ValidationIssue[]): v
       }
       break
     case 'ai_reply':
-      // No required config — instructions are optional and the workspace
+      // No required config, instructions are optional and the workspace
       // business context lives in ai_settings. Runtime checks (AI
       // configured, contact present) happen in the engine.
       break
     case 'ai_classify':
-      // No config at all — it always emits the same fields. Runtime check
+      // No config at all, it always emits the same fields. Runtime check
       // (AI configured) happens in the engine.
       break
     case 'request_payment':

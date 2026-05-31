@@ -241,7 +241,7 @@ export default function ContactsPage() {
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
-            // Reset pagination when the query changes — the result
+            // Reset pagination when the query changes, the result
             // set shrinks/grows, page N may no longer be valid.
             setPage(0);
           }}

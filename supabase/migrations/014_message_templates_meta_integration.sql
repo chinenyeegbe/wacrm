@@ -6,7 +6,7 @@
 --   catalog with a TitleCase status ('Draft'|'Pending'|'Approved'|
 --   'Rejected'). When the sync route imports from Meta, several of
 --   Meta's real statuses (PAUSED, DISABLED, IN_APPEAL, PENDING_REVIEW)
---   got collapsed into the four-bucket TitleCase set — losing
+--   got collapsed into the four-bucket TitleCase set, losing
 --   information that the upcoming submit / edit / resubmit flows
 --   need (e.g. a PAUSED template is recoverable; a DISABLED one is
 --   gone for 30 days; an IN_APPEAL one shouldn't be edited).
@@ -31,10 +31,10 @@
 --   can't create two local rows for the same Meta template variant.
 --
 --   Buttons CHECK enforces a shape guard (array of objects with a
---   recognised `type`) at the DB level — strict per-type validation
+--   recognised `type`) at the DB level, strict per-type validation
 --   lives in the API layer so error messages can be specific.
 --
--- Idempotent — safe to re-run.
+-- Idempotent, safe to re-run.
 -- ============================================================
 
 -- 1. New columns. ADD COLUMN IF NOT EXISTS is idempotent.
@@ -48,7 +48,7 @@ ALTER TABLE message_templates
   ADD COLUMN IF NOT EXISTS submission_error TEXT,
   ADD COLUMN IF NOT EXISTS last_submitted_at TIMESTAMPTZ;
 
--- 2. quality_score CHECK — GREEN / YELLOW / RED only (or NULL).
+-- 2. quality_score CHECK, GREEN / YELLOW / RED only (or NULL).
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -90,7 +90,7 @@ BEGIN
   END IF;
 END $$;
 
--- Backfill existing rows. Idempotent — already-uppercase rows are no-ops.
+-- Backfill existing rows. Idempotent, already-uppercase rows are no-ops.
 UPDATE message_templates SET status = 'DRAFT'    WHERE status = 'Draft';
 UPDATE message_templates SET status = 'PENDING'  WHERE status = 'Pending';
 UPDATE message_templates SET status = 'APPROVED' WHERE status = 'Approved';
@@ -128,7 +128,7 @@ ALTER TABLE message_templates ALTER COLUMN status SET DEFAULT 'DRAFT';
 --    + max length). Per-element type validation (recognised `type`
 --    values, max counts per type, QUICK_REPLY-vs-CTA exclusivity, URL
 --    example required when {{1}} is present) lives in the API
---    validators in src/lib/whatsapp/template-validators.ts — that's
+--    validators in src/lib/whatsapp/template-validators.ts, that's
 --    where error messages can be specific to the offending button
 --    anyway.
 DO $$
@@ -152,7 +152,7 @@ BEGIN
 END $$;
 
 -- 5. Unique index on (user_id, name, language). Fails loudly on
---    duplicates rather than dropping rows — the operator picks which
+--    duplicates rather than dropping rows, the operator picks which
 --    one to keep (same pattern as migration 013).
 DO $$
 DECLARE
@@ -182,7 +182,7 @@ BEGIN
     ) dupe_detail;
 
     RAISE EXCEPTION
-      E'Cannot add UNIQUE(user_id, name, language) on message_templates — % duplicate combination(s):\n  %\nDelete the rows you do not want to keep, then re-run migrations.',
+      E'Cannot add UNIQUE(user_id, name, language) on message_templates, % duplicate combination(s):\n  %\nDelete the rows you do not want to keep, then re-run migrations.',
       dupe_count, sample;
   END IF;
 END $$;
@@ -190,7 +190,7 @@ END $$;
 CREATE UNIQUE INDEX IF NOT EXISTS message_templates_user_name_language_key
   ON message_templates (user_id, name, language);
 
--- 6. Lookup index for the webhook handler — incoming events identify
+-- 6. Lookup index for the webhook handler, incoming events identify
 --    templates by (waba_id, meta_template_id). meta_template_id is the
 --    discriminator we'll match on.
 CREATE INDEX IF NOT EXISTS idx_message_templates_meta_template_id

@@ -22,7 +22,7 @@ import { supabaseAdmin } from './admin-client'
 // Mirrors src/lib/automations/meta-send.ts (engineSendText /
 // engineSendTemplate) but emits interactive button + list messages.
 // Kept separate from the automations file so the two engines don't
-// fight over each other's shape — once both stabilize, the
+// fight over each other's shape, once both stabilize, the
 // phone-variant retry + DB persistence are obvious extraction
 // candidates into a shared base.
 //
@@ -41,7 +41,7 @@ interface SendTextEngineArgs {
 /**
  * Send a plain-text WhatsApp message from the Flows engine.
  *
- * Used by the runner's `send_message` and `collect_input` nodes —
+ * Used by the runner's `send_message` and `collect_input` nodes, 
  * both prompt the customer with text and either auto-advance (the
  * send_message case) or suspend awaiting a text reply (collect_input).
  *
@@ -224,7 +224,7 @@ export async function engineSendMedia(
     await db.from('contacts').update({ phone: workingPhone }).eq('id', contact.id)
   }
 
-  // content_type='image'|'video'|'document' — these are already in the
+  // content_type='image'|'video'|'document', these are already in the
   // messages_content_type_check constraint (migration 001 + 010).
   // content_text carries the caption (or empty) so the conversation
   // list preview shows something meaningful when the user glances at it.
@@ -310,7 +310,7 @@ async function sendInteractiveViaMeta(
 ): Promise<{ whatsapp_message_id: string }> {
   const db = supabaseAdmin()
 
-  // Scope the contact lookup by user_id — same defense-in-depth
+  // Scope the contact lookup by user_id, same defense-in-depth
   // rationale as automations/meta-send.ts. Service-role client
   // bypasses RLS, so an attacker who could call into the engine
   // with a contact_id from another tenant would otherwise send
@@ -398,7 +398,7 @@ async function sendInteractiveViaMeta(
   // manual agent sends (the conversation list preview will pick up
   // last_message_text as a sensible summary).
   //
-  // We do NOT set interactive_reply_id here — that column is reserved
+  // We do NOT set interactive_reply_id here, that column is reserved
   // for the customer's tap on this message, populated by the webhook
   // when their reply arrives.
   const { error: msgErr } = await db.from('messages').insert({

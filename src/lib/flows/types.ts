@@ -6,11 +6,11 @@
  * unions the engine uses to typecheck node configs.
  *
  * Schema invariants enforced here that the DB CHECK constraints don't:
- *   - Each node_type maps to one config shape — adding a new node_type
+ *   - Each node_type maps to one config shape, adding a new node_type
  *     requires adding the matching config interface AND extending
  *     `FlowNodeConfig` so the engine's exhaustiveness checks light up.
  *   - Edges live INSIDE the config (each button row / list row carries
- *     `next_node_key`). The DB schema doesn't model this — the
+ *     `next_node_key`). The DB schema doesn't model this, the
  *     validator (PR #3) catches missing or orphan edges at save time.
  *
  * `next_node_key` is the stable string id stored in `flow_nodes.node_key`,
@@ -88,7 +88,7 @@ export interface SendMediaNodeConfig {
   /** Optional caption shown under the media (Meta caps at 1024 chars). */
   caption?: string;
   /**
-   * Filename shown in the recipient's chat. Documents only — Meta
+   * Filename shown in the recipient's chat. Documents only, Meta
    * ignores it for image/video. Defaults to the file's original name
    * at upload time; the user can edit it.
    */
@@ -121,13 +121,13 @@ export interface CollectInputNodeConfig {
   prompt_text: string;
   /**
    * Key under which to store the captured text in
-   * `flow_runs.vars`. Stable identifier — used by downstream
+   * `flow_runs.vars`. Stable identifier, used by downstream
    * `condition` nodes and `handoff` notes via interpolation.
    */
   var_key: string;
   /**
    * Reserved for v2. Accepted on the config but ignored by the v1.5
-   * runner — captures any non-empty text.
+   * runner, captures any non-empty text.
    */
   validation?: "any" | "email" | "phone" | "regex";
   /** Used only when `validation === 'regex'`. */
@@ -146,7 +146,7 @@ export type ConditionSubject = "var" | "tag" | "contact_field";
 
 /**
  * Routes the run based on a predicate over the contact's tags,
- * profile fields, or stored vars. Always auto-advances — no Meta
+ * profile fields, or stored vars. Always auto-advances, no Meta
  * call, no customer-side input.
  */
 export interface ConditionNodeConfig {
@@ -173,16 +173,16 @@ export interface SetTagNodeConfig {
   next_node_key: string;
 }
 
-// Terminal nodes carry no config — they just stop the run.
+// Terminal nodes carry no config, they just stop the run.
 export type EndNodeConfig = Record<string, never>;
 
 /**
- * Total union — every concrete node_type the v1 engine understands.
+ * Total union, every concrete node_type the v1 engine understands.
  * Add new node types here and the engine's switch will flag missing
  * cases via TypeScript's exhaustiveness check.
  *
  * v1.5+ additions (collect_input, condition, set_tag, http_fetch) will
- * extend this union — out-of-scope for the v1 engine PR.
+ * extend this union, out-of-scope for the v1 engine PR.
  */
 export type FlowNodeConfig =
   | { node_type: "start"; config: StartNodeConfig }
@@ -209,7 +209,7 @@ export interface KeywordTriggerConfig {
   case_sensitive?: boolean;
 }
 
-// No knobs in v1 — the trigger has a single semantic. Kept as a type
+// No knobs in v1, the trigger has a single semantic. Kept as a type
 // alias (not an empty interface) for forward compat without tripping
 // the no-empty-object-type lint rule.
 export type FirstInboundTriggerConfig = Record<string, never>;
@@ -296,7 +296,7 @@ export const DEFAULT_FALLBACK_POLICY: FlowFallbackPolicy = {
 };
 
 // ============================================================
-// Engine input — what `dispatchInboundToFlows` accepts
+// Engine input, what `dispatchInboundToFlows` accepts
 // ============================================================
 
 /**
@@ -309,7 +309,7 @@ export type ParsedInbound =
       kind: "text";
       /** The user's typed message body. */
       text: string;
-      /** Meta's `messages[0].id` — used for idempotency. */
+      /** Meta's `messages[0].id`, used for idempotency. */
       meta_message_id: string;
     }
   | {
@@ -330,12 +330,12 @@ export interface DispatchInboundInput {
 
 export interface DispatchInboundResult {
   /**
-   * True iff the runner handled the message — it either advanced an
+   * True iff the runner handled the message, it either advanced an
    * existing run or started a new one matching a flow trigger.
    * Webhook uses this to decide whether to also fire automations.
    */
   consumed: boolean;
-  /** For diagnostics / logging — null when not consumed. */
+  /** For diagnostics / logging, null when not consumed. */
   flow_run_id?: string;
   /** For diagnostics. */
   outcome?:
@@ -349,7 +349,7 @@ export interface DispatchInboundResult {
 }
 
 // ============================================================
-// Helpers — exhaustiveness assertions
+// Helpers, exhaustiveness assertions
 // ============================================================
 
 /**

@@ -57,7 +57,7 @@ export function buildReplyPrompt(ctx: ConversationContext): {
         content: `${who}${company}${biz}
 
 Here is the WhatsApp conversation so far:
-${transcript || "(no messages yet — the customer just reached out)"}
+${transcript || "(no messages yet, the customer just reached out)"}
 
 Write ONLY the next message you should send as the business. No preamble, no quotes, just the message text.`,
       },
@@ -179,7 +179,7 @@ export interface ConversationClassification {
   summary: string;
 }
 
-const CLASSIFY_SYSTEM = `You are a triage engine for a WhatsApp CRM used by African businesses. You read a conversation and classify it. You output STRICT JSON only — no prose, no markdown, no code fences. The JSON must match exactly:
+const CLASSIFY_SYSTEM = `You are a triage engine for a WhatsApp CRM used by African businesses. You read a conversation and classify it. You output STRICT JSON only, no prose, no markdown, no code fences. The JSON must match exactly:
 
 {"intent":"buying|question|support|complaint|spam|other","sentiment":"positive|neutral|negative","hot_lead":true|false,"needs_human":true|false,"summary":"one short sentence"}
 
@@ -229,7 +229,7 @@ export function parseClassification(raw: string): ConversationClassification {
     sentiment: "neutral",
     hot_lead: false,
     needs_human: true,
-    summary: "Could not classify — routed to a human.",
+    summary: "Could not classify, routed to a human.",
   };
 
   const start = raw.indexOf("{");

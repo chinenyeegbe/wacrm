@@ -6,7 +6,7 @@ import type { ComponentType } from 'react'
 
 // Quick-action shortcuts. Each navigates to the page that owns the
 // relevant "create" flow. We deliberately don't try to auto-open any
-// modal on the target page — that'd require touching those pages,
+// modal on the target page, that'd require touching those pages,
 // which is out of scope here.
 interface Action {
   label: string

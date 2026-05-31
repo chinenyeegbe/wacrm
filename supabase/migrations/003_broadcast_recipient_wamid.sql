@@ -17,10 +17,10 @@
 --      aggregate trigger's COUNT(*) FILTER scans are fast.
 --   3. Installs an AFTER INSERT/UPDATE/DELETE trigger on
 --      broadcast_recipients that re-aggregates the parent broadcasts
---      row. Keeps writer code trivial — the webhook + hook only touch
+--      row. Keeps writer code trivial, the webhook + hook only touch
 --      the recipient row; counts stay consistent automatically.
 --
--- Idempotent — safe to run multiple times.
+-- Idempotent, safe to run multiple times.
 -- ============================================================
 
 ALTER TABLE broadcast_recipients
@@ -70,7 +70,7 @@ BEGIN
     RETURN OLD;
   END IF;
 
-  -- INSERT or UPDATE — only recompute when status changed (or on fresh insert)
+  -- INSERT or UPDATE, only recompute when status changed (or on fresh insert)
   IF TG_OP = 'INSERT' OR OLD.status IS DISTINCT FROM NEW.status THEN
     PERFORM public.recompute_broadcast_counts(NEW.broadcast_id);
   END IF;

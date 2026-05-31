@@ -16,7 +16,7 @@ import {
  *
  * Sends the reaction to Meta and mirrors it into `message_reactions`
  * (delete on empty emoji). Customer-side reactions are handled by the
- * webhook — this route only writes `actor_type = 'agent'` rows.
+ * webhook, this route only writes `actor_type = 'agent'` rows.
  */
 export async function POST(request: Request) {
   try {
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     }
 
     if (!targetMessage.message_id) {
-      // No Meta ID yet — usually a sending/failed agent message. We can't
+      // No Meta ID yet, usually a sending/failed agent message. We can't
       // tell Meta to react to a message it never received.
       return NextResponse.json(
         { error: 'Cannot react to a message that has not been sent to WhatsApp' },

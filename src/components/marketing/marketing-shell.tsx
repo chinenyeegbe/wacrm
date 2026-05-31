@@ -2,18 +2,18 @@ import Link from "next/link";
 import { MessageSquare } from "lucide-react";
 
 /**
- * Marketing shell — a slim public nav + footer wrapping the landing pages.
+ * Marketing shell, a slim public nav + footer wrapping the landing pages.
  *
  * Deliberately minimal: a marketing page converts best with ONE job and few
  * distractions, so the nav carries the logo, a single quiet cross-link to
- * the *other* persona's page, and the page's primary CTA. Server component —
+ * the *other* persona's page, and the page's primary CTA. Server component, 
  * no client JS, fast on a cheap phone.
  */
 
 type Persona = "business" | "agent";
 
 interface MarketingShellProps {
-  /** Which landing this is — drives the cross-link + primary CTA. */
+  /** Which landing this is, drives the cross-link + primary CTA. */
   persona: Persona;
   /** The primary action (label + href) shown in the nav and footer. */
   cta: { label: string; href: string };

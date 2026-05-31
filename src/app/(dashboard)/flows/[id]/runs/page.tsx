@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
  *
  * Lists the 50 most recent runs for a flow, newest first. Each row
  * collapses to a one-liner (contact + status + time); expanding shows
- * the full `flow_run_events` timeline for that run — useful for
+ * the full `flow_run_events` timeline for that run, useful for
  * debugging "why didn't my flow advance?" by surfacing the engine's
  * own log.
  */

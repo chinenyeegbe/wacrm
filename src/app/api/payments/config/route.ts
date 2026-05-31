@@ -10,7 +10,7 @@ import type { PaymentProvider } from '@/types'
  * The provider secret is encrypted server-side (AES-256-GCM, same as the
  * WhatsApp token) before it touches the database, so it is written via the
  * service-role client here rather than from the browser. GET never returns
- * the secret — only whether one is set.
+ * the secret, only whether one is set.
  */
 
 const VALID_PROVIDERS: PaymentProvider[] = ['paystack', 'flutterwave', 'manual']
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
       secret_key: encryptedSecret,
       manual_instructions: manualInstructions,
       default_currency: defaultCurrency,
-      // platform_fee_bps is set by the platform operator, not merchants —
+      // platform_fee_bps is set by the platform operator, not merchants, 
       // we don't accept it from this endpoint. Defaults to 0 (migration).
       status: connected ? 'connected' : 'disconnected',
     },

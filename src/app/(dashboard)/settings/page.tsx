@@ -32,7 +32,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // The URL is the single source of truth for the active tab — no
+  // The URL is the single source of truth for the active tab, no
   // local state, no sync effect. A previous revision duplicated this
   // into `useState` + a sync effect, which tripped React 19's
   // set-state-in-effect rule and was also redundant.

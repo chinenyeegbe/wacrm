@@ -1,5 +1,5 @@
 /**
- * Payment providers — a thin, PSP-agnostic abstraction over the African
+ * Payment providers, a thin, PSP-agnostic abstraction over the African
  * payment gateways that matter (Paystack, Flutterwave), plus a zero-config
  * "manual" fallback (bank / mobile-money instructions) so a merchant can
  * start collecting before they have any gateway account.
@@ -13,7 +13,7 @@
  * to 'paid'. Everything else (attribution, fee math, persistence) is
  * provider-independent and lives in the route/engine.
  *
- * Amounts are ALWAYS in minor units (kobo/cents) as integers — no floats.
+ * Amounts are ALWAYS in minor units (kobo/cents) as integers, no floats.
  */
 
 export type PaymentProvider = "paystack" | "flutterwave" | "manual";
@@ -24,7 +24,7 @@ export interface CreateCheckoutInput {
   secretKey?: string | null;
   amountMinor: number;
   currency: string;
-  /** Our own reference — the idempotency + reconciliation key. */
+  /** Our own reference, the idempotency + reconciliation key. */
   reference: string;
   /** Customer email; PSPs require one. We synthesise a placeholder if absent. */
   email: string;
@@ -55,7 +55,7 @@ export function paymentMessage(
   const amount = formatMinor(opts.amountMinor, opts.currency);
   const what = opts.description ? ` for ${opts.description}` : "";
   if (result.checkoutUrl) {
-    return `Here is your secure payment link${what}: ${amount}\n${result.checkoutUrl}\n\nTap to pay — you'll get a confirmation once it goes through. Thank you! 🙏`;
+    return `Here is your secure payment link${what}: ${amount}\n${result.checkoutUrl}\n\nTap to pay, you'll get a confirmation once it goes through. Thank you! 🙏`;
   }
   // manual
   return `To complete your payment${what} (${amount}):\n\n${result.instructions ?? ""}\n\nPlease send proof once done and we'll confirm. Thank you! 🙏`;
@@ -91,7 +91,7 @@ export async function createCheckout(
         providerReference: input.reference,
         instructions:
           input.manualInstructions ||
-          "Bank transfer — ask us for account details.",
+          "Bank transfer, ask us for account details.",
       };
     default:
       throw new Error(`Unknown payment provider: ${input.provider}`);
@@ -180,7 +180,7 @@ async function createFlutterwaveCheckout(
 
 /**
  * Compute the platform commission for a paid amount.
- * Pure integer math on minor units — bps/10000 of the gross.
+ * Pure integer math on minor units, bps/10000 of the gross.
  */
 export function computePlatformFee(
   amountMinor: number,

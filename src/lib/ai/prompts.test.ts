@@ -24,7 +24,7 @@ describe("parseClassification", () => {
   it("falls back to human routing on unparseable output", () => {
     const c = parseClassification("I cannot do that.");
     expect(c.intent).toBe("other");
-    expect(c.needs_human).toBe(true); // safe default — escalate
+    expect(c.needs_human).toBe(true); // safe default, escalate
   });
 
   it("coerces unknown enum values to safe defaults", () => {

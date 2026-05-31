@@ -1,13 +1,13 @@
 -- ============================================================
--- 011_payments.sql — Payments rail (the commission engine)
+-- 011_payments.sql, Payments rail (the commission engine)
 --
 -- Two tables:
---   payment_config   — one row per user: which PSP, encrypted secret,
+--   payment_config, one row per user: which PSP, encrypted secret,
 --                      default currency, and the PLATFORM FEE in basis
 --                      points. This bps value is the whole business model:
 --                      money moves through links we mint, so the fee is
 --                      taken at settlement, never invoiced.
---   payment_requests — one row per payment link minted, with attribution
+--   payment_requests, one row per payment link minted, with attribution
 --                      back to the conversation / automation that closed it
 --                      so "the AI earned this" is provable and auditable.
 --
@@ -16,7 +16,7 @@
 -- no INSERT/UPDATE policy is exposed to authenticated users on
 -- payment_requests beyond SELECT of their own rows.
 --
--- Idempotent — follows the conventions of 001_initial_schema.sql.
+-- Idempotent, follows the conventions of 001_initial_schema.sql.
 -- ============================================================
 
 -- ------------------------------------------------------------
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS payment_requests (
   provider TEXT NOT NULL CHECK (provider IN ('paystack', 'flutterwave', 'manual')),
   -- Provider transaction reference; unique per user for idempotency.
   reference TEXT NOT NULL,
-  -- Minor units (kobo/cents) — integer math only, no float drift.
+  -- Minor units (kobo/cents), integer math only, no float drift.
   amount_minor BIGINT NOT NULL CHECK (amount_minor > 0),
   currency TEXT NOT NULL,
   description TEXT,

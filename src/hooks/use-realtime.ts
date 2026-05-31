@@ -30,7 +30,7 @@ export function useRealtime({
   // Store latest callbacks in refs to avoid re-subscribing when the
   // parent re-renders with fresh closures. Assigned inside an effect
   // so the mutation doesn't happen during render (React 19's refs
-  // rule) — subscribers only read `.current` inside async Realtime
+  // rule), subscribers only read `.current` inside async Realtime
   // callbacks, which always run after the render that updates it.
   const onMessageRef = useRef(onMessageEvent);
   const onConversationRef = useRef(onConversationEvent);

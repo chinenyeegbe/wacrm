@@ -127,7 +127,7 @@ export function TemplateManager() {
   const [submitting, setSubmitting] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [form, setForm] = useState<TemplateFormData>(emptyForm);
-  // Non-null when the dialog is editing an existing row — switches the
+  // Non-null when the dialog is editing an existing row, switches the
   // submit handler from POST /submit to PATCH /[id] and changes the
   // dialog title + CTA. Set to the template id to pre-fill from a row.
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -138,7 +138,7 @@ export function TemplateManager() {
   const [templateToDelete, setTemplateToDelete] =
     useState<MessageTemplate | null>(null);
 
-  // Body variable indices — `[1, 2, 3]` for "{{1}} {{2}} {{3}}". We
+  // Body variable indices, `[1, 2, 3]` for "{{1}} {{2}} {{3}}". We
   // re-run the extractor on every render to keep the sample-value rows
   // in sync with what the user typed.
   const bodyVarCount = useMemo(
@@ -265,17 +265,17 @@ export function TemplateManager() {
           data?.error || `${isEdit ? 'Edit' : 'Submit'} failed (HTTP ${res.status})`,
         );
       }
-      // Refresh first, then close — re-opening the dialog
+      // Refresh first, then close, re-opening the dialog
       // immediately should not show a stale list.
       if (user) await fetchTemplates(user.id);
       toast.success(
         data.dry_run
           ? isEdit
-            ? 'Template updated (dry-run — no Meta call)'
-            : 'Template saved (dry-run — no Meta call)'
+            ? 'Template updated (dry-run, no Meta call)'
+            : 'Template saved (dry-run, no Meta call)'
           : isEdit
-            ? 'Edit submitted — Meta typically reviews within 24 hours.'
-            : 'Submitted to Meta — typical review time is 24 hours. Status updates automatically.',
+            ? 'Edit submitted, Meta typically reviews within 24 hours.'
+            : 'Submitted to Meta, typical review time is 24 hours. Status updates automatically.',
       );
       setDialogOpen(false);
       setForm(emptyForm);
@@ -314,10 +314,10 @@ export function TemplateManager() {
       }
       if (data.truncated) {
         // Use error (not warning) so the message survives long
-        // enough to read — sonner's `warning` auto-dismisses on
+        // enough to read, sonner's `warning` auto-dismisses on
         // the same short timer as `success`.
         toast.error(
-          'Synced the first 2000 templates only — your account has more. Sync again to continue, or contact support if this persists.',
+          'Synced the first 2000 templates only, your account has more. Sync again to continue, or contact support if this persists.',
           { duration: 10000 },
         );
       }
@@ -550,7 +550,7 @@ export function TemplateManager() {
                         variant="ghost"
                         size="sm"
                         onClick={() => openEdit(template)}
-                        title="Editing triggers Meta re-review — status flips to PENDING."
+                        title="Editing triggers Meta re-review, status flips to PENDING."
                         aria-label="Edit template"
                         className="text-slate-300 hover:text-primary hover:bg-primary/10 h-8 px-2"
                       >
@@ -648,7 +648,7 @@ export function TemplateManager() {
               />
               <p className="text-[11px] text-slate-500">
                 {editingId
-                  ? 'Name is fixed once a template exists on Meta — create a new template to change it.'
+                  ? 'Name is fixed once a template exists on Meta, create a new template to change it.'
                   : 'Lowercase letters, digits, and underscores only.'}
               </p>
             </div>
@@ -704,7 +704,7 @@ export function TemplateManager() {
                     ? 'Language is fixed once a template exists on Meta.'
                     : (
                         <>
-                          Must match the exact code on Meta — <code>en_US</code>{' '}
+                          Must match the exact code on Meta, <code>en_US</code>{' '}
                           and <code>en</code> are distinct.
                         </>
                       )}
@@ -721,7 +721,7 @@ export function TemplateManager() {
                   // header_sample across format switches. The submit
                   // payload builder only reads the field that matches
                   // the active format, so an orphan value on a hidden
-                  // field is harmless — and keeping it lets the user
+                  // field is harmless, and keeping it lets the user
                   // switch formats to compare without losing typing.
                   setForm({
                     ...form,

@@ -3,8 +3,8 @@
  *
  * Three pre-canned flows users can clone with one click instead of
  * building from scratch. Each template is a plain JS object describing
- * the same shape `/api/flows` PUT accepts — name, trigger config,
- * entry_node_id, fallback_policy, nodes[] — keyed by a stable
+ * the same shape `/api/flows` PUT accepts, name, trigger config,
+ * entry_node_id, fallback_policy, nodes[], keyed by a stable
  * `slug`.
  *
  * The clone path (`/api/flows` POST with `template_slug`) creates a
@@ -68,7 +68,7 @@ export interface FlowTemplate {
 }
 
 // ============================================================
-// 1. Welcome menu — the example from the owner's brief
+// 1. Welcome menu, the example from the owner's brief
 // ============================================================
 const WELCOME_MENU: FlowTemplate = {
   slug: "welcome_menu",
@@ -109,21 +109,21 @@ const WELCOME_MENU: FlowTemplate = {
       node_key: "existing_handoff",
       node_type: "handoff",
       config: {
-        note: "Existing customer needs assistance — please check account history before replying.",
+        note: "Existing customer needs assistance, please check account history before replying.",
       } as HandoffNodeConfig,
     },
     {
       node_key: "new_handoff",
       node_type: "handoff",
       config: {
-        note: "New customer — share pricing + onboarding link.",
+        note: "New customer, share pricing + onboarding link.",
       } as HandoffNodeConfig,
     },
   ],
 };
 
 // ============================================================
-// 2. FAQ bot — list-message answers, fully automated
+// 2. FAQ bot, list-message answers, fully automated
 // ============================================================
 const FAQ_BOT: FlowTemplate = {
   slug: "faq_bot",
@@ -223,7 +223,7 @@ const FAQ_BOT: FlowTemplate = {
 };
 
 // ============================================================
-// 3. Lead capture — collect_input chain, ends in a handoff
+// 3. Lead capture, collect_input chain, ends in a handoff
 // ============================================================
 const LEAD_CAPTURE: FlowTemplate = {
   slug: "lead_capture",
@@ -270,7 +270,7 @@ const LEAD_CAPTURE: FlowTemplate = {
       node_key: "ask_company",
       node_type: "collect_input",
       config: {
-        prompt_text: "Almost done — what's your company name?",
+        prompt_text: "Almost done, what's your company name?",
         var_key: "company",
         next_node_key: "handoff",
       } as CollectInputNodeConfig,
@@ -279,7 +279,7 @@ const LEAD_CAPTURE: FlowTemplate = {
       node_key: "handoff",
       node_type: "handoff",
       config: {
-        note: "New lead — name={{vars.name}}, email={{vars.email}}, company={{vars.company}}.",
+        note: "New lead, name={{vars.name}}, email={{vars.email}}, company={{vars.company}}.",
       } as HandoffNodeConfig,
     },
   ],

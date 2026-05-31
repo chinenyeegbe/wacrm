@@ -80,7 +80,7 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     // Dep is the whole `contact` object (not `contact?.phone`) so the
-    // React Compiler's inference agrees with the manual dep list —
+    // React Compiler's inference agrees with the manual dep list, 
     // fixes the `preserve-manual-memoization` lint error.
   }, [contact]);
 

@@ -121,7 +121,7 @@ const RECIPIENT_STATUSES: readonly RecipientStatus[] = [
 ];
 
 /**
- * CSV export helper — RFC 4180 quoting. Quote every field so
+ * CSV export helper, RFC 4180 quoting. Quote every field so
  * commas/newlines/quotes round-trip cleanly.
  */
 function toCsv(rows: string[][]): string {
@@ -227,7 +227,7 @@ export default function BroadcastDetailPage() {
     setDeleting(true);
     const supabase = createClient();
     // broadcast_recipients cascades on broadcasts.id (migration 001), so a
-    // single delete is sufficient — the aggregate trigger in migration 003
+    // single delete is sufficient, the aggregate trigger in migration 003
     // is defined on broadcast_recipients but fires only on its own row
     // changes, not on a cascaded drop of the parent row.
     const { error: delErr } = await supabase
@@ -303,7 +303,7 @@ export default function BroadcastDetailPage() {
           </div>
         </div>
 
-        {/* Delete — inline-confirm pattern matches the pipeline-settings
+        {/* Delete, inline-confirm pattern matches the pipeline-settings
             "Delete Pipeline" flow. Mid-send broadcasts can't be deleted
             because orphaning in-flight Meta messages would leave the
             funnel inconsistent. */}
@@ -347,7 +347,7 @@ export default function BroadcastDetailPage() {
         )}
       </div>
 
-      {/* Stats — 6 cards: Total / Sent / Delivered / Read / Replied / Failed */}
+      {/* Stats, 6 cards: Total / Sent / Delivered / Read / Replied / Failed */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <StatCard
           label="Total Recipients"

@@ -7,7 +7,7 @@
  *     consistently (icon, label, color, 1-line summary).
  *   - Editing-only helpers (defaultConfigFor, slugify, uniqueNodeKey,
  *     BuilderState) stay in flow-builder.tsx until the canvas grows
- *     editing affordances — pulled across in the PR that adds them.
+ *     editing affordances, pulled across in the PR that adds them.
  *
  * Why .tsx and not .ts: NODE_META holds lucide icon components, which
  * are typed as React components; importing them from a .ts module
@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 
 // ============================================================
-// Node-type union — single source of truth for every place the UI
+// Node-type union, single source of truth for every place the UI
 // enumerates types (add menu, type pickers, switch statements). Kept
 // in lockstep with `FlowNodeType` in src/lib/flows/types.ts (which
 // drives the engine's exhaustiveness check); a divergence between the
@@ -54,7 +54,7 @@ export interface BuilderNode {
   node_key: string;
   node_type: NodeType;
   config: Record<string, unknown>;
-  /** Optional in v1 — defaults to 0 in the DB. Canvas view reads it
+  /** Optional in v1, defaults to 0 in the DB. Canvas view reads it
    *  to position nodes; list view ignores it. */
   position_x?: number;
   position_y?: number;
@@ -114,7 +114,7 @@ export const NODE_META: Record<
 };
 
 // ============================================================
-// Pure editing helpers — used by forms in both views.
+// Pure editing helpers, used by forms in both views.
 // ============================================================
 
 /**
@@ -133,7 +133,7 @@ export function slugify(s: string, fallback: string): string {
 }
 
 // ============================================================
-// Summary helpers — short, single-line content previews used in
+// Summary helpers, short, single-line content previews used in
 // collapsed node cards (list view) and node tiles (canvas view).
 // Returns null when there's nothing meaningful to show (start/end,
 // or a freshly-added node with no fields filled in).

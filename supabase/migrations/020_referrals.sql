@@ -1,23 +1,23 @@
 -- ============================================================
--- 020_referrals.sql — The partner / reseller network (network effect)
+-- 020_referrals.sql, The partner / reseller network (network effect)
 --
 -- Lets any individual become a "partner" who sells wacrm to businesses in
 -- their neighbourhood and earns a recurring share of the platform's
--- commission on every business they bring — forever. This is the growth
+-- commission on every business they bring, forever. This is the growth
 -- flywheel: partners are paid out of OUR margin (not added to the
 -- merchant's bill), so their incentive is glued to ours.
 --
 -- Three tables:
---   partners          — a user's reseller identity: their shareable code,
+--   partners, a user's reseller identity: their shareable code,
 --                       tier, and lifetime stats.
---   referrals         — the edge "this partner referred this business
+--   referrals, the edge "this partner referred this business
 --                       (workspace)". One business has at most one referrer.
---   referral_earnings — the immutable ledger: one row per partner payout
+--   referral_earnings, the immutable ledger: one row per partner payout
 --                       event, written when a referred business's payment
 --                       settles. Source of truth for what we owe.
 --
 -- Additive & non-breaking. Reads pair with src/lib/referrals/*.
--- Idempotent — conventions from 001_initial_schema.sql.
+-- Idempotent, conventions from 001_initial_schema.sql.
 -- ============================================================
 
 -- ------------------------------------------------------------
@@ -61,7 +61,7 @@ CREATE TRIGGER set_updated_at BEFORE UPDATE ON partners
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ------------------------------------------------------------
--- REFERRALS — partner → referred business (workspace).
+-- REFERRALS, partner → referred business (workspace).
 --
 -- workspace_id references the referred business's workspace (migration
 -- 019). A business has at most one referrer (UNIQUE), captured at signup.
@@ -97,7 +97,7 @@ CREATE POLICY "Partners view own referrals" ON referrals FOR SELECT
   );
 
 -- ------------------------------------------------------------
--- REFERRAL_EARNINGS — immutable payout ledger.
+-- REFERRAL_EARNINGS, immutable payout ledger.
 --
 -- One row each time a referred business's payment settles and the partner
 -- is owed a cut. Written server-side from the payments webhook. amount_minor

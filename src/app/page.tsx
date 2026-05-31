@@ -14,25 +14,22 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 
-// Business landing — speaks ONLY to the merchant persona.
+// Business landing. One audience only: the shop / business owner.
 //
-// Positioning rule (from the founder): sell the WHAT and the WHY, never the
-// HOW. Customers don't care if it's AI, a human, or both — they care that
-// their customers get supported, sold to, and brought back, so revenue goes
-// up and nobody drifts to a competitor. So: no "AI" in the pitch, no
-// over-explaining the mechanism, business-casual voice, say only what's
-// needed and let the details reveal themselves later.
+// Copy rules: sell the WHAT and the WHY, not the HOW (no "AI" talk, no
+// explaining the mechanism). Plain, simple English for a wide, ESL
+// audience. Short sentences. Say only what's needed; details come later.
 export const metadata: Metadata = {
-  title: "Moldlane — never lose a customer to a slow reply",
+  title: "Moldlane: answer every customer on WhatsApp",
   description:
-    "Moldlane keeps every customer on your WhatsApp answered, every buyer closed, and brings back the ones who've gone quiet — even when you're too busy. Pay only when you get paid.",
+    "Moldlane replies to every customer on your WhatsApp, helps them buy, and brings back the ones who went quiet. Day and night. You only pay when you get paid.",
   robots: { index: true, follow: true },
 };
 
 const CTA = { label: "Start free", href: "/signup" };
 
 export default async function HomePage() {
-  // Logged-in merchants skip the pitch and go straight to work.
+  // Logged-in owners skip the pitch and go straight to work.
   const supabase = await createClient();
   const {
     data: { user },
@@ -41,21 +38,20 @@ export default async function HomePage() {
 
   return (
     <MarketingShell persona="business" cta={CTA}>
-      {/* ---------- Hero ---------- */}
+      {/* Hero */}
       <section className="mx-auto w-full max-w-5xl px-4 pt-14 pb-10 sm:px-6 sm:pt-20 sm:pb-16">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
+          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
             Works on the WhatsApp you already use
           </span>
           <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl">
-            Never lose a customer to a{" "}
-            <span className="text-primary">slow reply</span>
+            Answer every customer,{" "}
+            <span className="text-primary">even when you can&apos;t</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
-            You can&apos;t be on your phone all day — you get busy, tired,
-            overwhelmed. Moldlane keeps every customer answered, every buyer
-            closed, and nudges the quiet ones to come back. Even while you
-            sleep.
+            You can&apos;t be on your phone all day. Moldlane replies to every
+            customer fast, helps them buy, and brings back the ones who went
+            quiet. Day and night.
           </p>
           <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
@@ -80,66 +76,63 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ---------- The three jobs, framed by the WHY ---------- */}
+      {/* The three jobs */}
       <section className="border-y border-border/60 bg-card/40">
         <div className="mx-auto grid w-full max-w-5xl gap-4 px-4 py-10 sm:grid-cols-3 sm:px-6">
           {[
             {
-              pain: "A question sits unanswered",
-              fix: "Every customer gets a quick, friendly reply — so they don't message your competitor instead.",
+              title: "Reply fast",
+              body: "Customers get a quick answer, so they do not go to someone else.",
             },
             {
-              pain: "A ready buyer waits too long",
-              fix: "Prospects and regulars get sold to on the spot, in their own language.",
+              title: "Sell more",
+              body: "It helps people buy, in their own language, right there in the chat.",
             },
             {
-              pain: "Old customers forget you",
-              fix: "Quiet customers get a warm nudge to come back — the marketing you never have time to do.",
+              title: "Bring people back",
+              body: "It reminds quiet customers to come back. The marketing you never have time to do.",
             },
           ].map((item) => (
             <div
-              key={item.pain}
+              key={item.title}
               className="rounded-xl border border-border bg-card p-5"
             >
-              <p className="text-sm font-medium text-muted-foreground line-through decoration-destructive/50">
-                {item.pain}
-              </p>
-              <p className="mt-2 text-sm text-foreground">{item.fix}</p>
+              <p className="font-semibold text-foreground">{item.title}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ---------- How it works (their experience, not our tech) ---------- */}
+      {/* How it works */}
       <section id="how" className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6">
         <h2 className="text-center text-2xl font-bold sm:text-3xl">
-          Set it up in an afternoon
+          Set up in one afternoon
         </h2>
         <p className="mx-auto mt-2 max-w-lg text-center text-muted-foreground">
-          Nothing changes for your customers — they keep chatting on WhatsApp.
-          You just stop dropping the ball.
+          Nothing changes for your customers. They keep chatting on WhatsApp.
         </p>
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
           {[
             {
               n: "1",
-              title: "Connect your WhatsApp",
-              body: "Add your number, your prices, and your hours once.",
+              title: "Connect WhatsApp",
+              body: "Add your number, your prices, and your hours. You only do this once.",
             },
             {
               n: "2",
-              title: "Make it yours",
-              body: "Decide how hands-on you want to be — review everything, or let it run.",
+              title: "Choose your style",
+              body: "Check every message yourself, or let it run on its own. Your call.",
             },
             {
               n: "3",
-              title: "Get back to business",
-              body: "Customers are looked after around the clock. You step in only when it matters.",
+              title: "Get back to work",
+              body: "Your customers are looked after all day. You step in only when you want to.",
             },
           ].map((step) => (
             <div
               key={step.n}
-              className="relative rounded-xl border border-border bg-card p-6"
+              className="rounded-xl border border-border bg-card p-6"
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
                 {step.n}
@@ -151,7 +144,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ---------- What you get (outcomes) ---------- */}
+      {/* What you get */}
       <section className="border-t border-border/60 bg-card/40">
         <div className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6">
           <h2 className="text-center text-2xl font-bold sm:text-3xl">
@@ -161,33 +154,33 @@ export default async function HomePage() {
             {[
               {
                 icon: Clock,
-                title: "Always answered",
-                body: "Never miss a midnight buyer or a busy-day rush. Replies come in seconds, every day.",
+                title: "Always on",
+                body: "Replies in seconds, any time of day, every day.",
               },
               {
                 icon: Languages,
-                title: "Speaks their language",
-                body: "English, Pidgin, Swahili, French, Hausa, Yoruba, Arabic — it matches each customer.",
+                title: "Any language",
+                body: "English, Pidgin, Swahili, French, Hausa, Yoruba, and more.",
               },
               {
                 icon: CreditCard,
-                title: "Takes payment in the chat",
-                body: "Sends a secure pay link right where they're talking, and confirms it for you.",
+                title: "Takes payment",
+                body: "Sends a safe pay link in the chat and confirms it for you.",
               },
               {
                 icon: RefreshCw,
-                title: "Brings customers back",
-                body: "Reaches out to people who've gone quiet with a friendly reminder or a small offer.",
+                title: "Brings people back",
+                body: "Messages old customers with a friendly reminder or a small offer.",
               },
               {
                 icon: Users,
-                title: "One inbox for your team",
-                body: "You and your staff on one number — with notes, tags, and a clear sales pipeline.",
+                title: "One inbox",
+                body: "You and your team on one number, with notes, tags, and a simple sales board.",
               },
               {
                 icon: ShieldCheck,
-                title: "Stays professional",
-                body: "Warm, human replies that sound like you — and your customers' details stay private.",
+                title: "Sounds like you",
+                body: "Friendly, human replies. Your customers' details stay private.",
               },
             ].map((f) => (
               <div
@@ -205,21 +198,21 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ---------- Pricing promise ---------- */}
+      {/* Pricing promise */}
       <section className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6">
         <div className="mx-auto max-w-xl rounded-2xl border border-primary/20 bg-primary-soft p-8 text-center">
           <h2 className="text-2xl font-bold sm:text-3xl">
             Pay nothing until it works
           </h2>
           <p className="mt-3 text-muted-foreground">
-            No subscription. No setup fee. Moldlane takes a small cut only when
-            a sale is paid through it — so we earn only when you do.
+            No subscription. No setup fee. You pay a small amount only when a
+            sale is paid through Moldlane. We earn only when you do.
           </p>
           <ul className="mx-auto mt-5 flex max-w-sm flex-col gap-2 text-left text-sm">
             {[
-              "Free to start, free to set up",
-              "A small fee only on collected sales",
-              "Flat plans available for larger teams",
+              "Free to start and free to set up",
+              "A small fee only on paid sales",
+              "Bigger team? Ask about a flat plan.",
             ].map((line) => (
               <li key={line} className="flex items-center gap-2">
                 <Check className="h-4 w-4 shrink-0 text-primary" />

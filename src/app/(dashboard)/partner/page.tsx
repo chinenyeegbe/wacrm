@@ -108,7 +108,7 @@ export default function PartnerPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      toast.error('Could not copy — long-press to copy the link');
+      toast.error('Could not copy, long-press to copy the link');
     }
   };
 
@@ -136,7 +136,7 @@ export default function PartnerPage() {
           e.status === 'accrued' ? { ...e, status: 'paid' as const } : e,
         ),
       );
-      toast.success('Payout requested — we’ll send it to your account.');
+      toast.success('Payout requested, we’ll send it to your account.');
     } finally {
       setCashingOut(false);
     }
@@ -163,7 +163,7 @@ export default function PartnerPage() {
           </h1>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
             Share wacrm with shops and businesses you know. When they collect
-            payments through it, you earn a slice of every sale —
+            payments through it, you earn a slice of every sale, 
             automatically, for as long as they stay. No cost to them, no cost
             to you.
           </p>
@@ -236,7 +236,7 @@ export default function PartnerPage() {
           value={payoutDetails}
           onChange={(e) => setPayoutDetails(e.target.value)}
           placeholder={
-            'e.g. Bank transfer — 0123456789 GTBank, Ada Eze\nor M-Pesa 0712 345 678'
+            'e.g. Bank transfer, 0123456789 GTBank, Ada Eze\nor M-Pesa 0712 345 678'
           }
           className="mt-3 min-h-20 text-sm"
         />
@@ -322,7 +322,7 @@ export default function PartnerPage() {
         </p>
         {earnings.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
-            No earnings yet. Share your link to get started — you&apos;ll earn
+            No earnings yet. Share your link to get started, you&apos;ll earn
             the moment a business you referred collects a payment.
           </p>
         ) : (
@@ -414,7 +414,7 @@ function TierLadder({ currentShare }: { currentShare?: number }) {
         })}
       </div>
       <p className="mt-2 text-[11px] text-muted-foreground">
-        Your share is taken from the platform fee — the businesses you refer
+        Your share is taken from the platform fee, the businesses you refer
         never pay more.
       </p>
     </div>

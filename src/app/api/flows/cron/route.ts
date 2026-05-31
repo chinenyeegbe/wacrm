@@ -13,7 +13,7 @@ import { resolveFallbackPolicy } from '@/lib/flows/fallback'
  *
  * Without this sweep, a customer who abandons a flow mid-conversation
  * keeps a row in `idx_one_active_run_per_contact` (the partial unique
- * index on `flow_runs WHERE status='active'`) forever — blocking any
+ * index on `flow_runs WHERE status='active'`) forever, blocking any
  * new triggers for them. The cron is therefore not optional.
  *
  * Auth: re-uses `AUTOMATION_CRON_SECRET` so operators only have one
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
   const now = new Date()
 
   // Pull all currently-active runs along with their parent flow's
-  // fallback_policy. Joined in one query — the small set of active
+  // fallback_policy. Joined in one query, the small set of active
   // runs per tenant keeps this cheap.
   const { data: runs, error } = await admin
     .from('flow_runs')
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
     const ageHours = (now.getTime() - lastAdvanced.getTime()) / (1000 * 60 * 60)
     if (ageHours < policy.on_timeout_hours) continue
 
-    // Mark timed_out — guarded by the precondition `status='active'`
+    // Mark timed_out, guarded by the precondition `status='active'`
     // so concurrent advance from a late inbound doesn't overwrite a
     // legitimate update.
     const { data: updated } = await admin

@@ -1,4 +1,4 @@
-# Payments — the commission rail
+# Payments, the commission rail
 
 wacrm can send a **payment link right inside the WhatsApp chat**, so the AI
 doesn't just close the sale, it collects the money. This is also how a
@@ -11,12 +11,12 @@ a commission is taken at settlement instead of being invoiced.
 | --- | --- | --- |
 | **Paystack** | Secret key (`sk_live_…`) | Amounts in kobo/cents (minor units). |
 | **Flutterwave** | Secret key | Set the dashboard "secret hash" to your secret key so webhooks verify. |
-| **Manual** | Bank / mobile-money instructions | Zero setup — sent to the customer verbatim. Start here. |
+| **Manual** | Bank / mobile-money instructions | Zero setup, sent to the customer verbatim. Start here. |
 
 ## Setup
 
 1. **Settings → Payments**, pick a provider.
-2. For a gateway, paste your secret key — it's encrypted (AES-256-GCM)
+2. For a gateway, paste your secret key, it's encrypted (AES-256-GCM)
    before storage, same as your WhatsApp token, and never shown again.
    For manual, paste your bank / M-Pesa instructions.
 3. Set your default currency (NGN, KES, GHS, ZAR, …).
@@ -46,7 +46,7 @@ inbox conversation.
 
 `payment_config.platform_fee_bps` (basis points; 100 = 1%) is the
 commission a hosted deployment takes on **collected** payments. It defaults
-to **0** — self-hosters keep 100%. It is intentionally not editable from
+to **0**, self-hosters keep 100%. It is intentionally not editable from
 the merchant settings UI; the platform operator sets it. Merchants only
 ever pay it on money they actually receive.
 
@@ -56,7 +56,7 @@ ever pay it on money they actually receive.
 - Webhooks verify the provider's HMAC signature over the raw body using the
   merchant's own key; unknown references and bad signatures are rejected.
 - Payment rows are writable only server-side (the create route and the
-  webhook) — a user can read their own history but cannot mark a request
+  webhook), a user can read their own history but cannot mark a request
   paid.
 - Amounts are integer minor units end-to-end (no float drift).
 

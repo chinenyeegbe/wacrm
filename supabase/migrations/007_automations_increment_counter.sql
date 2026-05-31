@@ -10,7 +10,7 @@
 -- two different contacts in the same second) could both read N and
 -- both write N+1, permanently losing one count.
 --
--- Idempotent — safe to re-run.
+-- Idempotent, safe to re-run.
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION increment_automation_execution_count(p_automation_id UUID)

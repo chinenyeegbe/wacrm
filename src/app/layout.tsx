@@ -14,10 +14,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     default: "Moldlane",
-    template: "%s — Moldlane",
+    template: "%s, Moldlane",
   },
   description:
-    "Moldlane — the AI employee that runs your WhatsApp: replies, sells, and collects payment 24/7.",
+    "Moldlane, the AI employee that runs your WhatsApp: replies, sells, and collects payment 24/7.",
   applicationName: "Moldlane",
   appleWebApp: {
     capable: true,
@@ -49,12 +49,12 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-// Inline boot script — runs before React hydrates so the user's
+// Inline boot script, runs before React hydrates so the user's
 // chosen theme is on the <html> element before first paint. Without
 // this every page load flashes the default Violet for a frame before
 // the React tree mounts and applies the picked theme.
 //
-// Kept dependency-free (no imports, no JSX) — must be a string the
+// Kept dependency-free (no imports, no JSX), must be a string the
 // browser can run as a single <script>. Knowledge of valid theme IDs
 // is sourced from the THEME_IDS constant so adding a theme doesn't
 // silently break the boot path.

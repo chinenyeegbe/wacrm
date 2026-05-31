@@ -7,7 +7,7 @@ import { THEMES, type ThemeId } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 
 /**
- * Appearance panel — color-theme picker.
+ * Appearance panel, color-theme picker.
  *
  * Click a card → applies + persists immediately. No save button:
  * the whole change is a single CSS-variable swap on <html>, there's
@@ -26,7 +26,7 @@ export function AppearancePanel() {
         <h2 className="text-lg font-semibold text-white">Color theme</h2>
         <p className="mt-1 text-sm text-slate-400">
           Pick the accent color used across the app. All themes stay
-          dark — only the primary color (buttons, active nav, badges)
+          dark, only the primary color (buttons, active nav, badges)
           changes. Saved to this device.
         </p>
       </div>

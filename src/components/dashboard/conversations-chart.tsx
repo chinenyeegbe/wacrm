@@ -134,7 +134,7 @@ function LineSvg({
   // assumed the viewBox filled the SVG DOM box linearly, but
   // `preserveAspectRatio="xMidYMid meet"` (the SVG default)
   // letterboxes the content horizontally when the container is
-  // wider than the viewBox aspect — so hover snapped hundreds of
+  // wider than the viewBox aspect, so hover snapped hundreds of
   // pixels off on wide layouts. CTM-inverse correctly accounts for
   // letterboxing, scaling, and any future transform changes.
   useEffect(() => {
@@ -159,7 +159,7 @@ function LineSvg({
         Math.min(data.length - 1, Math.round(stepX === 0 ? 0 : relative / stepX)),
       )
       // Map the snapped data-point's viewBox x back to screen, then
-      // subtract the wrapper's left edge — that pixel offset is what
+      // subtract the wrapper's left edge, that pixel offset is what
       // the absolutely-positioned tooltip div consumes. `xFor` is
       // inlined here so the effect deps stay stable (it's a closure
       // that'd otherwise be a new reference every render).
@@ -274,7 +274,7 @@ function LineSvg({
         )}
       </svg>
 
-      {/* Tooltip — absolute-positioned div so we get crisp text, not
+      {/* Tooltip, absolute-positioned div so we get crisp text, not
           SVG-rendered text. The left offset comes from the CTM-based
           mapping so it lines up with the actual crosshair pixel, not a
           letterboxed viewBox percentage. */}

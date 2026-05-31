@@ -6,12 +6,12 @@ choose to scale.
 
 ## What it does today
 
-- **Suggest reply** — in the inbox composer, click the ✨ button with an
+- **Suggest reply**, in the inbox composer, click the ✨ button with an
   empty box and the AI drafts the next reply from the conversation
   history. It matches the customer's language (English, Pidgin, Swahili,
   French, Hausa, Yoruba, Arabic, …).
-- **Rewrite draft** — type something first, then click ✨ to polish it.
-- **AI copy API** — `POST /api/ai` also drafts broadcast campaigns
+- **Rewrite draft**, type something first, then click ✨ to polish it.
+- **AI copy API**, `POST /api/ai` also drafts broadcast campaigns
   (`draft_broadcast`) and social-media posts (`draft_social`) so the
   business can market itself. See "API" below.
 
@@ -37,7 +37,7 @@ set.
 
 ### Choosing models
 
-The client tries a fallback list and the first model to answer wins —
+The client tries a fallback list and the first model to answer wins, 
 important on free tiers, which are best-effort and rate-limited. Override
 the list with `AI_MODELS` (comma-separated, first preferred):
 
@@ -50,9 +50,9 @@ AI_MODELS=nvidia/nemotron-nano-9b-v2:free,meta-llama/llama-3.3-70b-instruct:free
 - The provider key lives **only** on the server. The browser receives the
   generated text, never the key.
 - Every call is authenticated (Supabase session) and per-user
-  rate-limited (30/min) — same posture as the WhatsApp routes.
+  rate-limited (30/min), same posture as the WhatsApp routes.
 - No prompt content is stored by wacrm. What the upstream provider logs is
-  governed by their policy — read it before sending sensitive data.
+  governed by their policy, read it before sending sensitive data.
 
 ## API
 
@@ -73,10 +73,10 @@ gracefully.
 
 ## Where the code lives
 
-- `src/lib/ai/client.ts` — provider-agnostic chat client + fallbacks.
-- `src/lib/ai/prompts.ts` — Africa-aware prompt builders.
-- `src/app/api/ai/route.ts` — the authenticated endpoint.
-- `src/components/inbox/message-composer.tsx` — the ✨ button.
+- `src/lib/ai/client.ts`, provider-agnostic chat client + fallbacks.
+- `src/lib/ai/prompts.ts`, Africa-aware prompt builders.
+- `src/app/api/ai/route.ts`, the authenticated endpoint.
+- `src/components/inbox/message-composer.tsx`, the ✨ button.
 
 See [`STRATEGY.md`](../STRATEGY.md) for the longer roadmap (AI automation
 steps, self-marketing, and the operator/agency model).

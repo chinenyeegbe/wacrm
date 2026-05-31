@@ -47,7 +47,7 @@ import type {
 import { cn } from "@/lib/utils"
 
 // ------------------------------------------------------------
-// Types (builder-local — mirror the flattened rows we POST)
+// Types (builder-local, mirror the flattened rows we POST)
 // ------------------------------------------------------------
 
 export interface BuilderStep {
@@ -69,7 +69,7 @@ export interface BuilderInitial {
 }
 
 // ------------------------------------------------------------
-// Step metadata — one source of truth for icon + label + border color
+// Step metadata, one source of truth for icon + label + border color
 // ------------------------------------------------------------
 
 interface StepMeta {
@@ -638,7 +638,7 @@ function ConditionBranches({
   const no = step.branches?.no ?? []
   // Build the child scope by appending a branch marker. The scope the
   // StepList uses is driven by the LAST element of parentPath, so the
-  // tail's `index` doesn't matter — it's replaced per child during walks.
+  // tail's `index` doesn't matter, it's replaced per child during walks.
   const yesPath: StepPath = [
     ...parentPath,
     { kind: "branch", parentCid: step.cid, branch: "yes", index: 0 },
@@ -648,7 +648,7 @@ function ConditionBranches({
     { kind: "branch", parentCid: step.cid, branch: "no", index: 0 },
   ]
   return (
-    // Stack Yes/No vertically on mobile — two columns at 375px would
+    // Stack Yes/No vertically on mobile, two columns at 375px would
     // cram each branch to ~170px which is too narrow for the nested
     // cards. Two-column grid returns on sm+.
     <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -769,7 +769,7 @@ function StepEditor({
           </FieldBlock>
           <p className="rounded-md bg-fuchsia-500/10 px-3 py-2 text-[11px] leading-relaxed text-fuchsia-200/80">
             Generates the next reply from the conversation history using a
-            free LLM and sends it automatically — a 24/7 responder that
+            free LLM and sends it automatically, a 24/7 responder that
             matches the customer&apos;s language. Add your catalogue, prices
             and hours under{" "}
             <span className="font-medium">Settings → AI</span> so replies
@@ -780,7 +780,7 @@ function StepEditor({
     case "ai_classify":
       return (
         <p className="rounded-md bg-fuchsia-500/10 px-3 py-2 text-[11px] leading-relaxed text-fuchsia-200/80">
-          Reads the conversation and tags it — no message is sent. It writes
+          Reads the conversation and tags it, no message is sent. It writes
           variables you can branch on with a{" "}
           <span className="font-medium">Condition</span> step
           (subject &quot;Variable&quot;):{" "}
@@ -822,7 +822,7 @@ function StepEditor({
           </FieldBlock>
           <p className="rounded-md bg-emerald-500/10 px-3 py-2 text-[11px] leading-relaxed text-emerald-200/80">
             Mints a payment link via your connected provider and sends it to
-            the customer on WhatsApp — the AI doesn&apos;t just close the sale,
+            the customer on WhatsApp, the AI doesn&apos;t just close the sale,
             it collects. Connect Paystack, Flutterwave, or bank/mobile-money
             instructions under <span className="font-medium">Settings →
             Payments</span>. Amount can read a value an earlier AI step set,

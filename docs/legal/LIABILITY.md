@@ -8,7 +8,7 @@
 Moldlane sits in three high-risk positions at once: it **handles personal
 data**, it **touches money**, and it **sends automated messages on a
 business's behalf**. Each creates a distinct class of liability. Below is
-every category we can foresee, who it threatens, and how we reduce it — in
+every category we can foresee, who it threatens, and how we reduce it, in
 the **product**, in **contracts**, and in **operations**.
 
 ---
@@ -35,13 +35,13 @@ Moldlane processes customers' WhatsApp messages, names, phone numbers, and
 **Ghana's DPA**, and **GDPR** for any EU data subjects.
 
 **Our legal role:** Moldlane is a **data processor**; the merchant is the
-**data controller**. This distinction is the whole defense — the controller
+**data controller**. This distinction is the whole defense, the controller
 owns the lawful-basis/consent obligation; we process on their instructions.
 
 | Risk | Mitigation | Status in product |
 | --- | --- | --- |
 | Processing without a Data Processing Agreement | A **DPA** is part of the Terms (controller = merchant, processor = Moldlane), listing sub-processors (Supabase, Meta, OpenRouter/Nvidia, Paystack). | doc todo |
-| Leaking customer PII to the AID model | **Redact PII before any LLM call** — already built (`src/lib/safety/pii.ts`, wired into the prompt builders). Card/ID/phone/email are masked. | ✅ built |
+| Leaking customer PII to the AID model | **Redact PII before any LLM call**, already built (`src/lib/safety/pii.ts`, wired into the prompt builders). Card/ID/phone/email are masked. | ✅ built |
 | Tenant A reading tenant B's data | **Row-Level Security on every table**; the agency-mode RLS cutover must pass a deliberate two-account leak test before shipping. | ✅ per-user; ⚠ agency-mode cutover pending DB test |
 | Secrets/tokens stolen from the DB | WhatsApp tokens **and** payment keys are **AES-256-GCM encrypted at rest**; never returned to the browser. | ✅ built |
 | No way to honour deletion / access requests | Build **data export + hard-delete per workspace** (right to erasure). Cascade deletes already model this; add a user-facing action. | todo |
@@ -62,11 +62,11 @@ that doesn't settle for cash).
 
 | Risk | Mitigation |
 | --- | --- |
-| Being classified as a **money transmitter / PSP** (needs a CBN/regulator licence) | **Never hold customer funds.** Money flows merchant↔customer through the **licensed PSP** (Paystack/Flutterwave); Moldlane only *initiates* a charge and *reads* a webhook. Our fee is collected via the PSP's own split/settlement, or invoiced — we are not in the flow of funds custody. **This is the single most important boundary; do not cross it without a licence.** |
+| Being classified as a **money transmitter / PSP** (needs a CBN/regulator licence) | **Never hold customer funds.** Money flows merchant↔customer through the **licensed PSP** (Paystack/Flutterwave); Moldlane only *initiates* a charge and *reads* a webhook. Our fee is collected via the PSP's own split/settlement, or invoiced, we are not in the flow of funds custody. **This is the single most important boundary; do not cross it without a licence.** |
 | Partner commission looks like an unlicensed investment/MLM | The partner programme pays for **referred real revenue only** (a marketing affiliate model), never for recruitment alone, and has no buy-in. Document it as affiliate commission. Avoid "guaranteed returns" language. |
 | Chargebacks / fraud | The **PSP owns** chargeback handling and KYC of the merchant. Terms push payment-dispute liability to the merchant + PSP, not Moldlane. |
 | Tax (VAT on our fee, partner income) | Issue invoices; have partners accept they're responsible for their own tax; register for VAT where thresholds are met. |
-| Misreported earnings to a partner | The **earnings ledger is immutable** (`referral_earnings`), computed by tested integer math — auditable, no float drift. | 
+| Misreported earnings to a partner | The **earnings ledger is immutable** (`referral_earnings`), computed by tested integer math, auditable, no float drift. | 
 | Wrong amount charged to a customer | The merchant sets the amount; Terms disclaim our liability for merchant-entered figures; receipts are mirrored into the chat for transparency. |
 
 **Bright line:** Moldlane is a **software tool that talks to a licensed
@@ -82,9 +82,9 @@ Policy** and by anti-spam / consumer-protection law.
 
 | Risk | Mitigation |
 | --- | --- |
-| Account ban for spam / non-consented broadcasts | Enforce **opt-in**, the **24-hour customer-care window**, and **Meta-approved templates** — already enforced in code. Terms require the merchant to only message people who consented. |
+| Account ban for spam / non-consented broadcasts | Enforce **opt-in**, the **24-hour customer-care window**, and **Meta-approved templates**, already enforced in code. Terms require the merchant to only message people who consented. |
 | Merchant uses Moldlane to spam | Terms **prohibit** unsolicited bulk messaging; we reserve the right to suspend. Rate limits already exist. |
-| AI sends something defamatory / discriminatory / illegal | Human-in-the-loop default; system prompts forbid it; the merchant is the publisher and indemnifies us; provide a kill-switch (`ai_enabled`) — already built. |
+| AI sends something defamatory / discriminatory / illegal | Human-in-the-loop default; system prompts forbid it; the merchant is the publisher and indemnifies us; provide a kill-switch (`ai_enabled`), already built. |
 | Impersonation | Terms forbid using Moldlane to impersonate; the WhatsApp number is the merchant's own verified business number. |
 | Minors / regulated goods (alcohol, pharma, finance) | Terms place compliance on the merchant; consider a prohibited-use list. |
 
@@ -108,7 +108,7 @@ Policy** and by anti-spam / consumer-protection law.
 | --- | --- |
 | Downtime causing merchant loss | Terms: **no uptime guarantee** on free/low tiers; SLAs only on paid enterprise plans, with the liability cap. |
 | Breach via dependency | Keep dependencies patched (Dependabot already on the upstream); CI typecheck/build; secret scanning. |
-| Webhook forgery | **HMAC signature verification** on Meta + PSP webhooks — already built. |
+| Webhook forgery | **HMAC signature verification** on Meta + PSP webhooks, already built. |
 | Insider/admin access | Least-privilege service-role usage; document who can access prod. |
 | Open-source licence exposure | The base is **MIT**; keep attribution; audit added dependencies' licences before shipping. |
 
@@ -137,11 +137,11 @@ Policy** and by anti-spam / consumer-protection law.
 - PII detection + **redaction before LLM calls** (`lib/safety/pii.ts`).
 - **RLS** on every table; tokens & payment keys **encrypted at rest**.
 - **HMAC-verified** Meta + PSP webhooks.
-- **No fund custody** — money moves through the licensed PSP.
+- **No fund custody**, money moves through the licensed PSP.
 - **Human-in-the-loop default** + AI kill-switch (`ai_enabled`).
 - **Immutable, integer-safe** earnings ledger.
 - Opt-in / 24-hour window / approved-template enforcement for messaging.
 
 The remaining gaps are mostly **contracts** (Terms/Privacy/DPA) and a few
-**product items** (export/erasure, retention, the RLS leak test) — all
+**product items** (export/erasure, retention, the RLS leak test), all
 tracked above.

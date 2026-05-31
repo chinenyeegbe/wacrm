@@ -17,7 +17,7 @@ import {
  *   - draft_broadcast { brief, tone, language }
  *   - draft_social    { brief, platform }
  *
- * The provider key never leaves the server — the browser only ever sees the
+ * The provider key never leaves the server, the browser only ever sees the
  * generated text. Auth + per-user rate limiting mirror the WhatsApp routes.
  */
 

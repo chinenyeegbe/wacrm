@@ -198,7 +198,7 @@ function StepRow({ result }: { result: AutomationLogStepResult }) {
       </span>
       <span className="text-slate-300">{result.step_type}</span>
       {result.detail && (
-        <span className="truncate text-slate-500">— {result.detail}</span>
+        <span className="truncate text-slate-500">, {result.detail}</span>
       )}
     </li>
   )

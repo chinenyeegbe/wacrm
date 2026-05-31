@@ -9,7 +9,7 @@ import {
 import { encrypt, decrypt } from '@/lib/whatsapp/encryption'
 
 // Lazy-initialised service-role client. We need it to detect a
-// phone_number_id already claimed by a *different* user — under RLS,
+// phone_number_id already claimed by a *different* user, under RLS,
 // the user's own session can't see other users' rows, so the conflict
 // would be invisible without the service role.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
     }
 
     // Reject if another user has already claimed this phone_number_id.
-    // wacrm is single-tenant-per-WhatsApp-number — letting two users
+    // wacrm is single-tenant-per-WhatsApp-number, letting two users
     // bind the same number causes the webhook's `.single()` lookup to
     // throw PGRST116 ("multiple rows"), silently dropping every
     // inbound message. See issue #136.
@@ -225,7 +225,7 @@ export async function POST(request: Request) {
     }
 
     // Look up any pre-existing row so we know whether this number is
-    // already registered with Meta — if so we can skip /register when
+    // already registered with Meta, if so we can skip /register when
     // the user didn't provide a PIN this time around.
     const { data: existing } = await supabase
       .from('whatsapp_config')
@@ -242,7 +242,7 @@ export async function POST(request: Request) {
     // Required on first save AND whenever the user supplies a fresh
     // PIN (e.g. they rotated the 2FA PIN in Meta Manager). Skipped
     // when the same number is already registered and no PIN was
-    // supplied — re-registering an already-active number with a
+    // supplied, re-registering an already-active number with a
     // stale PIN would actually fail and undo the active subscription.
     let registeredAt: string | null = existing?.registered_at ?? null
     let registrationError: string | null = null
@@ -293,7 +293,7 @@ export async function POST(request: Request) {
         const message = err instanceof Error ? err.message : String(err)
         console.warn('WABA subscribed_apps failed (non-fatal):', message)
         // Subscription failures are rare once the App has the right
-        // permissions; we don't block save on them — the diagnostic
+        // permissions; we don't block save on them, the diagnostic
         // endpoint surfaces this state too.
       }
     }

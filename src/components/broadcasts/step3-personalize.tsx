@@ -114,7 +114,7 @@ export function Step3Personalize({
   /**
    * A placeholder is "unmapped" if the user hasn't picked either a
    * static value or a field/custom-field source. Blocks Next until
-   * every placeholder has something — otherwise the broadcast would
+   * every placeholder has something, otherwise the broadcast would
    * ship with empty strings and confuse recipients.
    */
   const unmappedKeys = useMemo(() => {
@@ -309,7 +309,7 @@ export function Step3Personalize({
         </div>
       )}
 
-      {/* Live Preview — rendered as a WhatsApp-style bubble so the user
+      {/* Live Preview, rendered as a WhatsApp-style bubble so the user
           sees approximately what the recipient will see. */}
       <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
         <div className="mb-3 flex items-center gap-2">
@@ -331,7 +331,7 @@ export function Step3Personalize({
 
       {unmappedKeys.length > 0 && (
         <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
-          Map every placeholder before continuing — still missing{' '}
+          Map every placeholder before continuing, still missing{' '}
           <span className="font-mono font-semibold">
             {unmappedKeys.join(', ')}
           </span>

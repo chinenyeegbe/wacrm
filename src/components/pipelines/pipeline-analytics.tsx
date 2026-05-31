@@ -116,7 +116,7 @@ export function PipelineAnalytics({ stages, deals }: PipelineAnalyticsProps) {
           icon={<Target className="h-4 w-4 text-blue-400" />}
           label="Avg Deal Size"
           value={formatCurrency(stats.avgValue)}
-          tooltip="Pipeline Value divided by Total Deals — the average value of a single non-lost deal."
+          tooltip="Pipeline Value divided by Total Deals, the average value of a single non-lost deal."
         />
         <Metric
           icon={<TrendingUp className="h-4 w-4 text-purple-400" />}

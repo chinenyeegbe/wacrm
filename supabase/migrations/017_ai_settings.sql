@@ -1,12 +1,12 @@
 -- ============================================================
--- 017_ai_settings.sql — Per-user AI configuration
+-- 017_ai_settings.sql, Per-user AI configuration
 --
 -- Stores the workspace "business context" the AI uses to answer
 -- accurately: catalogue, prices, opening hours, policies, tone. One
 -- row per user. Read by the AI route and the automation engine's
 -- ai_reply step so generated replies reflect the real business.
 --
--- Idempotent — follows the conventions of 001_initial_schema.sql.
+-- Idempotent, follows the conventions of 001_initial_schema.sql.
 -- The ai_reply automation step itself needs NO schema change: it is a
 -- new value of automation_steps.step_type (a free-text column) with its
 -- prompt in the existing step_config JSONB.
@@ -26,11 +26,11 @@ CREATE TABLE IF NOT EXISTS ai_settings (
   -- DEFAULT (safest, builds trust), but a business can choose to run
   -- AI-only or keep AI purely as a draft assistant. The ai_reply step
   -- reads this so one setting changes behaviour everywhere:
-  --   'assist'    — AI never auto-sends; only drafts (inbox ✨ button).
+  --   'assist', AI never auto-sends; only drafts (inbox ✨ button).
   --                 ai_reply steps are skipped.
-  --   'human_loop'— AI auto-answers routine chats but hands flagged ones
+  --   'human_loop', AI auto-answers routine chats but hands flagged ones
   --                 (hot leads, complaints) to a human. DEFAULT.
-  --   'autonomous'— AI handles everything itself, no human routing.
+  --   'autonomous', AI handles everything itself, no human routing.
   autonomy TEXT NOT NULL DEFAULT 'human_loop'
     CHECK (autonomy IN ('assist', 'human_loop', 'autonomous')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -24,7 +24,7 @@ interface MessageActionsProps {
 
 /**
  * Hover/long-press toolbar wrapper around a `<MessageBubble>`. The bubble
- * itself stays a pure presenter — this component owns the action surface so
+ * itself stays a pure presenter, this component owns the action surface so
  * the bubble's render path is unaffected when the toolbar isn't visible.
  */
 export function MessageActions({
@@ -74,7 +74,7 @@ export function MessageActions({
   };
 
   // Row alignment lives here (not in MessageBubble) so the `group/actions`
-  // hover region matches the bubble's content width — hovering empty space
+  // hover region matches the bubble's content width, hovering empty space
   // in the row no longer reveals the toolbar.
   return (
     <div

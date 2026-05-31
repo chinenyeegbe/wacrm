@@ -1,5 +1,5 @@
 -- ============================================================
--- 019_workspaces.sql — Agency mode, part 1: the membership graph
+-- 019_workspaces.sql, Agency mode, part 1: the membership graph
 --
 -- This is the FOUNDATION for multi-tenant / agency mode (one operator
 -- managing many businesses). It is deliberately ADDITIVE and NON-BREAKING:
@@ -15,11 +15,11 @@
 -- The roles mirror src/lib/workspaces/roles.ts:
 --   viewer < agent < operator < owner.
 --
--- Idempotent — follows the conventions of 001_initial_schema.sql.
+-- Idempotent, follows the conventions of 001_initial_schema.sql.
 -- ============================================================
 
 -- ------------------------------------------------------------
--- WORKSPACES — one row per business.
+-- WORKSPACES, one row per business.
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS workspaces (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS workspaces (
 CREATE INDEX IF NOT EXISTS idx_workspaces_owner ON workspaces(owner_id);
 
 -- ------------------------------------------------------------
--- WORKSPACE_MEMBERS — who belongs to a workspace, and as what.
+-- WORKSPACE_MEMBERS, who belongs to a workspace, and as what.
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS workspace_members (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -160,7 +160,7 @@ CREATE TRIGGER set_updated_at BEFORE UPDATE ON workspaces
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ------------------------------------------------------------
--- BACKFILL — give every existing user a personal workspace they own.
+-- BACKFILL, give every existing user a personal workspace they own.
 -- Safe to re-run: the NOT EXISTS guards skip users already migrated.
 -- ------------------------------------------------------------
 INSERT INTO workspaces (name, owner_id, kind)

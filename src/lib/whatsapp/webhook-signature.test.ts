@@ -44,7 +44,7 @@ describe("verifyMetaWebhookSignature", () => {
   });
 
   it("rejects a header of the wrong length without throwing", () => {
-    // timingSafeEqual would throw on length mismatch — the guard inside
+    // timingSafeEqual would throw on length mismatch, the guard inside
     // the verifier should catch this and return false instead.
     expect(verifyMetaWebhookSignature("{}", "sha256=tooshort")).toBe(false);
   });

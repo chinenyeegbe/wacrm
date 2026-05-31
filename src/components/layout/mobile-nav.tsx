@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useTotalUnread } from "@/hooks/use-total-unread";
 
 // Mobile-first bottom navigation. Africa is a mobile-first market, so the
-// primary destinations live where a thumb can reach them — a fixed tab bar
+// primary destinations live where a thumb can reach them, a fixed tab bar
 // at the bottom of the screen, like the apps people already use (WhatsApp,
 // banking apps). Hidden on lg+ where the sidebar takes over.
 //

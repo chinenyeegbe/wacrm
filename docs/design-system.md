@@ -1,17 +1,17 @@
 # Moldlane design system
 
-> Simple yet powerful — Notion-calm, but it earns its keep on a cheap
+> Simple yet powerful, Notion-calm, but it earns its keep on a cheap
 > Android phone on a 3G connection. Mobile-first, always.
 
 ## Brand idea
 
-**Moldlane** = the *lane* you *mould* your business into — a guided path
+**Moldlane** = the *lane* you *mould* your business into, a guided path
 from chaos (a phone full of chats) to a running machine (AI that sells and
-collects). The visual language is **light, calm, and crafted** — Notion's
+collects). The visual language is **light, calm, and crafted**, Notion's
 paper-and-ink restraint, warmed up with earth tones. Hand-made, human,
 trustworthy; not another cold blue SaaS.
 
-## Color — warm, earthy, minimal
+## Color, warm, earthy, minimal
 
 A **light** system on a bone canvas with **one** warm accent. Restraint is
 the rule: terracotta does the work, sage means "good things" (money /
@@ -21,26 +21,26 @@ neutral.
 | Role | Name | Hex | oklch token | Use |
 | --- | --- | --- | --- | --- |
 | Canvas | Bone | `#F7F5F0` | `--background` | App background |
-| Ink | Warm near-black | — | `--foreground` | Text (never pure black) |
+| Ink | Warm near-black |, | `--foreground` | Text (never pure black) |
 | **Primary** | **Terracotta** | `#C87A50` | `--primary` | Buttons, active nav, links, focus |
 | Primary deep | **Rust** | `#B3543A` | `--primary-hover` | Hover / active / emphasis |
 | **Secondary** | **Sage** | `#7A9A85` | `--chart-2` | **Positive / money / success** ("paid", earnings) |
-| Surface | Near-white | — | `--card` | Cards, popovers |
-| Muted | Warm taupe | — | `--muted`, `--border` | Surfaces, dividers, hints |
-| Error | Clear red | — | `--destructive` | Errors only — kept distinct from terracotta so "danger" never reads as "brand" |
+| Surface | Near-white |, | `--card` | Cards, popovers |
+| Muted | Warm taupe |, | `--muted`, `--border` | Surfaces, dividers, hints |
+| Error | Clear red |, | `--destructive` | Errors only, kept distinct from terracotta so "danger" never reads as "brand" |
 
 Why this split: you gave four colors, but they're really **one earthy
 family + a complement**. Terracotta (`#C87A50`) and rust (`#B3543A`) are
 light/deep shades of the *same* hue, so using rust as the hover/emphasis
 state keeps the look minimal instead of busy. Sage (`#7A9A85`) is the
-natural complement (green opposite orange) — reserved for positive/money
+natural complement (green opposite orange), reserved for positive/money
 signals so it carries *meaning*, not decoration. Bone is the Notion paper.
 
 Implemented as the **`moldlane` theme** (default) in `src/app/globals.css`;
 `:root` mirrors it for flash-free first paint. Five alternate themes remain
 in Settings → Appearance. Components consume tokens (`bg-primary`,
 `text-primary`, `bg-primary-soft`, `text-primary-hover`, `border-border`),
-never hard-coded colors — theming is one CSS block.
+never hard-coded colors, theming is one CSS block.
 
 **Accessibility:** warm-ink-on-bone is ~12:1; bone-white on terracotta and
 on rust both clear WCAG AA for buttons. Sage is used for emphasis/large
@@ -53,12 +53,12 @@ dashboard sweep to tokens is the next design task.
 
 ## Typography
 
-- **Inter** (variable, self-hosted via `next/font`) — one family, no
+- **Inter** (variable, self-hosted via `next/font`), one family, no
   network round-trip, excellent at small sizes on cheap screens.
 - Scale (Tailwind): page title `text-2xl font-bold`; section `text-base
   font-semibold`; body `text-sm`; meta/hints `text-xs`; micro-labels
   `text-[10px] uppercase tracking-wide`.
-- **Tabular numerals** for money — amounts should never jitter as they
+- **Tabular numerals** for money, amounts should never jitter as they
   change.
 
 ## Spacing, radius, motion
@@ -70,7 +70,7 @@ dashboard sweep to tokens is the next design task.
   burns battery / CPU on low-end devices. Respect
   `prefers-reduced-motion`.
 
-## Mobile-first rules (non-negotiable — Africa is mobile-first)
+## Mobile-first rules (non-negotiable, Africa is mobile-first)
 
 Desktop-primary apps fail here. Every screen is designed for a thumb first,
 a mouse second.
@@ -95,15 +95,15 @@ a mouse second.
 
 ## Iconography
 
-`lucide-react` throughout — one consistent stroke-based set. Feature
+`lucide-react` throughout, one consistent stroke-based set. Feature
 accents reuse the palette so the app stays cohesive: Earn/partner = `Gift`
 (terracotta primary), Payments/money/success = sage (`--chart-2`), AI =
-`Sparkles` (terracotta). Avoid introducing new hues — the earth family +
+`Sparkles` (terracotta). Avoid introducing new hues, the earth family +
 sage is the whole vocabulary.
 
 ## Voice & tone
 
-Plain, warm, human — the same register the AI uses with customers. Short
+Plain, warm, human, the same register the AI uses with customers. Short
 sentences. No jargon. Money is talked about plainly ("you earn", "they
 pay"), encouragement over corporate-speak. A smart 10-year-old should
 understand any screen.

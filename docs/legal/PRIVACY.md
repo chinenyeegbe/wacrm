@@ -1,6 +1,6 @@
-# Moldlane — Privacy Policy & DPA (TEMPLATE / DRAFT)
+# Moldlane, Privacy Policy & DPA (TEMPLATE / DRAFT)
 
-> **Draft template — not yet legally reviewed. Do not publish as-is.**
+> **Draft template, not yet legally reviewed. Do not publish as-is.**
 > Complete `[…]` fields and have it reviewed under each operating country's
 > law (NDPA 2023 · DPA 2019 · POPIA · GDPR). See `LIABILITY.md` §2.
 
@@ -32,10 +32,10 @@ text to the model.** We select providers/settings intended **not to train**
 on inputs where available.
 
 ## Sub-processors
-- **Supabase** — database, auth, storage ([region]).
-- **Meta (WhatsApp Cloud API)** — message delivery.
-- **OpenRouter / Nvidia** — AI model inference.
-- **Paystack / Flutterwave** — payment processing.
+- **Supabase**, database, auth, storage ([region]).
+- **Meta (WhatsApp Cloud API)**, message delivery.
+- **OpenRouter / Nvidia**, AI model inference.
+- **Paystack / Flutterwave**, payment processing.
 (The current list is available on request / at [URL].)
 
 ## Security

@@ -6,10 +6,10 @@
 --   actually receive webhook events from Meta. Two extra Cloud API
 --   calls are required:
 --
---     POST /{phone_number_id}/register     — subscribes the number
+--     POST /{phone_number_id}/register, subscribes the number
 --                                            with a 2FA PIN, makes
 --                                            it routable to OUR app
---     POST /{waba_id}/subscribed_apps      — subscribes the WABA
+--     POST /{waba_id}/subscribed_apps, subscribes the WABA
 --                                            (one-time per app, but
 --                                            idempotent so we can
 --                                            call on every save)
@@ -26,11 +26,11 @@
 --   re-entering everything.
 --
 -- Backfill: every column is nullable. Existing rows survive with
--- NULL values; the UI shows them as "registration status unknown —
+-- NULL values; the UI shows them as "registration status unknown, 
 -- click Verify Registration" and the diagnostic endpoint fills the
 -- timestamps on the next probe.
 --
--- Idempotent — safe to re-run.
+-- Idempotent, safe to re-run.
 -- ============================================================
 
 ALTER TABLE whatsapp_config

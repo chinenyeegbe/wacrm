@@ -13,13 +13,13 @@ ready to buy, collects the payment with a tap-to-pay link, and only
 interrupts a human when one is truly needed.
 
 The business keeps its customers and its money. We take a small slice of
-each payment the AI helps collect — so we only win when they win.
+each payment the AI helps collect, so we only win when they win.
 
 ---
 
 ## 2. Explain it like I'm 10
 
-Imagine a lemonade stand where **every customer talks to you on WhatsApp** —
+Imagine a lemonade stand where **every customer talks to you on WhatsApp**, 
 they message to ask the price, to order, and to pay.
 
 Now imagine a **smart helper robot** that:
@@ -27,7 +27,7 @@ Now imagine a **smart helper robot** that:
 - 👀 **Watches** every message the moment it arrives, even at 2am.
 - 🗣️ **Replies** in the language the customer used (English, Pidgin, Swahili,
   French…), and already knows your prices because you taught it once.
-- 🧠 **Decides** what each message means — "wants to buy!", "angry, get a
+- 🧠 **Decides** what each message means, "wants to buy!", "angry, get a
   human!", "just a question".
 - 💸 **Collects the cash** with a payment link in the chat, and pings you the
   moment it's paid.
@@ -86,7 +86,7 @@ mindmap
 
 ## 5. How one message flows through the system
 
-This is the heartbeat of the product — what happens when a customer sends
+This is the heartbeat of the product, what happens when a customer sends
 "How much for 2 gowns?"
 
 ```mermaid
@@ -111,7 +111,7 @@ flowchart TD
     J --> R
 ```
 
-The key idea: **the AI doesn't just chat — it carries the customer all the
+The key idea: **the AI doesn't just chat, it carries the customer all the
 way from "how much?" to money in the bank**, and steps aside for a human
 whenever the business wants.
 
@@ -271,7 +271,7 @@ flowchart LR
     E -- small trader --> G[Pay nothing upfront · only commission]
 ```
 
-- **No subscriptions for the little guy** — they hate/can't afford them. We
+- **No subscriptions for the little guy**, they hate/can't afford them. We
   take a small commission **only on money actually collected**.
 - **Bigger companies** can opt into a flat plan instead.
 - Our cost to run the AI is near **zero** (free models), so the math works
@@ -285,7 +285,7 @@ flowchart LR
 | 2 | **Optional subscription** | Flat monthly plan for bigger firms that prefer predictability (seats, volume, SLA). An *option*, not the default. | Planned |
 | 3 | **Operator commission-share** | Young Africans run wacrm for businesses and earn a slice of the sales their agents close; platform takes its cut of GMV. | Foundation in progress (agency mode) |
 | 4 | **Creator marketplace** | Sellable automation templates + domain "skills" (negotiation, certifications, sector nuance); we take a marketplace cut. | Phase 2 |
-| 5 | **Value-added & capital** | Broadcast/AI credits, ad-creative; eventually merchant cash advances underwritten on verified GMV — only possible because we sit in the payment flow. | Future |
+| 5 | **Value-added & capital** | Broadcast/AI credits, ad-creative; eventually merchant cash advances underwritten on verified GMV, only possible because we sit in the payment flow. | Future |
 
 Full detail: [`../STRATEGY.md`](../STRATEGY.md) §5.
 
@@ -328,8 +328,8 @@ Full detail: [`../STRATEGY.md`](../STRATEGY.md) §5.
 1. Businesses in Africa run on WhatsApp but drown in messages and lose
    sales overnight.
 2. We give them an **AI employee** that answers, sells, and collects money
-   in the chat 24/7 — with a human in the loop exactly as much as they
+   in the chat 24/7, with a human in the loop exactly as much as they
    want.
 3. It costs them nothing upfront because the AI runs on free models, and we
-   earn a small cut of every sale it closes — so our success is glued to
+   earn a small cut of every sale it closes, so our success is glued to
    theirs.

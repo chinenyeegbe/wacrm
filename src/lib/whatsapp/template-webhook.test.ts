@@ -7,7 +7,7 @@ import {
 
 // Tiny mock that records the .update payload and the .eq filter for
 // inspection. Mirrors the surface this module actually uses on the
-// Supabase client (.from().update().eq().select()) — anything beyond
+// Supabase client (.from().update().eq().select()), anything beyond
 // throws, so unintended calls fail loudly.
 function makeSupabaseStub(
   selectResult: { data: { id: string }[] | null; error: { message: string } | null } = {
@@ -70,7 +70,7 @@ describe('isTemplateWebhookField', () => {
   });
 });
 
-describe('handleTemplateWebhookChange — status update', () => {
+describe('handleTemplateWebhookChange, status update', () => {
   let supabaseCalls: ReturnType<typeof makeSupabaseStub>['calls'];
 
   beforeEach(() => {
@@ -180,7 +180,7 @@ describe('handleTemplateWebhookChange — status update', () => {
   });
 });
 
-describe('handleTemplateWebhookChange — quality update', () => {
+describe('handleTemplateWebhookChange, quality update', () => {
   it('sets quality_score from new_quality_score', async () => {
     const { stub, calls } = makeSupabaseStub();
     await handleTemplateWebhookChange(
@@ -217,7 +217,7 @@ describe('handleTemplateWebhookChange — quality update', () => {
   });
 });
 
-describe('handleTemplateWebhookChange — components update', () => {
+describe('handleTemplateWebhookChange, components update', () => {
   it('is an info-log no-op (does not write to DB)', async () => {
     const info = vi.spyOn(console, 'info').mockImplementation(() => {});
     const { stub, calls } = makeSupabaseStub();
@@ -236,7 +236,7 @@ describe('handleTemplateWebhookChange — components update', () => {
   });
 });
 
-describe('handleTemplateWebhookChange — unknown field', () => {
+describe('handleTemplateWebhookChange, unknown field', () => {
   it('is a defensive no-op', async () => {
     const { stub, calls } = makeSupabaseStub();
     await handleTemplateWebhookChange(

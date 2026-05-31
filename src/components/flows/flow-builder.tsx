@@ -4,16 +4,16 @@
  * Linear-list flow editor.
  *
  * Renders the trigger panel, entry-node picker, and the per-node card
- * list. Header and validation panel are NOT owned here — they live
+ * list. Header and validation panel are NOT owned here, they live
  * once in FlowEditorShell so they show in both views (lifted in PR 3
  * so canvas users can also save + see validator issues).
  *
- * State lives in the shared `useFlowEditor()` context — toggling
+ * State lives in the shared `useFlowEditor()` context, toggling
  * Canvas ⇄ List never loses edits, and a drag on the canvas updates
  * the same nodes the list view reads.
  *
  * What's still local: the `expanded` set (which cards are open) and
- * the scroll refs used when the validator's flashKey changes — those
+ * the scroll refs used when the validator's flashKey changes, those
  * are list-only and have no canvas analogue.
  */
 
@@ -60,7 +60,7 @@ import {
 } from "./flow-editor-state";
 
 // ============================================================
-// Local state shape — mirrors the DB but the configs are typed
+// Local state shape, mirrors the DB but the configs are typed
 // loosely (Record<string, unknown>) since each node_type carries a
 // different shape. The sub-form components narrow as needed.
 // ============================================================
@@ -170,7 +170,7 @@ export function FlowBuilder() {
         {state.nodes.length === 0 ? (
           <div className="rounded-lg border border-dashed border-slate-700 bg-slate-900/50 p-8 text-center text-sm text-slate-400">
             Add a <strong>Start</strong> node, then a <strong>Send buttons</strong>
-            {" "}node, then a <strong>Handoff</strong> — that&apos;s the welcome-menu
+            {" "}node, then a <strong>Handoff</strong>, that&apos;s the welcome-menu
             shape from the brief.
           </div>
         ) : (
@@ -318,7 +318,7 @@ function EntryPicker({
 }
 
 // ============================================================
-// Node card — collapsed summary + expanded config form
+// Node card, collapsed summary + expanded config form
 // ============================================================
 
 function NodeCard({
@@ -443,7 +443,7 @@ function NodeCard({
 }
 
 // ============================================================
-// Per-node-type config form — wraps the extracted dispatcher with
+// Per-node-type config form, wraps the extracted dispatcher with
 // the list-view's "Show advanced" disclosure (which exposes the
 // internal node_key for stable analytics, hidden by default).
 // ============================================================
@@ -487,7 +487,7 @@ function NodeConfigWithAdvanced({
           <div className="mt-3 flex flex-col gap-3">
             <div>
               <label className="mb-1 block text-xs text-slate-400">
-                Node key (internal identifier — keep stable for analytics)
+                Node key (internal identifier, keep stable for analytics)
               </label>
               <Input
                 value={node.node_key}

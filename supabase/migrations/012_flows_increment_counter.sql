@@ -10,7 +10,7 @@
 -- starting runs for different contacts in the same second) could both
 -- read N and both write N+1, permanently losing one count.
 --
--- Mirrors migration 007 for automations — same shape, same security
+-- Mirrors migration 007 for automations, same shape, same security
 -- posture. Idempotent: safe to re-run.
 -- ============================================================
 

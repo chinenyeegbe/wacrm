@@ -4,12 +4,12 @@ This is a **template repository**, not a collaborative product. The
 expected flow is:
 
 1. **Fork** it to your own GitHub account or organisation.
-2. **Deploy** the fork — see [`docs/`](./docs/README.md).
+2. **Deploy** the fork, see [`docs/`](./docs/README.md).
 3. **Customise** your fork. Rebrand, add the features you need, remove
    the ones you don't, swap hosting, change the schema.
 
 You **don't** need to send changes back upstream. The fact that your
-fork diverges is the whole point — the upstream is deliberately
+fork diverges is the whole point, the upstream is deliberately
 opinionated about stack, UX, and scope, and your fork is where those
 opinions become yours.
 
@@ -48,8 +48,8 @@ updating on your schedule is a valid alternative.
 
 ## Reporting bugs in the upstream template
 
-If you find a bug in the upstream code — not one you introduced in your
-fork — please file it using the
+If you find a bug in the upstream code, not one you introduced in your
+fork, please file it using the
 [bug report](https://github.com/ArnasDon/wacrm/issues/new?template=bug_report.yml)
 template. Including the commit SHA, the runtime (Hostinger / Vercel /
 local / other), and logs will get to a fix fastest.
@@ -63,18 +63,18 @@ local / other), and logs will get to a fix fastest.
 
 Not the primary flow, but welcome in specific cases:
 
-- **Security fixes** — always welcome, please follow SECURITY.md first
+- **Security fixes**, always welcome, please follow SECURITY.md first
   for disclosure.
 - **Bug fixes** that match upstream intent (crash, correctness,
-  documentation errors, typos) — land quickly.
-- **Small improvements** (accessibility, obvious UX nits) — usually
+  documentation errors, typos), land quickly.
+- **Small improvements** (accessibility, obvious UX nits), usually
   welcome, open an issue first to check alignment.
 
 Less likely to land:
 
 - **New features.** The template's scope is intentionally narrow. A
-  "great idea for a CRM" is often a great idea for *your* CRM — i.e.
-  your fork — but would dilute the template for the next forker.
+  "great idea for a CRM" is often a great idea for *your* CRM, i.e.
+  your fork, but would dilute the template for the next forker.
 - **Stack changes** (different ORM, different UI kit, different auth
   provider). These belong in a fork, not upstream.
 - **Opinionated refactors** without a concrete correctness or
@@ -82,7 +82,7 @@ Less likely to land:
 
 If you do send a PR, the usual rules apply:
 
-- Branch off the latest `main` (don't push to a merged branch — commits
+- Branch off the latest `main` (don't push to a merged branch, commits
   end up orphaned).
 - Run `npm run typecheck` and `npm run format` locally first.
 - Fill in the PR template, especially the **Test plan**.
@@ -91,14 +91,14 @@ If you do send a PR, the usual rules apply:
   the *why*, the diff shows the *what*.
 
 Expect a review within a few days. PRs opened without an issue may be
-closed — open the issue first to align.
+closed, open the issue first to align.
 
 ## If you maintain a public fork
 
 - Rebrand. The "CRM Template for WhatsApp" name, favicon, and
   `wacrm.tech` URL belong to the upstream project; please swap them
   for your own before putting your deployment in front of users.
-- Keep the MIT [`LICENSE`](./LICENSE) file — that's how the template's
+- Keep the MIT [`LICENSE`](./LICENSE) file, that's how the template's
   permissions travel with the code. Attribution in a `README` section
   is appreciated but not required.
 - You are free to re-license additions to your fork however you like.

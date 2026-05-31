@@ -6,7 +6,7 @@ import { computePlatformFee } from '@/lib/payments/providers'
 import { splitCommission } from '@/lib/referrals/commission'
 import type { PaymentProvider } from '@/types'
 
-// Lazy admin client — mirrors the WhatsApp webhook so we don't crash at
+// Lazy admin client, mirrors the WhatsApp webhook so we don't crash at
 // build time when env vars are absent.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let _adminClient: any = null
@@ -28,7 +28,7 @@ function supabaseAdmin() {
  * Security: we verify the provider's HMAC signature over the RAW body
  * using the merchant's own secret key. Because the signature is keyed on a
  * per-merchant secret, we first locate the payment_request by its
- * reference, load that merchant's key, then verify — a forged event for an
+ * reference, load that merchant's key, then verify, a forged event for an
  * unknown reference is rejected before any key lookup.
  */
 export async function POST(
@@ -40,7 +40,7 @@ export async function POST(
     return NextResponse.json({ error: 'Unknown provider' }, { status: 404 })
   }
 
-  // Read the raw body once — signature verification needs the exact bytes.
+  // Read the raw body once, signature verification needs the exact bytes.
   const raw = await request.text()
   let event: Record<string, unknown>
   try {
@@ -51,7 +51,7 @@ export async function POST(
 
   const reference = extractReference(provider as PaymentProvider, event)
   if (!reference) {
-    // Nothing actionable (e.g. a non-charge event) — ack so the PSP stops retrying.
+    // Nothing actionable (e.g. a non-charge event), ack so the PSP stops retrying.
     return NextResponse.json({ ok: true, ignored: true })
   }
 
@@ -63,7 +63,7 @@ export async function POST(
     .maybeSingle()
 
   if (prErr || !pr) {
-    // Unknown reference — reject forged/unrelated events.
+    // Unknown reference, reject forged/unrelated events.
     return NextResponse.json({ error: 'Unknown reference' }, { status: 404 })
   }
 
@@ -90,7 +90,7 @@ export async function POST(
 
   const paid = isPaidEvent(provider as PaymentProvider, event)
   if (!paid) {
-    // A failed/cancelled signal — record it without confirming money.
+    // A failed/cancelled signal, record it without confirming money.
     return NextResponse.json({ ok: true })
   }
 
@@ -133,7 +133,7 @@ export async function POST(
 
   // Accrue a partner's referral earning, if this business was referred.
   // Best-effort and isolated: a failure here must never fail the webhook
-  // (the payment is already confirmed). The merchant's bill is unchanged —
+  // (the payment is already confirmed). The merchant's bill is unchanged, 
   // the partner's share comes out of the platform fee.
   await accrueReferralEarning(db, pr, feeMinor).catch((err) => {
     console.error('[payments/webhook] referral accrual failed:', err)

@@ -12,12 +12,12 @@
  * the list editor: PR 2 (canvas editing) needs to mount the same
  * form in a side panel when a user clicks a node on the canvas.
  * Keeping the per-node forms here means there's exactly one place
- * where each form's behaviour and validation lives — drift between
+ * where each form's behaviour and validation lives, drift between
  * "what the list editor shows" and "what the canvas side panel
  * shows" becomes impossible.
  *
  * `showAdvanced` is the disclosure that surfaces internal
- * identifiers (node_key, button reply_id, list row reply_id) — owned
+ * identifiers (node_key, button reply_id, list row reply_id), owned
  * by the host (NodeCard / SideSheet) so the toggle is rendered
  * outside this form alongside whatever delete/cancel buttons that
  * host wants. The form just reads the boolean and conditionally
@@ -270,7 +270,7 @@ function SendButtonsForm({
       <div>
         <div className="mb-2 flex items-center justify-between">
           <label className="text-xs text-slate-400">
-            Buttons (1–3) — each one routes to a different next node
+            Buttons (1–3), each one routes to a different next node
           </label>
         </div>
         <div className="flex flex-col gap-3">
@@ -825,7 +825,7 @@ function SetTagForm({
 /**
  * Shared loader for both `condition` (subject=tag) and `set_tag`.
  * Falls back to raw UUID input if the endpoint is absent on older
- * deployments — the form remains authorable in that case.
+ * deployments, the form remains authorable in that case.
  */
 function useUserTags(): UserTag[] {
   const [tags, setTags] = useState<UserTag[]>([]);
@@ -838,7 +838,7 @@ function useUserTags(): UserTag[] {
         const json = (await res.json()) as { tags?: UserTag[] };
         if (!cancelled) setTags(json.tags ?? []);
       } catch {
-        // Tags endpoint absent — caller falls back to raw input.
+        // Tags endpoint absent, caller falls back to raw input.
       }
     })();
     return () => {
@@ -872,7 +872,7 @@ const MEDIA_ACCEPT: Record<NonNullable<SendMediaCfg["media_type"]>, string> = {
 };
 
 const FLOW_MEDIA_BUCKET = "flow-media";
-// 16 MB — matches the bucket file_size_limit set in migration 016.
+// 16 MB, matches the bucket file_size_limit set in migration 016.
 const FLOW_MEDIA_MAX_BYTES = 16 * 1024 * 1024;
 
 function SendMediaForm({
@@ -899,7 +899,7 @@ function SendMediaForm({
     async (file: File) => {
       if (file.size > FLOW_MEDIA_MAX_BYTES) {
         toast.error(
-          `File is ${(file.size / 1024 / 1024).toFixed(1)} MB — limit is 16 MB.`,
+          `File is ${(file.size / 1024 / 1024).toFixed(1)} MB, limit is 16 MB.`,
         );
         return;
       }
@@ -962,7 +962,7 @@ function SendMediaForm({
         <Select
           value={mediaType}
           onValueChange={(v) => {
-            // Changing type clears the existing file — the bucket
+            // Changing type clears the existing file, the bucket
             // accepts different MIME sets per type and a previously
             // uploaded PDF can't be sent as an image.
             onUpdateConfig({

@@ -9,7 +9,7 @@ import { validateFlowForActivation } from '@/lib/flows/validate'
  * Body: { status: 'draft' | 'active' | 'archived' }
  *
  * Activating runs the full validator and refuses on any 'error'
- * severity issue. Drafts and archives are unconditional — users
+ * severity issue. Drafts and archives are unconditional, users
  * need to be able to save broken-work-in-progress and pause flows
  * without first fixing them.
  *
@@ -42,7 +42,7 @@ export async function POST(
     )
   }
 
-  // Ownership via RLS — caller's client.
+  // Ownership via RLS, caller's client.
   const { data: existing } = await supabase
     .from('flows')
     .select('id')
@@ -87,7 +87,7 @@ export async function POST(
     if (blockers.length > 0) {
       return NextResponse.json(
         {
-          error: 'Cannot activate flow — fix the issues below first.',
+          error: 'Cannot activate flow, fix the issues below first.',
           issues,
         },
         { status: 422 },

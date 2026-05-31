@@ -158,10 +158,10 @@ export interface PartnerPayout {
 /**
  * How autonomous the AI is allowed to be. Human-in-the-loop is the
  * default and safest, but businesses choose their own structure:
- *  - 'assist'     — AI only drafts (inbox ✨); never auto-sends.
- *  - 'human_loop' — AI auto-answers routine chats, routes flagged ones
+ *  - 'assist', AI only drafts (inbox ✨); never auto-sends.
+ *  - 'human_loop', AI auto-answers routine chats, routes flagged ones
  *                   (hot leads, complaints) to a human. DEFAULT.
- *  - 'autonomous' — AI handles everything itself, no human routing.
+ *  - 'autonomous', AI handles everything itself, no human routing.
  */
 export type AIAutonomy = 'assist' | 'human_loop' | 'autonomous';
 
@@ -176,7 +176,7 @@ export interface AISettings {
 }
 
 // ============================================================
-// Payments (migration 018) — the commission rail
+// Payments (migration 018), the commission rail
 // ============================================================
 
 export type PaymentProvider = 'paystack' | 'flutterwave' | 'manual';
@@ -272,7 +272,7 @@ export interface Message {
   created_at: string;
   reply_to_message_id?: string;
   /**
-   * Only set when `content_type === 'interactive'` — the stable id of
+   * Only set when `content_type === 'interactive'`, the stable id of
    * the button or list row the customer tapped. The Flows engine uses
    * this to route the next node; the inbox bubble uses it as a styling
    * cue (renders with a "↩ button reply" affordance).
@@ -304,7 +304,7 @@ export interface WhatsAppConfig {
   /**
    * Set when POST /{phone_number_id}/register last succeeded. NULL
    * means the number was saved but never actually subscribed for
-   * webhooks on Meta's side — inbound events will be silently lost.
+   * webhooks on Meta's side, inbound events will be silently lost.
    */
   registered_at?: string;
   /** Set when POST /{waba_id}/subscribed_apps last succeeded. */
@@ -314,7 +314,7 @@ export interface WhatsAppConfig {
 }
 
 // Raw Meta status enum. We persist this verbatim from Meta (sync + webhook)
-// rather than collapsing to a local TitleCase set — distinctions like
+// rather than collapsing to a local TitleCase set, distinctions like
 // PAUSED vs DISABLED vs IN_APPEAL drive the edit/resubmit/delete flows.
 // DRAFT is the local-only state before the row is submitted to Meta.
 export type MessageTemplateStatus =
@@ -385,7 +385,7 @@ export interface Deal {
   pipeline_id: string;
   stage_id: string;
   /**
-   * Nullable after migration 004 — becomes NULL when the referenced
+   * Nullable after migration 004, becomes NULL when the referenced
    * contact is deleted (ON DELETE SET NULL). History preserved.
    */
   contact_id: string | null;
@@ -430,7 +430,7 @@ export interface BroadcastRecipient {
   id: string;
   broadcast_id: string;
   /**
-   * Nullable after migration 004 — becomes NULL when the referenced
+   * Nullable after migration 004, becomes NULL when the referenced
    * contact is deleted (ON DELETE SET NULL). History preserved; the
    * UI renders "Unknown" for orphaned rows.
    */
@@ -511,7 +511,7 @@ export interface SendMessageStepConfig {
 
 /**
  * AI reply step (migration 017). Generates the next reply from the
- * conversation history using a free LLM and sends it via WhatsApp —
+ * conversation history using a free LLM and sends it via WhatsApp, 
  * a true 24/7 auto-responder. `instructions` steers the model for this
  * specific automation (e.g. "only answer FAQs, never quote prices");
  * the workspace-wide catalogue/prices live in ai_settings.business_context.
@@ -523,7 +523,7 @@ export interface AIReplyStepConfig {
 /**
  * AI classify step (the qualifier/router). Reads the conversation and
  * writes results into the run's context vars so downstream Condition
- * steps can branch on them. No config needed — it always emits the same
+ * steps can branch on them. No config needed, it always emits the same
  * fields (ai_intent, ai_sentiment, ai_hot_lead, ai_needs_human,
  * ai_summary). Sends nothing to the customer.
  */
@@ -542,7 +542,7 @@ export interface RequestPaymentStepConfig {
   amount: string;
   /** ISO 4217, e.g. NGN, KES, GHS, ZAR. Falls back to provider default. */
   currency?: string;
-  /** What the customer is paying for — shown on the link + the message. */
+  /** What the customer is paying for, shown on the link + the message. */
   description?: string;
 }
 
@@ -589,7 +589,7 @@ export interface ConditionStepConfig {
   subject: ConditionSubject;
   /** e.g. field name, tag id, substring, or "HH:mm-HH:mm" depending on subject */
   operand?: string;
-  /** For contact_field equals / message_content contains — comparison value */
+  /** For contact_field equals / message_content contains, comparison value */
   value?: string;
 }
 

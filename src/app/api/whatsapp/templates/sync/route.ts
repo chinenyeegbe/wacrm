@@ -13,7 +13,7 @@ import type { TemplateButton, TemplateSampleValues } from '@/types'
  * states (PAUSED) from terminal ones (DISABLED) and so webhook events
  * land 1:1 without a translation table.
  *
- * Locally-created templates (no Meta counterpart) are NOT deleted —
+ * Locally-created templates (no Meta counterpart) are NOT deleted, 
  * they remain visible so the user can notice drift and clean up.
  */
 
@@ -101,7 +101,7 @@ function parseButtons(metaButtons: MetaButton[] | undefined): TemplateButton[] {
           example: Array.isArray(b.example) ? b.example[0] ?? '' : b.example ?? '',
         })
         break
-      // OTP, FLOW, etc — out of scope for v1; drop silently.
+      // OTP, FLOW, etc, out of scope for v1; drop silently.
     }
   }
   return out
@@ -111,7 +111,7 @@ function extractSampleValues(
   body: MetaTemplateComponent | undefined,
   header: MetaTemplateComponent | undefined,
 ): TemplateSampleValues | null {
-  // Meta returns body_text as a 2D array — one row per example set.
+  // Meta returns body_text as a 2D array, one row per example set.
   // We take the first row (most templates have exactly one).
   const bodySample = body?.example?.body_text?.[0]
   const headerSample = header?.example?.header_text
@@ -182,7 +182,7 @@ export async function POST() {
           const body = await metaRes.json()
           if (body?.error?.message) metaErr = body.error.message
         } catch {
-          // response wasn't JSON — keep the fallback
+          // response wasn't JSON, keep the fallback
         }
         return NextResponse.json({ error: metaErr }, { status: 502 })
       }

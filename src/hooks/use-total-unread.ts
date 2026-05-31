@@ -23,7 +23,7 @@ export function useTotalUnread(): number {
     const supabase = createClient();
     let cancelled = false;
 
-    // Initial load. RLS scopes this to the signed-in user automatically —
+    // Initial load. RLS scopes this to the signed-in user automatically, 
     // no explicit user_id filter needed here.
     (async () => {
       const { data, error } = await supabase
@@ -56,7 +56,7 @@ export function useTotalUnread(): number {
             const row = payload.new as Conversation;
             map.set(row.id, row.unread_count ?? 0);
           }
-          // Recompute — cheap, conversations per user stay small.
+          // Recompute, cheap, conversations per user stay small.
           let sum = 0;
           for (const n of map.values()) if (n > 0) sum += 1;
           setTotal(sum);

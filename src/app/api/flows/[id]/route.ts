@@ -3,17 +3,17 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/flows/admin-client'
 
 /**
- * GET   /api/flows/[id]  — fetch one flow with its nodes.
- * PUT   /api/flows/[id]  — replace name/trigger/entry/fallback + the
+ * GET   /api/flows/[id], fetch one flow with its nodes.
+ * PUT   /api/flows/[id], replace name/trigger/entry/fallback + the
  *                          full node graph (delete-then-insert under
  *                          the hood; not atomic, but the runner is
- *                          resilient to mid-edit reads — node_not_found
+ *                          resilient to mid-edit reads, node_not_found
  *                          gracefully ends the run).
- * DELETE /api/flows/[id] — hard delete (RLS+CASCADE clean up nodes,
+ * DELETE /api/flows/[id], hard delete (RLS+CASCADE clean up nodes,
  *                          runs, events).
  *
  * All three require a signed-in caller who owns the flow. Flows is in
- * soft-GA — the beta gate that previously 404'd non-beta accounts is
+ * soft-GA, the beta gate that previously 404'd non-beta accounts is
  * gone; the "Beta" label in the UI is the only remaining signal.
  */
 
@@ -34,7 +34,7 @@ async function requireOwnership(
   if (!user) {
     return { ok: false, status: 401, body: { error: 'Unauthorized' } }
   }
-  // RLS scopes this to the caller — a flow owned by another user
+  // RLS scopes this to the caller, a flow owned by another user
   // returns null (404 below).
   const { data: flow } = await supabase
     .from('flows')
@@ -107,7 +107,7 @@ export async function PUT(
 
   const admin = supabaseAdmin()
 
-  // Update the flow row first — the body may not include `nodes` (a
+  // Update the flow row first, the body may not include `nodes` (a
   // header-only save for editing the trigger config without touching
   // the graph). Skip node replacement in that case.
   const flowPatch: Record<string, unknown> = {
@@ -159,7 +159,7 @@ export async function PUT(
     }
   }
 
-  // Re-fetch and return the new state — the editor uses the response
+  // Re-fetch and return the new state, the editor uses the response
   // to reconcile its local form state.
   const [{ data: flow }, { data: nodes }] = await Promise.all([
     admin.from('flows').select('*').eq('id', id).maybeSingle(),
@@ -181,7 +181,7 @@ export async function DELETE(
   if (!guard.ok) return NextResponse.json(guard.body, { status: guard.status })
 
   // CASCADE on flow_nodes / flow_runs / flow_run_events handles the
-  // children. Active runs end abruptly — there's no graceful "drain"
+  // children. Active runs end abruptly, there's no graceful "drain"
   // mechanism in v1, but that's intentional: deleting a flow is a
   // deliberate destructive action and the partial unique index will
   // free up the contact for new triggers immediately.

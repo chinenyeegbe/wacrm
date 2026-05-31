@@ -129,7 +129,7 @@ export default function SignupPage() {
               {referralCode && (
                 <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary-soft px-4 py-3 text-sm text-primary">
                   <Gift className="h-4 w-4 shrink-0" />
-                  <span>You were invited by a Moldlane partner — welcome! 🎉</span>
+                  <span>You were invited by a Moldlane partner, welcome! 🎉</span>
                 </div>
               )}
               {error && (

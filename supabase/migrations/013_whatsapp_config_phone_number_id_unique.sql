@@ -5,7 +5,7 @@
 -- `.single()` to find the owning config row. If two users have saved
 -- the same `phone_number_id`, `.single()` errors PGRST116 ("multiple
 -- rows returned") and the webhook silently drops every inbound
--- message — see issue #136.
+-- message, see issue #136.
 --
 -- wacrm is single-tenant per WhatsApp number by design (RLS on
 -- conversations / messages is `auth.uid() = user_id`, so another user
@@ -16,7 +16,7 @@
 -- ─── On existing data ───────────────────────────────────────────
 -- If duplicates already exist in production, this migration FAILS
 -- LOUDLY rather than silently dropping rows. Auto-deduping would
--- destroy user data (encrypted tokens, connection state) — the
+-- destroy user data (encrypted tokens, connection state), the
 -- operator has to choose which user keeps the number. To resolve:
 --
 --   SELECT phone_number_id, array_agg(user_id) AS owners
@@ -27,7 +27,7 @@
 -- Then DELETE the duplicate rows you don't want to keep and re-run
 -- migrations.
 --
--- Idempotent — safe to run multiple times once the constraint is in
+-- Idempotent, safe to run multiple times once the constraint is in
 -- place.
 -- ============================================================
 
@@ -61,7 +61,7 @@ BEGIN
     ) dupe_detail;
 
     RAISE EXCEPTION
-      E'Cannot add UNIQUE(phone_number_id) on whatsapp_config — % phone_number_id value(s) are claimed by more than one user:\n  %\nDelete the duplicate rows you do not want to keep (see migration comment), then re-run migrations.',
+      E'Cannot add UNIQUE(phone_number_id) on whatsapp_config, % phone_number_id value(s) are claimed by more than one user:\n  %\nDelete the duplicate rows you do not want to keep (see migration comment), then re-run migrations.',
       conflict_count,
       sample;
   END IF;

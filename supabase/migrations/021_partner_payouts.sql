@@ -1,5 +1,5 @@
 -- ============================================================
--- 021_partner_payouts.sql — Withdrawals for the partner network
+-- 021_partner_payouts.sql, Withdrawals for the partner network
 --
 -- Partners accrue earnings into referral_earnings (status 'accrued', from
 -- migration 020). This adds the withdrawal side: a partner requests a
@@ -7,7 +7,7 @@
 -- atomically claims the accrued rows so a balance can't be double-spent.
 --
 -- Tables:
---   partner_payouts — one row per withdrawal request (pending → paid /
+--   partner_payouts, one row per withdrawal request (pending → paid /
 --                     rejected), with the destination + amount snapshot.
 --
 -- The link between earnings and a payout is referral_earnings.payout_id
@@ -15,7 +15,7 @@
 -- stamped with the new payout_id and flipped to 'paid'; if the payout is
 -- later rejected, they're released back to 'accrued'.
 --
--- Additive & non-breaking. Idempotent — conventions from 001.
+-- Additive & non-breaking. Idempotent, conventions from 001.
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS partner_payouts (
@@ -59,7 +59,7 @@ CREATE INDEX IF NOT EXISTS idx_referral_earnings_payout
   ON referral_earnings(payout_id);
 
 -- ------------------------------------------------------------
--- request_partner_payout() — atomically claim a partner's accrued
+-- request_partner_payout(), atomically claim a partner's accrued
 -- earnings into a new payout. SECURITY DEFINER so the balance check and
 -- the row updates happen in one transaction the caller can't race.
 -- Returns the new payout id, or NULL when there's nothing to withdraw.

@@ -3,7 +3,7 @@
 /**
  * Canvas / mind-map view of a flow. Editable, in parity with the
  * list view for everything except the trigger / header / fallback
- * panels (those are list-only — they don't fit visually inside a
+ * panels (those are list-only, they don't fit visually inside a
  * node graph and the user can switch to List for them).
  *
  * What this view does:
@@ -26,12 +26,12 @@
  *     viewport center.
  *   - Runs dagre auto-layout once on mount for flows whose
  *     `position_x` / `position_y` are all zero (pre-canvas flows
- *     and brand-new flows) — otherwise everything would pile at
+ *     and brand-new flows), otherwise everything would pile at
  *     the origin.
  *
  * The toggle in `flow-editor-shell.tsx` swaps this in for
  * `<FlowBuilder>` on the same page. Both views share the same
- * `BuilderState` via `useFlowEditor()` — toggling never resets
+ * `BuilderState` via `useFlowEditor()`, toggling never resets
  * unsaved edits, and a drag here updates the same nodes array the
  * list view reads.
  */
@@ -87,11 +87,11 @@ import {
 import { useFlowEditor } from "./flow-editor-state";
 import { NodeConfigForm } from "./forms/node-config-form";
 
-// React-Flow node `data` payload — the bits our custom renderer needs.
+// React-Flow node `data` payload, the bits our custom renderer needs.
 interface NodeData extends Record<string, unknown> {
   node: BuilderNode;
   isEntry: boolean;
-  /** Validator's "look here" pulse — flashes the card border for
+  /** Validator's "look here" pulse, flashes the card border for
    *  ~1.6s. Drives a CSS animation, doesn't change layout. */
   isFlashed: boolean;
 }
@@ -103,7 +103,7 @@ const NODE_WIDTH = 240;
 const NODE_HEIGHT = 90;
 
 // ============================================================
-// Custom node — one card per flow node, styled to match the list
+// Custom node, one card per flow node, styled to match the list
 // view's collapsed card so the two views feel like the same product.
 // ============================================================
 
@@ -115,7 +115,7 @@ function FlowNodeCard({ data, selected }: NodeProps) {
   const slots = outgoingSlots(node);
   // Start nodes are entry-only; nothing ever targets them, so they
   // don't need an incoming Handle. Every other node type accepts
-  // incoming edges (including terminal handoff / end — they're the
+  // incoming edges (including terminal handoff / end, they're the
   // common targets).
   const hasTarget = node.node_type !== "start";
   // Single-slot nodes get a single source handle floated on the right
@@ -234,7 +234,7 @@ function FlowCanvasInner() {
   const builderNodes = state.nodes;
   const entryNodeId = state.entry_node_id;
 
-  // Side-panel state — which node's form is open. Canvas-only UI; the
+  // Side-panel state, which node's form is open. Canvas-only UI; the
   // list view's analogue is the per-card expanded set in
   // flow-builder.tsx.
   const [selectedNodeKey, setSelectedNodeKey] = useState<string | null>(null);
@@ -252,7 +252,7 @@ function FlowCanvasInner() {
     // Decide whether to auto-layout. The helper guards against
     // overwriting a user's manual arrangement (only fires when ALL
     // nodes sit at the origin), so we can safely call it
-    // unconditionally — if any node has been positioned, this is a
+    // unconditionally, if any node has been positioned, this is a
     // no-op.
     const positions = shouldAutoLayout(builderNodes)
       ? autoLayout(
@@ -283,7 +283,7 @@ function FlowCanvasInner() {
       };
     });
 
-    // sourceHandle is now wired up — the FlowNodeCard renders a Handle
+    // sourceHandle is now wired up, the FlowNodeCard renders a Handle
     // per slot whose id matches the scheme in edges.ts, so React-Flow
     // can hang the arrow off the right place on each card.
     const rfEdges: RfEdge[] = canvasEdges.map((e) => ({
@@ -318,7 +318,7 @@ function FlowCanvasInner() {
 
   // Pan to the flashed node when the validator panel requests one.
   // Animate over 400ms; landing zoom is whatever the user already has
-  // (don't force a zoom reset — that would be jarring mid-edit).
+  // (don't force a zoom reset, that would be jarring mid-edit).
   useEffect(() => {
     if (!flashKey) return;
     const node = builderNodes.find((n) => n.node_key === flashKey);
@@ -343,7 +343,7 @@ function FlowCanvasInner() {
   // compute the right config patch via applyEdgeConnection (matches
   // the same slot scheme as deriveCanvasEdges), and dispatch via
   // updateNodeConfig. The resulting state change re-derives edges on
-  // the next render — no need to maintain a separate edge list.
+  // the next render, no need to maintain a separate edge list.
   const handleConnect = useCallback(
     (connection: Connection) => {
       if (!connection.source || !connection.target || !connection.sourceHandle) {
@@ -354,7 +354,7 @@ function FlowCanvasInner() {
       );
       if (!sourceNode) return;
       // Self-loops are a footgun (a button whose target is its own
-      // node = infinite reprompt). Reject silently — the user can
+      // node = infinite reprompt). Reject silently, the user can
       // still wire one via the per-node dropdown if they really want.
       if (connection.source === connection.target) return;
       const patch = applyEdgeConnection(
@@ -399,7 +399,7 @@ function FlowCanvasInner() {
     [builderNodes, updateNodeConfig],
   );
 
-  // Wrapped mutators that target the currently-selected node — pass to
+  // Wrapped mutators that target the currently-selected node, pass to
   // the form so each keystroke goes through the editor context (which
   // flips `dirty` and feeds the validator).
   const onSelectedUpdateConfig = useCallback(
@@ -444,7 +444,7 @@ function FlowCanvasInner() {
           onConnect={handleConnect}
           onNodesDelete={handleNodesDelete}
           onEdgesDelete={handleEdgesDelete}
-          // Default is "Backspace" only — accept both so Mac users
+          // Default is "Backspace" only, accept both so Mac users
           // hitting Delete (Fn+Backspace) get the same behavior.
           deleteKeyCode={["Backspace", "Delete"]}
           nodesConnectable={true}
@@ -488,7 +488,7 @@ function FlowCanvasInner() {
 }
 
 // ============================================================
-// Side panel — opens when a canvas node is clicked. Mounts the
+// Side panel, opens when a canvas node is clicked. Mounts the
 // shared NodeConfigForm dispatcher so edits made here behave
 // identically to the list view's per-card editor.
 // ============================================================
@@ -510,7 +510,7 @@ function NodeEditSheet({
   onDelete: () => void;
   onSetEntry: () => void;
 }) {
-  // Sheet is controlled — opens when a node is selected, closes via
+  // Sheet is controlled, opens when a node is selected, closes via
   // Esc / overlay / close button (all delegated to onClose).
   const open = node !== null;
   if (!node) {
@@ -576,7 +576,7 @@ function NodeEditSheet({
 }
 
 // ============================================================
-// Floating add-node button — bottom-right of the canvas. Mirrors
+// Floating add-node button, bottom-right of the canvas. Mirrors
 // the list view's AddNodeButton (same dropdown menu, same NodeType
 // list, same icons via NODE_META) but drops the new node into the
 // center of the visible viewport rather than appending to a list.

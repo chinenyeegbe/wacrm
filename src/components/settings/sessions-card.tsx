@@ -56,7 +56,7 @@ export function SessionsCard() {
             Active sessions
           </CardTitle>
           <CardDescription className="text-slate-400">
-            Sign out of every device where you&apos;re logged in — including
+            Sign out of every device where you&apos;re logged in, including
             this one. Useful if you lost a laptop or shared your password.
           </CardDescription>
         </CardHeader>

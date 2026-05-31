@@ -19,7 +19,7 @@ describe("splitCommission", () => {
   });
 
   it("never loses a minor unit (platform absorbs rounding)", () => {
-    // 33.33% of an odd fee — partner rounds down, platform keeps remainder.
+    // 33.33% of an odd fee, partner rounds down, platform keeps remainder.
     const r = splitCommission({
       grossMinor: 99_999,
       platformFeeMinor: 9_999,

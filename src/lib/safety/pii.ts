@@ -1,11 +1,11 @@
 /**
  * Sensitive-content detection (PII + risk flags).
  *
- * Pure, dependency-free, synchronous — safe to run on every inbound
+ * Pure, dependency-free, synchronous, safe to run on every inbound
  * message in the webhook hot path. It does two jobs:
- *   1. detect()  — find PII spans (card numbers, emails, phones, long IDs)
+ *   1. detect(), find PII spans (card numbers, emails, phones, long IDs)
  *      so the UI can flag them and the engine can branch on them.
- *   2. redact()  — mask those spans before text is ever sent to an
+ *   2. redact(), mask those spans before text is ever sent to an
  *      external LLM, so a customer's card/BVN never leaves the box.
  *
  * This is a trust primitive, not a compliance product: it is intentionally
@@ -29,10 +29,10 @@ export interface DetectResult {
   kinds: PiiKind[];
 }
 
-// Email — deliberately simple; we only need to spot one, not validate RFC.
+// Email, deliberately simple; we only need to spot one, not validate RFC.
 const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 
-// A run of 13–19 digits, possibly grouped by spaces/dashes — candidate card.
+// A run of 13–19 digits, possibly grouped by spaces/dashes, candidate card.
 // Validated with Luhn below so random long numbers don't trip it.
 const CARD_CANDIDATE_RE = /\b(?:\d[ -]?){13,19}\b/g;
 
@@ -43,7 +43,7 @@ const PHONE_RE = /(?:\+?\d{1,4}[ -]?)?(?:\(?\d{2,4}\)?[ -]?){2,5}\d{2,4}/g;
 // Long opaque identifiers (BVN, NIN, passport-ish): 9–12 digits standalone.
 const ID_RE = /\b\d{9,12}\b/g;
 
-/** Luhn check — distinguishes real card numbers from arbitrary digit runs. */
+/** Luhn check, distinguishes real card numbers from arbitrary digit runs. */
 export function luhnValid(digits: string): boolean {
   const s = digits.replace(/\D/g, "");
   if (s.length < 13 || s.length > 19) return false;
@@ -79,7 +79,7 @@ export function detect(text: string): DetectResult {
   };
 
   // Order matters: cards & emails first (most specific), then phones, then
-  // bare IDs — earlier claims block later, looser patterns from re-matching.
+  // bare IDs, earlier claims block later, looser patterns from re-matching.
   for (const m of text.matchAll(CARD_CANDIDATE_RE)) {
     const val = m[0];
     if (luhnValid(val)) take("card", val, m.index ?? 0);

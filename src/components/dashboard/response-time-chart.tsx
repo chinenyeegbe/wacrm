@@ -118,7 +118,7 @@ function Bars({
         )
       })}
 
-      {/* Threshold line — rendered after grid so it sits on top, but
+      {/* Threshold line, rendered after grid so it sits on top, but
           we keep it muted so bars remain the visual focus. */}
       {thresholdMinutes > 0 && thresholdMinutes <= maxY && (
         <g>
@@ -183,7 +183,7 @@ function Bars({
 }
 
 function fmt(mins: number | null): string {
-  if (mins == null) return '—'
+  if (mins == null) return ', '
   if (mins < 1) return `${Math.max(1, Math.round(mins * 60))}s`
   if (mins < 60) return `${mins.toFixed(1)}m`
   return `${(mins / 60).toFixed(1)}h`

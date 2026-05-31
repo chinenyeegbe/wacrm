@@ -3,7 +3,7 @@
  *
  * Fixed-window counter (not token bucket): every identifier gets a
  * fresh N-request budget each window. Simple, allocation-light, and
- * fine for a single-instance VPS — which is how forkers of this
+ * fine for a single-instance VPS, which is how forkers of this
  * template will usually deploy.
  *
  * Trade-off: a single Node process holds the Map, so horizontal scale
@@ -16,7 +16,7 @@
  * Memory: entries are ~50 bytes each. With LIGHT_SWEEP below, expired
  * keys get cleared opportunistically on every ~1 000th call, so a
  * healthy instance stays in the low-MB range even with thousands of
- * distinct users. No background timer — works in serverless edge
+ * distinct users. No background timer, works in serverless edge
  * runtimes that don't keep timers alive across requests.
  */
 
@@ -117,11 +117,11 @@ export const RATE_LIMITS = {
   /** Individual message send. 60/min per user = one per second
    *  sustained, comfortable for a live human typing. */
   send: { limit: 60, windowMs: 60_000 },
-  /** Broadcast dispatch. 5/min per user — even a 1 000-recipient
+  /** Broadcast dispatch. 5/min per user, even a 1 000-recipient
    *  broadcast is one call; this caps the rate at which a single user
    *  can launch campaigns, not the messages inside one. */
   broadcast: { limit: 5, windowMs: 60_000 },
-  /** Reaction add/swap/remove. More permissive than send — users
+  /** Reaction add/swap/remove. More permissive than send, users
    *  fidget with reactions and a single "swap" is actually two calls
    *  (remove + add) under the hood. */
   react: { limit: 120, windowMs: 60_000 },

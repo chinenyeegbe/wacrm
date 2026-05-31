@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Validation panel — surfaces every error and warning from
+ * Validation panel, surfaces every error and warning from
  * `validateFlowForActivation`. Lives once at the bottom of the
  * editor shell so it's visible in both views (canvas + list).
  *
@@ -12,7 +12,7 @@
  * Both views read the same flashKey so the panel doesn't need
  * per-view plumbing.
  *
- * Trigger-scoped issues are NOT clickable from canvas — trigger
+ * Trigger-scoped issues are NOT clickable from canvas, trigger
  * config is a list-only panel (it's a flat form, not a graph
  * concept). User can switch to List to address them.
  */

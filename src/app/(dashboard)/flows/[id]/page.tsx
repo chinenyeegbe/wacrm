@@ -15,7 +15,7 @@ import type { FlowRow, FlowNodeRow } from "@/lib/flows/types";
  * `<FlowBuilder>`. Owns the loading/error state so the builder can
  * focus purely on editing.
  *
- * Open to every authenticated user — the beta gate that previously
+ * Open to every authenticated user, the beta gate that previously
  * 404'd non-beta accounts was removed in PR #134. The API still
  * 404s on a flow id the caller doesn't own (RLS), which becomes the
  * "Flow not found" state below.

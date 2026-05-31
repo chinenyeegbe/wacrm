@@ -1,7 +1,7 @@
 # wacrm → an AI growth engine for African business
 
 This document is the plan for turning wacrm (a self-hostable WhatsApp CRM)
-into a product that gives any African business an unfair advantage — and a
+into a product that gives any African business an unfair advantage, and a
 business that can grow on top of it. It is deliberately honest about what
 is **built today** versus what is **next**, so it can be executed
 incrementally without hand-waving.
@@ -14,7 +14,7 @@ incrementally without hand-waving.
   follow-up, and no analytics. That is the gap.
 - An AI that reads the thread, drafts the reply in the customer's own
   language, never forgets a lead, and markets the business while the owner
-  sleeps is a genuine superpower — and it now runs on **free** LLMs, so the
+  sleeps is a genuine superpower, and it now runs on **free** LLMs, so the
   unit economics work even at a ₦/KSh price point.
 
 ## What is built today (this session)
@@ -24,7 +24,7 @@ Nemotron), wired into the product:
 
 - **Suggest reply** and **Rewrite draft** in the inbox (✨ button).
 - **AI endpoint** (`/api/ai`) that also drafts broadcast campaigns and
-  social posts — the seed of "the product markets itself."
+  social posts, the seed of "the product markets itself."
 - Africa-aware prompting: matches the customer's language and register
   (Pidgin, Swahili, French, Hausa, Yoruba, Arabic, Zulu, …), keeps
   replies WhatsApp-short, never invents prices.
@@ -36,7 +36,7 @@ See [`docs/ai.md`](docs/ai.md) to switch it on.
 
 Each item is scoped to be a self-contained PR on top of what exists.
 
-### 1. AI in automations — "it works while you sleep"
+### 1. AI in automations, "it works while you sleep"
 Add an **AI step** to the no-code automation builder (the engine already
 supports typed steps in `src/lib/automations/`). Triggers like "new
 inbound message" → AI step → "send message" gives an auto-responder that
@@ -47,7 +47,7 @@ accurately. This is the single highest-leverage feature.
 ### 2. Knowledge base / RAG
 Let the owner paste their catalogue, price list, and policies. Store as
 embeddings (pgvector in Supabase) and retrieve into the prompt. Now the AI
-quotes real prices and stock — the difference between a toy and a closer.
+quotes real prices and stock, the difference between a toy and a closer.
 
 ### 3. The product markets itself
 - A **"Generate campaign"** wizard: brief in, broadcast + social posts
@@ -56,7 +56,7 @@ quotes real prices and stock — the difference between a toy and a closer.
   "powered by" link; referred sign-ups credit the referrer. This is the
   organic growth loop.
 - A weekly **AI digest**: the system summarises the week's conversations,
-  flags hot leads, and proposes next actions — delivered to the owner's
+  flags hot leads, and proposes next actions, delivered to the owner's
   own WhatsApp.
 
 ### 4. It improves itself (safely)
@@ -66,7 +66,7 @@ unsupervised self-editing:
   (a thumbs-up signal). Use it to tune prompts and pick better models.
 - A/B the model fallback order by win-rate and latency.
 - Surface analytics: response time, conversion by stage, best-performing
-  copy — so the human operator (you) compounds improvements each week.
+  copy, so the human operator (you) compounds improvements each week.
   Genuine autonomous code-change should stay gated behind human review.
 
 ### 5. How we make money
@@ -74,14 +74,14 @@ unsupervised self-editing:
 **The hard truth about African SMB monetization:** most merchants hate
 (or can't afford) subscriptions, but they'll happily share a commission
 *if you helped them earn it*. The trap is that a commission you can't
-**collect** is just a wish — payment usually happens off-platform (bank
+**collect** is just a wish, payment usually happens off-platform (bank
 transfer, cash on delivery, mobile money), so most "rev-share" models
 can't see or take their cut.
 
 So the entire monetization design bends around one principle:
 
 > **To earn a commission we must sit in the payment flow. The AI doesn't
-> just close the sale — it collects the money.**
+> just close the sale, it collects the money.**
 
 #### Primary model: transaction commission ("we eat only when you eat")
 The AI, mid-conversation, generates a **payment request** (Paystack /
@@ -89,11 +89,11 @@ Flutterwave / M-Pesa / mobile-money link or USSD push) for the agreed
 amount. The customer pays through it; settlement routes to the merchant
 **minus a small platform fee** (target ~1–3% of GMV, on top of the PSP's
 own fee). Because the money moves through our generated link, the
-commission is collected automatically — never invoiced, never chased.
+commission is collected automatically, never invoiced, never chased.
 
 Why merchants accept it:
 - Zero upfront cost. No subscription. The fee only exists when a sale
-  closes — money they wouldn't have had if the lead went cold at 11pm.
+  closes, money they wouldn't have had if the lead went cold at 11pm.
 - It's framed as "the AI sold this for you," not "rent." Aligned, not
   extractive.
 - They get instant proof of value: "wacrm closed ₦340k for you this week"
@@ -103,39 +103,39 @@ This is the flywheel: **better AI → more closed sales → more GMV → more
 commission**, with our COGS still near zero (free LLMs).
 
 #### Secondary models (layer on once #1 works)
-- **Subscription — for those who prefer it.** Medium/large companies and
+- **Subscription, for those who prefer it.** Medium/large companies and
   agencies often *want* a flat fee for predictability and will pay for
   seats, volume, multi-number, analytics, and SLAs. Offer it as an
   *option*, not the default. A merchant doing high GMV can also opt into a
-  flat plan to cap commission — both paths are profitable.
-- **Float / payments margin.** Standard PSP economics — a thin spread on
-  processing — once volume justifies negotiating rates.
+  flat plan to cap commission, both paths are profitable.
+- **Float / payments margin.** Standard PSP economics, a thin spread on
+  processing, once volume justifies negotiating rates.
 - **Value-added, pay-per-use.** Bulk broadcast credits, premium templates,
   AI ad-creative generation, a "boost" that drafts and schedules a week of
   marketing. Small à-la-carte spend Africans *do* tolerate (airtime-style).
 - **Capital, eventually.** Verified GMV history through our rails is an
-  underwriting signal — merchant cash advances ("borrow against next
+  underwriting signal, merchant cash advances ("borrow against next
   week's sales"). High-trust, high-margin, and only possible *because* we
   sit in the flow. Far-future, but it's where the real money is.
 
 #### The operator network's economics (ties to 5b below)
-Operators are paid **per closed-sale commission share**, not a salary —
+Operators are paid **per closed-sale commission share**, not a salary, 
 so their incentive is identical to ours and the merchant's: close more,
 earn more. The platform takes its cut of GMV, pays the operator their
 share, keeps the rest. Nobody pays a subscription; everybody gets paid
 when sales happen.
 
 #### What this requires us to build (priority order)
-1. **Payments module** — ✅ shipped. PSP-agnostic provider layer
+1. **Payments module**, ✅ shipped. PSP-agnostic provider layer
    (Paystack, Flutterwave, manual bank/mobile-money), `payment_config` +
    `payment_requests` tables (migration 011, RLS'd, fee in basis points),
    a signed PSP webhook that flips pending→paid and mirrors a confirmation
    into the inbox, and a Settings → Payments UI (encrypted keys).
-2. **`request_payment` automation step** — ✅ shipped. Mints a link via the
+2. **`request_payment` automation step**, ✅ shipped. Mints a link via the
    merchant's provider and sends it on WhatsApp; amount can read
    `{{vars.amount}}` set by an upstream AI step. Plus an "AI Close &
    Collect" template (classify → buying? → confirm → link).
-3. **Attribution** — ✅ shipped. Each `payment_request` stores
+3. **Attribution**, ✅ shipped. Each `payment_request` stores
    `conversation_id` + `automation_id` and the `platform_fee_minor` taken,
    so "the AI closed this" and the commission are provable and auditable.
 
@@ -152,7 +152,7 @@ agency mode, below).
 **Sell to businesses (mostly commission, optional subscription):**
 Hosted wacrm with AI + payments on. Default to transaction commission;
 offer flat plans to companies that prefer them. The self-host template
-stays MIT — it's the top-of-funnel, not the revenue.
+stays MIT, it's the top-of-funnel, not the revenue.
 
 **An operator / agency network ("young Africans get paid"):**
 Train young Africans as **CRM operators** who set up and run wacrm for
@@ -160,64 +160,64 @@ local businesses (configure WhatsApp, write the knowledge base, manage
 broadcasts, watch the inbox, close sales). Each operator runs several
 businesses; the AI multiplies one person across many accounts. Operators
 earn a share of the commission they help generate. Deepest moat, most jobs
-created — needs **multi-workspace / agency mode** (see next).
+created, needs **multi-workspace / agency mode** (see next).
 
-### 6. Multi-tenant / agency mode (enables 5b) — IN PROGRESS
+### 6. Multi-tenant / agency mode (enables 5b), IN PROGRESS
 A workspace/team layer so one operator account can manage many business
 workspaces, with roles (owner / operator / agent / viewer) and commission
 accounting per workspace. This rewrites the RLS trust boundary (from "row
 owner = user" to "row belongs to a workspace the user is a member of"), so
 it ships in carefully separated, individually-verifiable phases.
 
-**Phase 1 — membership graph (DONE, migration 019 + lib/workspaces):**
+**Phase 1, membership graph (DONE, migration 019 + lib/workspaces):**
 - `workspaces` + `workspace_members(role)` tables, RLS'd on membership.
 - `is_workspace_member()` / `has_workspace_role()` SECURITY DEFINER helpers
   for use by phase-2 policies (defined now to keep 020 focused).
 - Backfill: every existing user gets a `personal` workspace they own; new
-  signups get one via an additive auth trigger. **Non-breaking** — existing
+  signups get one via an additive auth trigger. **Non-breaking**, existing
   per-`user_id` RLS is untouched, so today's single-user behaviour is
   identical.
 - `src/lib/workspaces/roles.ts`: the pure role→capability model (viewer <
   agent < operator < owner), with `canAssignRole` privilege-escalation
   guard. 12 unit tests.
 
-**Phase 2 — the RLS cutover (NEXT, migration 020):** add `workspace_id` to
+**Phase 2, the RLS cutover (NEXT, migration 020):** add `workspace_id` to
 each tenant table, backfill it from the owner's personal workspace, then
 swap every policy predicate to `is_workspace_member(workspace_id)`. This is
 the dangerous part and must be validated against a real Postgres (a leak
 here crosses tenants), so it is its own migration + a manual RLS test plan,
 not bundled with app features.
 
-**Phase 3 — UX & commerce:** a workspace switcher, member invites, and
+**Phase 3, UX & commerce:** a workspace switcher, member invites, and
 per-workspace commission split so an operator's share of `platform_fee` is
 tracked and payable.
 
 ### 7. Human-in-the-loop is the default, not a mandate
-Human-in-the-loop is the **default and recommended** structure — it builds
-trust and is safest — but it is **optional**. Each business picks its own
+Human-in-the-loop is the **default and recommended** structure, it builds
+trust and is safest, but it is **optional**. Each business picks its own
 shape via one setting (Settings → AI → "How should the AI work?"), stored
 as `ai_settings.autonomy` and enforced everywhere the AI runs:
-- **Assist only** — AI just drafts (inbox ✨ button); `ai_reply` steps are
+- **Assist only**, AI just drafts (inbox ✨ button); `ai_reply` steps are
   skipped so nothing is ever auto-sent.
-- **AI + human** (default) — AI auto-answers routine chats and routes
+- **AI + human** (default), AI auto-answers routine chats and routes
   flagged ones (hot leads, complaints) to the *right* person.
-- **AI only** — AI handles everything itself, no human routing, for teams
+- **AI only**, AI handles everything itself, no human routing, for teams
   that trust its replies (or have no staff to spare).
 
 The loop we're building toward (for the human_loop and assist modes):
 - AI triages every inbound (`ai_classify`, shipped) and routes the ones
   that need judgement to a human (round-robin shipped; skills-based routing
   next).
-- The human oversees, edits, approves — and can hand sub-tasks to agents
+- The human oversees, edits, approves, and can hand sub-tasks to agents
   (their own staff, or marketplace operators) and gets paid out of the
   value created, paying helpers from the same flow. A self-sustaining
   circular market: the operator earns the spread between what the work is
-  worth and what they pay to get it done — with AI doing most of the
+  worth and what they pay to get it done, with AI doing most of the
   typing so that spread is wide.
 
 ### Upstream sync policy (parent project: ArnasDon/wacrm)
 We periodically merge the parent template's `main` into our branch. The
-last sync pulled the **Flows** feature (interactive WhatsApp messages —
+last sync pulled the **Flows** feature (interactive WhatsApp messages, 
 a separate builder from our automations), WhatsApp **template Meta
 integration**, **color themes** (`violet-*` → `primary` token), and a
 **beta-features** flag. Notes for future syncs:
@@ -234,7 +234,7 @@ integration**, **color themes** (`violet-*` → `primary` token), and a
 - **When to break away**: keep syncing while the parent ships genuinely
   useful infra (WhatsApp/template/Meta plumbing, security fixes). Break
   away cleanly once our divergence (agency mode, payments, AI engine)
-  makes merges cost more than they return — at that point fork hard,
+  makes merges cost more than they return, at that point fork hard,
   cherry-picking only security patches. See the reply in chat for the
   fuller heuristic.
 
@@ -243,8 +243,8 @@ African SMB relationships run on trust; mishandling a customer's details
 breaks it instantly. Shipped this batch:
 - **PII / sensitive-content detection** (`src/lib/safety/pii.ts`):
   card numbers (Luhn-checked), emails, phones, long ID numbers. Pure and
-  synchronous — cheap enough to run on every inbound message.
-- **Redaction before any LLM call** — the AI prompt builders now strip PII
+  synchronous, cheap enough to run on every inbound message.
+- **Redaction before any LLM call**, the AI prompt builders now strip PII
   from the transcript, so a customer's card/BVN never leaves the box even
   though replies are drafted by an external model.
 Next: surface a "⚠ sensitive info" flag on flagged messages in the inbox,
@@ -253,16 +253,16 @@ and per-business rules ("never share a customer's phone with X").
 
 ### 9. Re-engagement / win-back
 Dormant clients are the cheapest revenue a business has. Shipped: a
-**Win-Back** template — tag a past customer `win-back` and the AI sends a
+**Win-Back** template, tag a past customer `win-back` and the AI sends a
 warm, non-pushy reconnect message, then hands the reply to a human. Next:
 a scheduled "haven't heard from these N contacts in 90 days → win-back"
 audience, and a small returning-customer offer mechanic.
 
-### 9b. The partner / reseller network (network effect) — BUILT (v1)
+### 9b. The partner / reseller network (network effect), BUILT (v1)
 Distribution in African markets is won by people and trust, not ad spend.
 So anyone can become a **partner**, sell wacrm to businesses in their
 network, and earn a **recurring share of every sale those businesses
-collect** — paid out of our commission, never added to the merchant's bill.
+collect**, paid out of our commission, never added to the merchant's bill.
 Built: become-a-partner + shareable code/link, signup attribution,
 automatic earnings accrual in the payments webhook, a tiered reward ladder
 (20→50%), and a partner dashboard. Pure tested money math in
@@ -273,16 +273,16 @@ Full write-up + the "global relevance" and network-effect plan:
 
 ### 10. Creator / skills marketplace
 Independent creators as first-class businesses on the platform:
-- **Sell automation templates** — automations are already portable data
+- **Sell automation templates**, automations are already portable data
   and the install-from-template plumbing exists; needs a user-authored
   registry + a safety review (templates can contain `send_webhook` /
   `request_payment`, so listing must be gated).
-- **Sell skills** — reusable, domain-deep prompt packs that plug into
+- **Sell skills**, reusable, domain-deep prompt packs that plug into
   `ai_reply` / `ai_classify`: negotiation, specific government
   certification/paperwork flows, sector and cultural nuances that differ by
   business and region. These are where real expertise (and pricing power)
   live.
-- **Earn commission on outcomes** — a creator runs agents for merchants and
+- **Earn commission on outcomes**, a creator runs agents for merchants and
   is paid a share of what those agents *collect* (the payments rail makes
   this measurable). Needs agency mode (#6) + a commission ledger.
 The marketplace is phase-2; its prerequisites are payments (done) and
@@ -296,7 +296,7 @@ What you (the human operator) provide and how it maps to growth:
 | ------------------ | ---------------------------------------------------- |
 | Hosting + domain   | Deploy (Hostinger one-click is wired in the README). |
 | Supabase project   | Database, auth, storage, realtime.                   |
-| OpenRouter key     | The AI layer — free models, $0 to start.             |
+| OpenRouter key     | The AI layer, free models, $0 to start.             |
 | Meta WhatsApp app  | The actual messaging channel.                        |
 | Payments account   | Subscriptions (SaaS) and operator payouts.           |
 | Social accounts    | Distribution for the AI-generated marketing copy.    |
@@ -312,11 +312,11 @@ Suggested first 30 days, solo:
 
 ## Guardrails
 
-- Keep the self-host template MIT and free — it is the top of the funnel,
+- Keep the self-host template MIT and free, it is the top of the funnel,
   not the revenue.
 - Never auto-send AI messages without either explicit human approval or an
   automation the owner consciously turned on. Trust is the whole product.
 - Respect WhatsApp's policies (opt-in, 24-hour window, approved templates)
-  — they are already enforced in the codebase; don't route around them.
+, they are already enforced in the codebase; don't route around them.
 - Don't impersonate anyone or send unsolicited bulk messages. Growth comes
   from genuinely useful automation, not spam.

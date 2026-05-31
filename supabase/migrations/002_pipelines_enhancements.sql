@@ -1,7 +1,7 @@
 -- ============================================================
 -- Pipeline enhancements:
---   * deals.assigned_to — optional FK to profiles.id
---   * deals.status — CHECK constraint ('open', 'won', 'lost')
+--   * deals.assigned_to, optional FK to profiles.id
+--   * deals.status, CHECK constraint ('open', 'won', 'lost')
 --     (replaces the old default 'active' with spec-compliant values)
 --
 -- Idempotent: safe to run multiple times.

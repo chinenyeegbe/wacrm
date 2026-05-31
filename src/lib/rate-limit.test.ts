@@ -82,7 +82,7 @@ describe("rateLimitResponse", () => {
   });
 
   it("clamps Retry-After to a minimum of 1 second", () => {
-    // Reset already in the past — the ceiling math would otherwise give 0.
+    // Reset already in the past, the ceiling math would otherwise give 0.
     const res = rateLimitResponse({
       success: false,
       remaining: 0,

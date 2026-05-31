@@ -1,19 +1,19 @@
 /**
- * Referral codes — the identity of a "partner" (reseller / operator /
+ * Referral codes, the identity of a "partner" (reseller / operator /
  * affiliate) in the growth network.
  *
  * A partner is any user who refers a business to the platform. They get a
  * short, human-shareable code (e.g. "ADA-7K3Q") that goes on links, flyers,
  * WhatsApp status, and word-of-mouth. When a business signs up with that
  * code, the partner earns a share of the platform's commission on that
- * business — forever (or for a configured window). That recurring,
+ * business, forever (or for a configured window). That recurring,
  * outcome-linked payout is what makes neighbourhood selling worth it.
  *
  * Pure & dependency-free so it runs identically on server and client and is
  * trivially testable.
  */
 
-// Crockford-ish alphabet: no 0/O, 1/I/L, U — removes the characters people
+// Crockford-ish alphabet: no 0/O, 1/I/L, U, removes the characters people
 // misread or that form unwanted words. 30 symbols.
 const ALPHABET = "23456789ABCDEFGHJKMNPQRSTVWXYZ";
 const CODE_BODY_LEN = 4; // e.g. "7K3Q" → 30^4 ≈ 810k per prefix
@@ -99,7 +99,7 @@ export function extractRefFromUrl(url: string): string | null {
 
 /**
  * Build a shareable signup link carrying the partner's code. This is the
- * viral primitive — it can be dropped on a WhatsApp status, a flyer QR, or
+ * viral primitive, it can be dropped on a WhatsApp status, a flyer QR, or
  * appended to outbound business messages as a "powered by" tag.
  */
 export function buildReferralUrl(baseUrl: string, code: string): string {

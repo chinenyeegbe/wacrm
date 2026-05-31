@@ -24,13 +24,13 @@ const validNodes = [
   { node_key: "ho", node_type: "handoff", config: {} },
 ];
 
-describe("validateFlowForActivation — happy path", () => {
+describe("validateFlowForActivation, happy path", () => {
   it("produces no issues on a well-formed flow", () => {
     expect(validateFlowForActivation(validFlow, validNodes)).toEqual([]);
   });
 });
 
-describe("validateFlowForActivation — flow-level", () => {
+describe("validateFlowForActivation, flow-level", () => {
   it("flags empty name", () => {
     expect(
       validateFlowForActivation({ ...validFlow, name: "" }, validNodes),
@@ -101,7 +101,7 @@ describe("validateFlowForActivation — flow-level", () => {
   });
 });
 
-describe("validateFlowForActivation — trigger", () => {
+describe("validateFlowForActivation, trigger", () => {
   it("flags keyword trigger with no keywords", () => {
     const issues = validateFlowForActivation(
       {
@@ -158,7 +158,7 @@ describe("validateFlowForActivation — trigger", () => {
   });
 });
 
-describe("validateFlowForActivation — nodes", () => {
+describe("validateFlowForActivation, nodes", () => {
   it("flags send_buttons without text", () => {
     const nodes = [
       { node_key: "s", node_type: "start", config: { next_node_key: "b" } },
@@ -389,7 +389,7 @@ describe("validateFlowForActivation — nodes", () => {
     const nodes = [
       { node_key: "s", node_type: "start", config: { next_node_key: "h" } },
       { node_key: "h", node_type: "handoff", config: {} },
-      // Orphaned — nothing points at it.
+      // Orphaned, nothing points at it.
       { node_key: "orphan", node_type: "end", config: {} },
     ];
     const issues = validateFlowForActivation(
@@ -406,7 +406,7 @@ describe("validateFlowForActivation — nodes", () => {
     ).toBe(true);
   });
 
-  it("doesn't crash on unknown node_type — flags it", () => {
+  it("doesn't crash on unknown node_type, flags it", () => {
     const nodes = [
       { node_key: "s", node_type: "wibble", config: {} },
     ];
@@ -420,7 +420,7 @@ describe("validateFlowForActivation — nodes", () => {
   });
 });
 
-describe("validateFlowForActivation — send_media", () => {
+describe("validateFlowForActivation, send_media", () => {
   const baseFlow = { ...validFlow, entry_node_id: "s" };
   const nodesWith = (mediaConfig: Record<string, unknown>) => [
     { node_key: "s", node_type: "start", config: { next_node_key: "m" } },

@@ -4,8 +4,8 @@ import { supabaseAdmin } from '@/lib/automations/admin-client'
 
 /**
  * Partner payouts.
- *   GET  — list the caller's payout history.
- *   POST — request a payout of the caller's accrued balance. The heavy
+ *   GET, list the caller's payout history.
+ *   POST, request a payout of the caller's accrued balance. The heavy
  *          lifting (sum + atomic claim of accrued earnings) is done by the
  *          request_partner_payout() SQL function so a balance can't be
  *          double-withdrawn under a race.

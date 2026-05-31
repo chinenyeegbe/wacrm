@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Editor header — flow name / description, status badge, dirty
+ * Editor header, flow name / description, status badge, dirty
  * indicator, and the action buttons (Save, Activate/Pause, Delete,
  * View runs, Back).
  *
@@ -12,7 +12,7 @@
  * Reads everything from the editor context (`useFlowEditor`) so it
  * stays in sync with whichever view is mutating state, and routes
  * router navigation locally (back to /flows, View runs to
- * /flows/[id]/runs) — those don't belong in the hook.
+ * /flows/[id]/runs), those don't belong in the hook.
  */
 
 import { useRouter } from "next/navigation";
@@ -78,7 +78,7 @@ export function EditorHeader() {
           {dirty && (
             <span
               className="inline-flex shrink-0 items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-amber-300"
-              title="Unsaved changes — hit Save to persist"
+              title="Unsaved changes, hit Save to persist"
               aria-live="polite"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
@@ -153,7 +153,7 @@ export function EditorHeader() {
         onChange={(e) =>
           setState((s) => ({ ...s, description: e.target.value }))
         }
-        placeholder="Optional description (internal — customers don't see this)"
+        placeholder="Optional description (internal, customers don't see this)"
         className="bg-slate-900 text-sm"
       />
     </div>

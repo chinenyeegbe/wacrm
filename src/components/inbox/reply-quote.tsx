@@ -6,7 +6,7 @@ import type { Message } from "@/types";
 
 interface ReplyQuoteProps {
   /** Sender label of the quoted message: "You" for our own messages,
-   *  contact name for customer-sent messages. Caller resolves this — the
+   *  contact name for customer-sent messages. Caller resolves this, the
    *  quote component doesn't see the parent Message. */
   authorLabel: string;
   /** Compact text preview. Falls back to a placeholder for media types. */

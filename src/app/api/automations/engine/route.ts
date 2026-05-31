@@ -5,7 +5,7 @@ import type { AutomationTriggerType } from '@/types'
 
 /**
  * Manual trigger for testing or for external integrations that want
- * to fire automations. Auth is required — the caller's user_id is
+ * to fire automations. Auth is required, the caller's user_id is
  * used so RLS-safe data remains per-user.
  */
 export async function POST(request: Request) {

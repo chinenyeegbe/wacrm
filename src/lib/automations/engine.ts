@@ -28,7 +28,7 @@ import { decrypt } from '@/lib/whatsapp/encryption'
 import type { AIReplyStepConfig, RequestPaymentStepConfig } from '@/types'
 
 // How many recent messages to feed the model for an automated reply.
-// Matches the inbox suggest_reply budget — enough context, safely inside
+// Matches the inbox suggest_reply budget, enough context, safely inside
 // free-tier token limits.
 const AI_REPLY_HISTORY_LIMIT = 15
 
@@ -59,7 +59,7 @@ export interface DispatchInput {
 /**
  * Fire all active automations matching the given trigger for a user.
  *
- * Must never throw — callers use fire-and-forget from the webhook.
+ * Must never throw, callers use fire-and-forget from the webhook.
  * All errors are caught and logged; per-automation failures are
  * recorded into automation_logs with status='failed'.
  */
@@ -176,7 +176,7 @@ async function executeAutomation(automation: Automation, input: DispatchInput) {
 
   // Atomic counter update via the SQL function from migration 007.
   // Doing this with a client-side read-modify-write raced when the
-  // same automation fired for two contacts simultaneously — both
+  // same automation fired for two contacts simultaneously, both
   // would read N and both write N+1, losing one count permanently.
   const { error: rpcErr } = await db.rpc('increment_automation_execution_count', {
     p_automation_id: automation.id,
@@ -304,7 +304,7 @@ async function executeStepsFrom(args: ExecuteArgs): Promise<void> {
   if (args.parentStepId === null) {
     await appendResults(args.logId, results, status, errorMessage)
   } else {
-    // Nested branch — just append results; parent scope decides final status.
+    // Nested branch, just append results; parent scope decides final status.
     await appendResults(args.logId, results, null, errorMessage)
   }
 }
@@ -443,7 +443,7 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
       // The qualifier/router. Reads the conversation, classifies it, and
       // writes results into the run's context vars so downstream Condition
       // steps can branch (subject 'variable'). Sends nothing to the
-      // customer — pure routing.
+      // customer, pure routing.
       if (!isAIConfigured()) {
         throw new Error('AI not configured (set OPENROUTER_API_KEY)')
       }
@@ -479,7 +479,7 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
         businessContext: aiSettings?.business_context ?? null,
       })
 
-      // Low temperature — we want stable, repeatable labels, not creativity.
+      // Low temperature, we want stable, repeatable labels, not creativity.
       const raw = await chatComplete({ system, messages, temperature: 0, maxTokens: 200 })
       const c = parseClassification(raw)
 
@@ -696,7 +696,7 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
  * Pick the conversation a send-type step should use. Prefer the id the
  * webhook handed us (it's the one that just got the inbound message);
  * fall back to the contact's conversation for resumed/wait paths and
- * manual engine POSTs. Throws if none exists — send steps have
+ * manual engine POSTs. Throws if none exists, send steps have
  * no meaningful target without a conversation.
  */
 async function resolveConversationId(args: ExecuteArgs): Promise<string> {
@@ -764,7 +764,7 @@ async function evaluateCondition(cfg: ConditionStepConfig, args: ExecuteArgs): P
       return String(actual).toLowerCase() === String(cfg.value ?? '').toLowerCase()
     }
     case 'time_of_day': {
-      // operand form "HH:mm-HH:mm" — true if now is within that window
+      // operand form "HH:mm-HH:mm", true if now is within that window
       // (supports over-midnight ranges like "18:00-09:00").
       const [from, to] = (cfg.operand ?? '').split('-')
       if (!from || !to) return false
@@ -815,7 +815,7 @@ async function appendResults(
     ...newItems,
   ]
   const update: Record<string, unknown> = { steps_executed: merged }
-  // Only overwrite status on the outermost scope — nested branches pass null.
+  // Only overwrite status on the outermost scope, nested branches pass null.
   if (status !== null) {
     update.status = status
   }

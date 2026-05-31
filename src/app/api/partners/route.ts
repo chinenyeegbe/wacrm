@@ -9,11 +9,11 @@ import {
 
 /**
  * Partner self-service.
- *   GET  — fetch the caller's partner profile + shareable link (or null).
- *   POST — become a partner (idempotent): mints a unique code if the
+ *   GET, fetch the caller's partner profile + shareable link (or null).
+ *   POST, become a partner (idempotent): mints a unique code if the
  *          caller doesn't already have one.
  *
- * Becoming a partner is open to any authenticated user — that openness is
+ * Becoming a partner is open to any authenticated user, that openness is
  * the point: anyone can start selling wacrm in their neighbourhood. Earnings
  * are gated downstream (only paid on real, settled referred payments).
  */

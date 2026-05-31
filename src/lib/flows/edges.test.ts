@@ -11,7 +11,7 @@ function nodes(...ns: BuilderNode[]): BuilderNode[] {
   return ns;
 }
 
-describe("deriveCanvasEdges — single-outgoing node types", () => {
+describe("deriveCanvasEdges, single-outgoing node types", () => {
   it("derives a `next` edge from send_message", () => {
     const edges = deriveCanvasEdges(
       nodes(
@@ -93,7 +93,7 @@ describe("deriveCanvasEdges — single-outgoing node types", () => {
   });
 });
 
-describe("deriveCanvasEdges — condition (true/false branches)", () => {
+describe("deriveCanvasEdges, condition (true/false branches)", () => {
   it("produces a labeled edge for each branch", () => {
     const edges = deriveCanvasEdges(
       nodes(
@@ -146,7 +146,7 @@ describe("deriveCanvasEdges — condition (true/false branches)", () => {
   });
 });
 
-describe("deriveCanvasEdges — send_buttons (per-button)", () => {
+describe("deriveCanvasEdges, send_buttons (per-button)", () => {
   it("emits one edge per button, labeled with the button title", () => {
     const edges = deriveCanvasEdges(
       nodes(
@@ -219,7 +219,7 @@ describe("deriveCanvasEdges — send_buttons (per-button)", () => {
   });
 });
 
-describe("deriveCanvasEdges — send_list (per-row across sections)", () => {
+describe("deriveCanvasEdges, send_list (per-row across sections)", () => {
   it("emits one edge per row, with `row:<reply_id>` handles", () => {
     const edges = deriveCanvasEdges(
       nodes(
@@ -256,7 +256,7 @@ describe("deriveCanvasEdges — send_list (per-row across sections)", () => {
   });
 });
 
-describe("deriveCanvasEdges — terminal nodes", () => {
+describe("deriveCanvasEdges, terminal nodes", () => {
   it("emits no outgoing edges from handoff / end", () => {
     const edges = deriveCanvasEdges(
       nodes(
@@ -268,7 +268,7 @@ describe("deriveCanvasEdges — terminal nodes", () => {
   });
 });
 
-describe("deriveCanvasEdges — id stability", () => {
+describe("deriveCanvasEdges, id stability", () => {
   it("produces unique, deterministic ids per (source, slot, target)", () => {
     const edges = deriveCanvasEdges(
       nodes(

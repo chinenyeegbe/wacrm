@@ -1,5 +1,5 @@
 /**
- * AI client — a thin, provider-agnostic wrapper over OpenAI-compatible
+ * AI client, a thin, provider-agnostic wrapper over OpenAI-compatible
  * chat-completion APIs, tuned to run on FREE large-language models.
  *
  * Why this exists
@@ -10,10 +10,10 @@
  * a single env var and pay nothing until they choose to scale up.
  *
  * Providers (auto-selected from whichever key is present):
- *   1. OpenRouter  — set OPENROUTER_API_KEY. Aggregates dozens of free
+ *   1. OpenRouter, set OPENROUTER_API_KEY. Aggregates dozens of free
  *      models (Llama, Gemini, DeepSeek, Nvidia Nemotron, …) behind one
  *      OpenAI-compatible endpoint. Free models carry a `:free` suffix.
- *   2. Nvidia NIM  — set NVIDIA_API_KEY. Hosts Nemotron directly, also
+ *   2. Nvidia NIM, set NVIDIA_API_KEY. Hosts Nemotron directly, also
  *      OpenAI-compatible. Generous free quota for builders.
  *
  * Both speak the same `/chat/completions` shape, so the only difference is
@@ -21,7 +21,7 @@
  *
  * Resilience: free endpoints are best-effort and rate-limited, so we try a
  * list of models in order and fall through to the next one on failure. The
- * first model that answers wins. Nothing here throws on a missing key —
+ * first model that answers wins. Nothing here throws on a missing key, 
  * callers check `isAIConfigured()` and degrade gracefully.
  */
 
@@ -31,7 +31,7 @@ interface ProviderConfig {
   provider: Provider;
   apiKey: string;
   baseUrl: string;
-  /** Ordered model fallback list — first to answer wins. */
+  /** Ordered model fallback list, first to answer wins. */
   models: string[];
   /** Extra headers (OpenRouter likes attribution headers). */
   extraHeaders: Record<string, string>;

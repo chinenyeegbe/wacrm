@@ -5,7 +5,7 @@
  * WhatsApp webhook on every inbound message *for an account that has
  * opted into the Flows beta*. It decides whether the message belongs
  * to an active conversation flow (advance it) or matches the entry
- * trigger of an active flow (start a new run) — and reports back to
+ * trigger of an active flow (start a new run), and reports back to
  * the webhook so the webhook knows whether to also fire automations.
  *
  * Architecture in a sentence: the runner walks the customer through
@@ -14,15 +14,15 @@
  *
  * What lives here vs elsewhere:
  *   - Pure decision logic (which button matched, where to advance to,
- *     when to fallback) — here.
- *   - DB shape (table reads/writes) — here.
- *   - Meta API calls — `meta-send.ts` (engineSendInteractive*).
- *   - Policy resolution (reprompt vs handoff vs end) — `fallback.ts`.
- *   - Type definitions — `types.ts`.
+ *     when to fallback), here.
+ *   - DB shape (table reads/writes), here.
+ *   - Meta API calls, `meta-send.ts` (engineSendInteractive*).
+ *   - Policy resolution (reprompt vs handoff vs end), `fallback.ts`.
+ *   - Type definitions, `types.ts`.
  *
  * Concurrency model:
  *   - Idempotency on `meta_message_id`: the runner refuses to advance
- *     an active run twice for the same Meta message — protects against
+ *     an active run twice for the same Meta message, protects against
  *     Meta's retries.
  *   - Optimistic UPDATE with `current_node_key` precondition: two
  *     simultaneous taps for the same run collide at the DB layer; the
@@ -59,7 +59,7 @@ import {
 } from "./types";
 
 // ============================================================
-// Pure helpers — extracted so engine.test.ts can exercise them
+// Pure helpers, extracted so engine.test.ts can exercise them
 // without a Supabase / Meta mock.
 // ============================================================
 
@@ -136,7 +136,7 @@ export function isTerminal(node_type: string): boolean {
 
 /**
  * Evaluate a `condition` node's predicate against the current run
- * state. Exported pure for unit testing — the engine wraps it with a
+ * state. Exported pure for unit testing, the engine wraps it with a
  * DB lookup for `tag` / `contact_field` subjects.
  */
 export function evaluateConditionPredicate(args: {
@@ -165,8 +165,8 @@ export function evaluateConditionPredicate(args: {
 }
 
 // ============================================================
-// DB I/O — wrapped in tiny helpers so the dispatch flow stays
-// readable. Errors surface as thrown — the entry point catches.
+// DB I/O, wrapped in tiny helpers so the dispatch flow stays
+// readable. Errors surface as thrown, the entry point catches.
 // ============================================================
 
 type AdminClient = ReturnType<typeof supabaseAdmin>;
@@ -179,7 +179,7 @@ async function loadActiveRunForContact(
   // The partial unique index `idx_one_active_run_per_contact` makes
   // "two active runs for one contact" impossible by design. But a
   // future migration glitch or manual SQL could create one, and
-  // .maybeSingle() throws on >1 row — which would kill dispatch for
+  // .maybeSingle() throws on >1 row, which would kill dispatch for
   // that contact's webhook entirely. .limit(1) is forgiving: pick the
   // newest, let the cron sweep clean up the stale one.
   const { data, error } = await db
@@ -216,7 +216,7 @@ async function loadFlow(
 
 /**
  * Load every node of a flow in one round trip and key them by
- * `node_key`. The advance loop is then in-memory — a 5-node
+ * `node_key`. The advance loop is then in-memory, a 5-node
  * auto-advancing chain costs one SELECT, not five.
  *
  * Returns an empty map on error so the caller can still dispatch
@@ -265,13 +265,13 @@ async function logEvent(
     payload,
   });
   if (error) {
-    // Logging failure is non-fatal — surface but don't throw.
+    // Logging failure is non-fatal, surface but don't throw.
     console.error("[flows] logEvent error:", error.message);
   }
 }
 
 /**
- * Idempotency check — has a `reply_received` event with this Meta
+ * Idempotency check, has a `reply_received` event with this Meta
  * message_id already been recorded for any of the contact's flow
  * runs? If yes, the inbound is a duplicate (Meta retry) and we
  * exit without re-advancing.
@@ -287,7 +287,7 @@ async function isDuplicateInbound(
   metaMessageId: string,
 ): Promise<boolean> {
   // Fetch ALL run ids for this contact (active + historical). Bounded
-  // by how many flows the customer has been through — small.
+  // by how many flows the customer has been through, small.
   const { data: runs } = await db
     .from("flow_runs")
     .select("id")
@@ -344,7 +344,7 @@ async function findEntryFlow(
 }
 
 // ============================================================
-// Node executors — each handles ONE node type. send_buttons and
+// Node executors, each handles ONE node type. send_buttons and
 // send_list also persist `last_prompt_message_id` so the inbox
 // thread can quote the prompt the customer is replying to.
 // ============================================================
@@ -369,7 +369,7 @@ async function sendButtonsAndSuspend(
     whatsapp_message_id,
   });
   // Look up our internal message id so we can stash it on the run.
-  // Cheap — indexed on `messages.message_id`.
+  // Cheap, indexed on `messages.message_id`.
   const { data: msg } = await db
     .from("messages")
     .select("id")
@@ -476,7 +476,7 @@ async function evaluateConditionNode(
       .select("contact_id", { count: "exact", head: true })
       .eq("contact_id", run.contact_id!)
       .eq("tag_id", cfg.subject_key);
-    // For tags, "present" really is the only meaningful test — the
+    // For tags, "present" really is the only meaningful test, the
     // `present`/`absent` operators are the natural fit. equals/contains
     // against a tag UUID would still work mechanically (compare its
     // existence to the value).
@@ -506,7 +506,7 @@ async function evaluateConditionNode(
  * Tiny `{{vars.foo}}` interpolation. Used by send_message + collect_input
  * prompt text so a captured `name` can show up in the next prompt
  * ("Thanks {{vars.name}}, what's your email?"). Missing vars render as
- * empty string — the same behavior as the automations engine.
+ * empty string, the same behavior as the automations engine.
  */
 function interpolateVars(template: string, vars: Record<string, unknown>): string {
   if (!template) return "";
@@ -546,7 +546,7 @@ async function advanceFromNodeKey(
   nodes: Map<string, FlowNodeRow>,
 ): Promise<{ outcome: "advanced" | "completed" | "handed_off" }> {
   let currentKey: string | null = startNodeKey;
-  // Defensive cap — if a flow has a cycle (which the validator
+  // Defensive cap, if a flow has a cycle (which the validator
   // SHOULD catch but doesn't yet in v1), we bail rather than loop.
   for (let safety = 0; safety < 64; safety += 1) {
     if (!currentKey) {
@@ -714,7 +714,7 @@ async function advanceFromNodeKey(
             .eq("tag_id", cfg.tag_id);
         }
       } catch (err) {
-        // Non-fatal — log + advance. A tag-write failure shouldn't
+        // Non-fatal, log + advance. A tag-write failure shouldn't
         // strand the customer mid-flow.
         await logEvent(db, run.id, "error", node.node_key, {
           reason: "set_tag_failed",
@@ -764,14 +764,14 @@ async function advanceFromNodeKey(
       await endRun(db, run.id, "completed", "end_node");
       return { outcome: "completed" };
     }
-    // Unknown node type — shouldn't happen given the CHECK constraint.
+    // Unknown node type, shouldn't happen given the CHECK constraint.
     await logEvent(db, run.id, "error", node.node_key, {
       reason: `unknown_node_type:${node.node_type}`,
     });
     await endRun(db, run.id, "failed", "unknown_node_type");
     return { outcome: "completed" };
   }
-  // Safety break — log + fail.
+  // Safety break, log + fail.
   await logEvent(db, run.id, "error", currentKey, {
     reason: "advance_loop_safety_break",
   });
@@ -780,7 +780,7 @@ async function advanceFromNodeKey(
 }
 
 /**
- * Optimistic UPDATE — only advance current_node_key when it matches
+ * Optimistic UPDATE, only advance current_node_key when it matches
  * the value we read at the top of dispatch. If another webhook beat
  * us, the row's pointer has already moved and our UPDATE returns
  * zero rows; we treat that as a no-op and let the other run continue.
@@ -815,7 +815,7 @@ async function advanceCurrentNodeKey(
 }
 
 // ============================================================
-// Public entry point — the webhook calls this on every inbound.
+// Public entry point, the webhook calls this on every inbound.
 // ============================================================
 
 export async function dispatchInboundToFlows(
@@ -829,7 +829,7 @@ export async function dispatchInboundToFlows(
       input.contactId,
     );
 
-    // Idempotency — only matters if there's already a run for this
+    // Idempotency, only matters if there's already a run for this
     // contact. For new runs, the partial unique index catches duplicate
     // starts at INSERT time.
     if (activeRun) {
@@ -846,7 +846,7 @@ export async function dispatchInboundToFlows(
           outcome: "duplicate_inbound_ignored",
         };
       }
-      // One SELECT for the whole flow's nodes — advance loop is now
+      // One SELECT for the whole flow's nodes, advance loop is now
       // in-memory. See loadAllNodes.
       const nodes = await loadAllNodes(db, activeRun.flow_id);
       return handleReplyForActiveRun(db, activeRun, input.message, nodes);
@@ -894,7 +894,7 @@ async function handleReplyForActiveRun(
   });
 
   if (!run.current_node_key) {
-    // Defensive — a run with status='active' but no current node is
+    // Defensive, a run with status='active' but no current node is
     // malformed. Fail the run rather than spin.
     await endRun(db, run.id, "failed", "active_run_missing_current_node");
     return {
@@ -912,7 +912,7 @@ async function handleReplyForActiveRun(
 
   // Two ways a reply can advance:
   //   1. Interactive button/list tap on a send_buttons/send_list node.
-  //   2. Text reply on a collect_input node — capture into vars.
+  //   2. Text reply on a collect_input node, capture into vars.
   //
   // Everything else falls through to the fallback policy below.
   let matched: string | null = null;
@@ -955,7 +955,7 @@ async function handleReplyForActiveRun(
 
   if (matched) {
     // Reset reprompt count on a successful match. Skip the write when
-    // already 0 — the collect_input capture branch above already
+    // already 0, the collect_input capture branch above already
     // zeroed it, and interactive-reply matches against a fresh run
     // (post-prior-reset) are also already 0. The previous re-read of
     // the whole row was needed only because we weren't mirroring the
@@ -992,7 +992,7 @@ async function handleReplyForActiveRun(
     reprompt_count: newReprompts,
   });
   if (action.type === "ignore") {
-    // Don't consume — let automations have a shot at it.
+    // Don't consume, let automations have a shot at it.
     return { consumed: false, flow_run_id: run.id, outcome: "no_match" };
   }
   if (action.type === "reprompt") {
@@ -1003,7 +1003,7 @@ async function handleReplyForActiveRun(
       await sendListAndSuspend(db, run, currentNode);
     } else if (currentNode.node_type === "collect_input") {
       // Customer typed something we couldn't accept (empty after trim,
-      // or var_key missing — rare). Re-send the prompt so they try again.
+      // or var_key missing, rare). Re-send the prompt so they try again.
       const cfg = currentNode.config as unknown as CollectInputNodeConfig;
       try {
         await engineSendText({
@@ -1045,7 +1045,7 @@ async function startNewRun(
   input: DispatchInboundInput,
   nodes: Map<string, FlowNodeRow>,
 ): Promise<DispatchInboundResult> {
-  // INSERT — partial unique index `idx_one_active_run_per_contact`
+  // INSERT, partial unique index `idx_one_active_run_per_contact`
   // catches concurrent inserts with 23505. We catch and return as
   // consumed:true (the parallel webhook handles it).
   const { data: inserted, error: insErr } = await db
@@ -1075,7 +1075,7 @@ async function startNewRun(
     trigger_type: flow.trigger_type,
     meta_message_id: input.message.meta_message_id,
   });
-  // Bump the flow's execution counter — used by the builder UI to
+  // Bump the flow's execution counter, used by the builder UI to
   // surface "X runs since activation" on the flow card.
   //
   // Atomic RPC (migration 012) rather than read-modify-write: two
@@ -1087,7 +1087,7 @@ async function startNewRun(
     p_flow_id: flow.id,
   });
   if (incErr) {
-    // Non-fatal — the run itself succeeded; only the counter is off.
+    // Non-fatal, the run itself succeeded; only the counter is off.
     console.error("[flows] execution_count rpc error:", incErr.message);
   }
 

@@ -1,12 +1,12 @@
 /**
- * Workspace roles & capabilities — the permission model for agency mode.
+ * Workspace roles & capabilities, the permission model for agency mode.
  *
  * A workspace is one business. People join a workspace with a role. This
  * module is the single source of truth for "what can each role do",
  * expressed as pure data + pure functions so it is trivially testable and
  * can be reused on both the server (authorization) and client (hiding UI).
  *
- * It deliberately knows nothing about the database or RLS — those enforce
+ * It deliberately knows nothing about the database or RLS, those enforce
  * the boundary; this defines the policy.
  *
  * Roles (least → most power):

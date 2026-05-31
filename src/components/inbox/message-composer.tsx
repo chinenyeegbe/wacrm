@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { ReplyQuote } from "./reply-quote";
 
 interface ReplyDraft {
-  /** Internal UUID of the message being replied to — sent back through onSend. */
+  /** Internal UUID of the message being replied to, sent back through onSend. */
   id: string;
   authorLabel: string;
   preview: string;
@@ -80,7 +80,7 @@ export function MessageComposer({
 
   // AI assist: with an empty box it suggests the next reply from the
   // conversation history; with a draft already typed it rewrites it. The
-  // provider key lives server-side — we only ever receive the finished text.
+  // provider key lives server-side, we only ever receive the finished text.
   const handleAI = useCallback(async () => {
     if (aiLoading || sessionExpired) return;
     const draft = text.trim();

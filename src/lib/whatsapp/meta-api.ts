@@ -33,7 +33,7 @@ async function throwMetaError(response: Response, fallback: string): Promise<nev
     const data = (await response.json()) as MetaErrorResponse
     if (data.error?.message) message = data.error.message
   } catch {
-    // response body wasn't JSON — keep the fallback
+    // response body wasn't JSON, keep the fallback
   }
   throw new Error(message)
 }
@@ -78,7 +78,7 @@ export async function verifyPhoneNumber(
 //     6-digit 2FA PIN the user previously set in Meta WhatsApp
 //     Manager → Two-step verification. Without /register, inbound
 //     events are routed to whichever app last claimed the number
-//     (often the one that did Embedded Signup) — so a second user
+//     (often the one that did Embedded Signup), so a second user
 //     adding a second number under the same WABA silently loses
 //     every inbound message.
 //
@@ -87,7 +87,7 @@ export async function verifyPhoneNumber(
 //     once per WABA, but idempotent so calling on every save is
 //     safe and cheap.
 //
-// Both calls are no-ops when already done — Meta returns success +
+// Both calls are no-ops when already done, Meta returns success +
 // the helpers below treat that as success.
 
 export interface RegisterPhoneNumberArgs {
@@ -106,7 +106,7 @@ export interface RegisterPhoneNumberResult {
   success: boolean
   /**
    * True when Meta indicated the number was already registered to
-   * THIS app — same outcome as a fresh registration from the
+   * THIS app, same outcome as a fresh registration from the
    * caller's POV, surfaced separately for logging clarity.
    */
   alreadyRegistered: boolean
@@ -140,7 +140,7 @@ export async function registerPhoneNumber(
 
   // Meta returns an error envelope with a code. Code 133005 + the
   // text "already registered" appears when the number is already
-  // subscribed to this app — that's success from the caller's
+  // subscribed to this app, that's success from the caller's
   // perspective, surface it as such.
   let data: { error?: { message?: string; code?: number; error_subcode?: number } } = {}
   try {
@@ -161,7 +161,7 @@ export interface SubscribeWabaToAppArgs {
 }
 
 /**
- * Subscribe the WABA to this Meta app's webhook. Idempotent — Meta
+ * Subscribe the WABA to this Meta app's webhook. Idempotent, Meta
  * returns success even when the subscription already exists.
  */
 export async function subscribeWabaToApp(
@@ -192,7 +192,7 @@ export interface SubscribedApp {
 }
 
 /**
- * Diagnostic — fetch the list of apps currently subscribed to this
+ * Diagnostic, fetch the list of apps currently subscribed to this
  * WABA. The UI uses this to confirm OUR app is in the list when
  * the user clicks Verify Registration.
  */
@@ -268,7 +268,7 @@ export interface SendMediaMessageArgs {
   kind: MediaKind
   /** Public URL Meta fetches at send time. */
   link: string
-  /** Optional caption — Meta caps at 1024 chars. Documents + images + videos all accept it. */
+  /** Optional caption, Meta caps at 1024 chars. Documents + images + videos all accept it. */
   caption?: string
   /** Document-only. Shown in the recipient's chat as the file name. Ignored for image/video. */
   filename?: string
@@ -279,7 +279,7 @@ export interface SendMediaMessageArgs {
  * Send an image, video, or document via a public URL.
  *
  * Used by the Flows engine's `send_media` node. Mirrors
- * `sendTextMessage` — single fetch, throws on non-2xx, returns Meta's
+ * `sendTextMessage`, single fetch, throws on non-2xx, returns Meta's
  * message id.
  */
 export async function sendMediaMessage(
@@ -339,7 +339,7 @@ export interface SendTemplateMessageArgs {
   /**
    * The template row from message_templates. When provided, the helper
    * builds the full components array (header + body + buttons) via
-   * buildSendComponents — that's the only way image/video/document
+   * buildSendComponents, that's the only way image/video/document
    * headers and URL-with-variable buttons actually reach the recipient.
    */
   template?: MessageTemplate
@@ -400,7 +400,7 @@ export async function sendTemplateMessage(
       templatePayload.components = components
     }
   } else if (params && params.length > 0) {
-    // Legacy body-only path — no template row available.
+    // Legacy body-only path, no template row available.
     templatePayload.components = [
       {
         type: 'body',
@@ -497,9 +497,9 @@ export interface EditMessageTemplateArgs {
   /** Meta's template id (stored locally as `meta_template_id`). */
   metaTemplateId: string
   accessToken: string
-  /** Send the full components array — Meta replaces, not patches. */
+  /** Send the full components array, Meta replaces, not patches. */
   components: MetaTemplateSubmitPayload['components']
-  /** Optional — only certain category transitions are allowed by Meta. */
+  /** Optional, only certain category transitions are allowed by Meta. */
   category?: MetaTemplateSubmitPayload['category']
 }
 
@@ -515,7 +515,7 @@ export interface EditMessageTemplateResult {
  * back to PENDING until Meta approves the new components.
  *
  * Note: PENDING / DISABLED / IN_APPEAL templates cannot be edited
- * — the route handler enforces that before calling here.
+ *, the route handler enforces that before calling here.
  */
 export async function editMessageTemplate(
   args: EditMessageTemplateArgs
@@ -552,7 +552,7 @@ export interface DeleteMessageTemplateArgs {
 
 /**
  * Delete a message template on Meta. Pass `metaTemplateId` to scope
- * to a single language variant — otherwise Meta nukes every variant
+ * to a single language variant, otherwise Meta nukes every variant
  * sharing the same `name`.
  */
 export async function deleteMessageTemplate(
@@ -566,7 +566,7 @@ export async function deleteMessageTemplate(
     method: 'DELETE',
     headers: { Authorization: `Bearer ${accessToken}` },
   })
-  // Treat a 404 as a no-op — the template is already gone on Meta's
+  // Treat a 404 as a no-op, the template is already gone on Meta's
   // side, and we still want the local row removed.
   if (response.status === 404) return
   if (!response.ok) {
@@ -622,7 +622,7 @@ export async function sendReactionMessage(
 // Interactive (button replies + list messages)
 // ============================================================
 //
-// Meta's two flavours of interactive message — used by the Flows
+// Meta's two flavours of interactive message, used by the Flows
 // engine to drive scripted chatbot menus. Caller passes plain
 // JS values; helpers shape the Meta payload and enforce Meta's
 // limits BEFORE the network call so the failure mode is a
@@ -658,7 +658,7 @@ export interface SendInteractiveButtonsArgs {
   phoneNumberId: string
   accessToken: string
   to: string
-  /** The body text — what the customer reads above the buttons. */
+  /** The body text, what the customer reads above the buttons. */
   bodyText: string
   /** Optional plain-text header (≤ 60 chars). */
   headerText?: string
