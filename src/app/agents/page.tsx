@@ -192,6 +192,23 @@ export default function AgentsPage() {
         </div>
       </section>
 
+      {/* ---------- Use it for your own hustle too ---------- */}
+      <section className="border-t border-border/60 bg-card/40">
+        <div className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-2xl font-bold sm:text-3xl">
+              Got a small hustle of your own?
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Sell hair, jewellery, snacks, or run a service on the side? Use
+              Moldlane to look after your <span className="font-medium text-foreground">own</span>{" "}
+              customers too — answer faster, sell more, and win back the regulars
+              who forgot to come back. Same account, no extra cost.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ---------- Final CTA ---------- */}
       <section className="border-t border-border/60">
         <div className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6">

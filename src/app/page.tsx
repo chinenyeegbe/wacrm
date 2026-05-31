@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  MessageSquare,
   Clock,
   Languages,
   CreditCard,
-  Sparkles,
+  RefreshCw,
+  Users,
   ShieldCheck,
   ArrowRight,
   Check,
@@ -14,13 +14,18 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 
-// Business landing — speaks ONLY to the merchant persona (a shop/SME owner
-// drowning in WhatsApp). The agent/earner story lives on /agents so each
-// page has a single audience and a single conversion goal.
+// Business landing — speaks ONLY to the merchant persona.
+//
+// Positioning rule (from the founder): sell the WHAT and the WHY, never the
+// HOW. Customers don't care if it's AI, a human, or both — they care that
+// their customers get supported, sold to, and brought back, so revenue goes
+// up and nobody drifts to a competitor. So: no "AI" in the pitch, no
+// over-explaining the mechanism, business-casual voice, say only what's
+// needed and let the details reveal themselves later.
 export const metadata: Metadata = {
-  title: "Moldlane — your WhatsApp, run by AI",
+  title: "Moldlane — never lose a customer to a slow reply",
   description:
-    "Moldlane answers every WhatsApp message, sells in your customer's language, and collects payment — 24/7. No monthly fee; pay only when you get paid.",
+    "Moldlane keeps every customer on your WhatsApp answered, every buyer closed, and brings back the ones who've gone quiet — even when you're too busy. Pay only when you get paid.",
   robots: { index: true, follow: true },
 };
 
@@ -40,18 +45,17 @@ export default async function HomePage() {
       <section className="mx-auto w-full max-w-5xl px-4 pt-14 pb-10 sm:px-6 sm:pt-20 sm:pb-16">
         <div className="mx-auto max-w-2xl text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
-            <Sparkles className="h-3.5 w-3.5" />
-            Runs on WhatsApp you already use
+            Works on the WhatsApp you already use
           </span>
           <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl">
-            Your WhatsApp, run by an AI that{" "}
-            <span className="text-primary">sells while you sleep</span>
+            Never lose a customer to a{" "}
+            <span className="text-primary">slow reply</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
-            Moldlane replies to every customer in seconds — in their own
-            language — answers questions from your price list, and sends a
-            payment link right in the chat. You wake up to sales, not a
-            backlog.
+            You can&apos;t be on your phone all day — you get busy, tired,
+            overwhelmed. Moldlane keeps every customer answered, every buyer
+            closed, and nudges the quiet ones to come back. Even while you
+            sleep.
           </p>
           <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
@@ -68,29 +72,35 @@ export default async function HomePage() {
             </Link>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">
-            No monthly fee. <span className="font-medium text-foreground">You only pay a small fee when you get paid.</span>
+            No monthly fee.{" "}
+            <span className="font-medium text-foreground">
+              You only pay when you get paid.
+            </span>
           </p>
         </div>
       </section>
 
-      {/* ---------- Problem → relief ---------- */}
+      {/* ---------- The three jobs, framed by the WHY ---------- */}
       <section className="border-y border-border/60 bg-card/40">
         <div className="mx-auto grid w-full max-w-5xl gap-4 px-4 py-10 sm:grid-cols-3 sm:px-6">
           {[
             {
-              pain: "“How much?” fifty times a day",
-              fix: "AI answers instantly from your price list — every time.",
+              pain: "A question sits unanswered",
+              fix: "Every customer gets a quick, friendly reply — so they don't message your competitor instead.",
             },
             {
-              pain: "Leads go cold overnight",
-              fix: "It replies at 2am, in Pidgin, Swahili, French — whatever they speak.",
+              pain: "A ready buyer waits too long",
+              fix: "Prospects and regulars get sold to on the spot, in their own language.",
             },
             {
-              pain: "Chasing payments",
-              fix: "It sends a pay link in the chat and confirms the moment money lands.",
+              pain: "Old customers forget you",
+              fix: "Quiet customers get a warm nudge to come back — the marketing you never have time to do.",
             },
           ].map((item) => (
-            <div key={item.pain} className="rounded-xl border border-border bg-card p-5">
+            <div
+              key={item.pain}
+              className="rounded-xl border border-border bg-card p-5"
+            >
               <p className="text-sm font-medium text-muted-foreground line-through decoration-destructive/50">
                 {item.pain}
               </p>
@@ -100,34 +110,37 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ---------- How it works ---------- */}
+      {/* ---------- How it works (their experience, not our tech) ---------- */}
       <section id="how" className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6">
         <h2 className="text-center text-2xl font-bold sm:text-3xl">
-          Live in an afternoon
+          Set it up in an afternoon
         </h2>
         <p className="mx-auto mt-2 max-w-lg text-center text-muted-foreground">
-          No new app for your customers. They keep chatting on WhatsApp — the AI
-          works behind the scenes.
+          Nothing changes for your customers — they keep chatting on WhatsApp.
+          You just stop dropping the ball.
         </p>
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
           {[
             {
               n: "1",
               title: "Connect your WhatsApp",
-              body: "Link your business number and paste your catalogue, prices, and hours once.",
+              body: "Add your number, your prices, and your hours once.",
             },
             {
               n: "2",
-              title: "Turn the AI on",
-              body: "Pick how much it does alone — draft-only, AI + you, or fully automatic.",
+              title: "Make it yours",
+              body: "Decide how hands-on you want to be — review everything, or let it run.",
             },
             {
               n: "3",
-              title: "Get paid",
-              body: "It answers, closes, and sends pay links. You handle only what needs a human.",
+              title: "Get back to business",
+              body: "Customers are looked after around the clock. You step in only when it matters.",
             },
           ].map((step) => (
-            <div key={step.n} className="relative rounded-xl border border-border bg-card p-6">
+            <div
+              key={step.n}
+              className="relative rounded-xl border border-border bg-card p-6"
+            >
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
                 {step.n}
               </span>
@@ -138,46 +151,49 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ---------- Feature grid ---------- */}
+      {/* ---------- What you get (outcomes) ---------- */}
       <section className="border-t border-border/60 bg-card/40">
         <div className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6">
           <h2 className="text-center text-2xl font-bold sm:text-3xl">
-            Everything your shop needs, in one chat
+            Looks after your customers like you would
           </h2>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
                 icon: Clock,
-                title: "Answers 24/7",
-                body: "Never miss a midnight buyer. Replies in seconds, every day.",
+                title: "Always answered",
+                body: "Never miss a midnight buyer or a busy-day rush. Replies come in seconds, every day.",
               },
               {
                 icon: Languages,
                 title: "Speaks their language",
-                body: "English, Pidgin, Swahili, French, Hausa, Yoruba, Arabic — it matches the customer.",
+                body: "English, Pidgin, Swahili, French, Hausa, Yoruba, Arabic — it matches each customer.",
               },
               {
                 icon: CreditCard,
-                title: "Collects payment",
-                body: "Sends a secure pay link in the chat. Confirms automatically.",
+                title: "Takes payment in the chat",
+                body: "Sends a secure pay link right where they're talking, and confirms it for you.",
               },
               {
-                icon: Sparkles,
-                title: "Knows your business",
-                body: "Quotes your real prices and policies. Never makes things up.",
+                icon: RefreshCw,
+                title: "Brings customers back",
+                body: "Reaches out to people who've gone quiet with a friendly reminder or a small offer.",
               },
               {
-                icon: MessageSquare,
-                title: "One shared inbox",
-                body: "You and your team on one number, with notes, tags, and a sales pipeline.",
+                icon: Users,
+                title: "One inbox for your team",
+                body: "You and your staff on one number — with notes, tags, and a clear sales pipeline.",
               },
               {
                 icon: ShieldCheck,
-                title: "Safe by default",
-                body: "Hides card numbers from the AI, and you stay in control of every send.",
+                title: "Stays professional",
+                body: "Warm, human replies that sound like you — and your customers' details stay private.",
               },
             ].map((f) => (
-              <div key={f.title} className="rounded-xl border border-border bg-card p-5">
+              <div
+                key={f.title}
+                className="rounded-xl border border-border bg-card p-5"
+              >
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-soft text-primary">
                   <f.icon className="h-5 w-5" />
                 </span>
