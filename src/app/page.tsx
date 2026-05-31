@@ -14,6 +14,8 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { Faq } from "@/components/marketing/faq";
+import { RotatingText } from "@/components/marketing/rotating-text";
+import { BUSINESS_HERO } from "@/lib/marketing/hero-variants";
 
 const FAQ_ITEMS = [
   {
@@ -77,8 +79,9 @@ export default async function HomePage() {
             Works on the WhatsApp you already use
           </span>
           <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl">
-            Answer every customer,{" "}
-            <span className="text-primary">even when you can&apos;t</span>
+            WhatsApp that helps you
+            <br />
+            <RotatingText sets={BUSINESS_HERO} className="text-primary" />
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
             You can&apos;t be on your phone all day. Moldlane replies to every

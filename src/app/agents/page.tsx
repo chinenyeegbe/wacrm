@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { Faq } from "@/components/marketing/faq";
+import { RotatingText } from "@/components/marketing/rotating-text";
+import { AGENT_HERO } from "@/lib/marketing/hero-variants";
 import { DEFAULT_PARTNER_TIERS } from "@/lib/referrals/commission";
 
 const FAQ_ITEMS = [
@@ -68,8 +70,10 @@ export default function AgentsPage() {
             Moldlane Partners
           </span>
           <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl">
-            Earn money helping{" "}
-            <span className="text-primary">local businesses</span>
+            Help local shops{" "}
+            <RotatingText sets={AGENT_HERO} className="text-primary" />
+            <br />
+            and get paid
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
             Show shops you know how Moldlane works. When they make sales, you
