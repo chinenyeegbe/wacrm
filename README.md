@@ -22,6 +22,9 @@ clone or fork it to run your own CRM.
 > explainer with journey maps and flowcharts of how the whole system fits
 > together (the AI employee, payments, and how it makes money). The growth
 > plan is in [`STRATEGY.md`](./STRATEGY.md).
+>
+> **Want a live URL to test on your phone?** See
+> **[DEPLOY.md](./DEPLOY.md)** (Vercel + Supabase, free).
 
 ## What you get out of the box
 

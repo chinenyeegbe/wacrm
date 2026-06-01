@@ -64,11 +64,18 @@ export const metadata: Metadata = {
 const CTA = { label: "Start free", href: "/signup" };
 
 export default async function HomePage() {
-  // Logged-in owners skip the pitch and go straight to work.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Logged-in owners skip the pitch and go straight to work. Guarded so the
+  // landing still renders on a fresh deploy where Supabase isn't configured
+  // yet (otherwise this throws on the missing keys). redirect() must stay
+  // OUTSIDE the try/catch, it works by throwing a control-flow signal.
+  let user = null;
+  try {
+    const supabase = await createClient();
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch {
+    // Supabase not configured; show the landing page.
+  }
   if (user) redirect("/dashboard");
 
   return (
