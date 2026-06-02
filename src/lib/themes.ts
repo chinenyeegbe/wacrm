@@ -8,22 +8,16 @@
  *
  * Adding a new theme is a two-step change:
  *   1. Append the new `html[data-theme="<id>"]` block in globals.css
- *      with every token from an existing theme (use violet as the
+ *      with every token from an existing theme (use sage as the
  *      shape reference).
  *   2. Add an entry below. The order here drives the picker grid.
  */
 
-export const THEME_IDS = [
-  "violet",
-  "emerald",
-  "cobalt",
-  "amber",
-  "rose",
-] as const;
+export const THEME_IDS = ["stone", "terracotta", "sage"] as const;
 
 export type ThemeId = (typeof THEME_IDS)[number];
 
-export const DEFAULT_THEME: ThemeId = "violet";
+export const DEFAULT_THEME: ThemeId = "stone";
 
 export const STORAGE_KEY = "wacrm.theme";
 
@@ -42,34 +36,22 @@ export interface ThemeMeta {
 
 export const THEMES: ReadonlyArray<ThemeMeta> = [
   {
-    id: "violet",
-    name: "Violet",
-    tagline: "The default — confident, slightly playful.",
-    swatch: "oklch(0.526 0.247 293)",
+    id: "stone",
+    name: "Stone",
+    tagline: "The default — greyscale-first, terracotta only where it counts.",
+    swatch: "oklch(0.55 0.13 40)",
   },
   {
-    id: "emerald",
-    name: "Emerald",
-    tagline: "Growth-coded, nods at messaging without copying WhatsApp green.",
-    swatch: "oklch(0.62 0.16 162)",
+    id: "terracotta",
+    name: "Terracotta",
+    tagline: "Warm and earthy — clay tones tint the whole surface.",
+    swatch: "oklch(0.56 0.13 42)",
   },
   {
-    id: "cobalt",
-    name: "Cobalt",
-    tagline: "Clean B2B-SaaS blue — calm and product-y.",
-    swatch: "oklch(0.585 0.2 254)",
-  },
-  {
-    id: "amber",
-    name: "Amber",
-    tagline: "Warm and friendly — feels good for SMB teams.",
-    swatch: "oklch(0.745 0.16 65)",
-  },
-  {
-    id: "rose",
-    name: "Rose",
-    tagline: "Bold and modern — D2C, creator-economy, lifestyle.",
-    swatch: "oklch(0.645 0.22 16)",
+    id: "sage",
+    name: "Sage",
+    tagline: "Calm and green — natural sage across the UI.",
+    swatch: "oklch(0.52 0.05 150)",
   },
 ];
 

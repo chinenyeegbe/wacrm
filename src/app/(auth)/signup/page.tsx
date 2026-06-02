@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,37 +17,42 @@ import {
 import { MessageSquare, CheckCircle } from "lucide-react";
 
 export default function SignupPage() {
+  // useSearchParams needs a Suspense boundary in the App Router.
+  return (
+    <Suspense fallback={null}>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  // "agent" when arriving from the agent-program CTA (/signup?role=agent),
+  // otherwise a regular business signup.
+  const isAgent = useSearchParams().get("role") === "agent";
   const supabase = createClient();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
-
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    // Magic-link signup: no password. `options.data` is written to the
+    // new user's metadata on first verification, so the name and role
+    // are captured the moment the account is created. `signInWithOtp`
+    // creates the user if they don't exist yet, so this doubles as
+    // "sign in" for anyone who already signed up.
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           full_name: fullName,
+          role: isAgent ? "agent" : "business",
         },
       },
     });
@@ -63,26 +69,26 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
-        <Card className="w-full max-w-md border-slate-800 bg-slate-900">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-md border-border bg-card">
           <CardHeader className="items-center text-center">
             <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
               <CheckCircle className="h-6 w-6 text-primary" />
             </div>
-            <CardTitle className="text-xl text-white">
+            <CardTitle className="text-xl text-foreground">
               Check your email
             </CardTitle>
-            <CardDescription className="text-slate-400">
-              We&apos;ve sent a confirmation link to{" "}
-              <span className="text-white">{email}</span>. Please check your
-              inbox and click the link to verify your account.
+            <CardDescription className="text-muted-foreground">
+              We&apos;ve sent a sign-in link to{" "}
+              <span className="text-foreground">{email}</span>. Click it to
+              confirm your email and finish creating your account.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/login">
               <Button
                 variant="outline"
-                className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+                className="w-full border-border text-foreground hover:bg-secondary hover:text-foreground"
               >
                 Back to sign in
               </Button>
@@ -94,16 +100,25 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
-      <Card className="w-full max-w-md border-slate-800 bg-slate-900">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <Card className="w-full max-w-md border-border bg-card">
         <CardHeader className="items-center text-center">
           <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
             <MessageSquare className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-xl text-white">Create account</CardTitle>
-          <CardDescription className="text-slate-400">
-            Get started with CRM Template for WhatsApp
+          <CardTitle className="text-xl text-foreground">
+            {isAgent ? "Become an agent" : "Create account"}
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
+            {isAgent
+              ? "Sign up to start onboarding local businesses to Moldlane"
+              : "Get started with Moldlane"}
           </CardDescription>
+          {isAgent && (
+            <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
+              Agent application
+            </span>
+          )}
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignup} className="flex flex-col gap-4">
@@ -114,7 +129,7 @@ export default function SignupPage() {
             )}
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="fullName" className="text-slate-300">
+              <Label htmlFor="fullName" className="text-foreground">
                 Full name
               </Label>
               <Input
@@ -124,12 +139,12 @@ export default function SignupPage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 focus-visible:border-primary focus-visible:ring-primary/20"
+                className="border-border bg-secondary text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
               />
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="email" className="text-slate-300">
+              <Label htmlFor="email" className="text-foreground">
                 Email
               </Label>
               <Input
@@ -139,37 +154,7 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password" className="text-slate-300">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="confirmPassword" className="text-slate-300">
-                Confirm password
-              </Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Repeat your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 focus-visible:border-primary focus-visible:ring-primary/20"
+                className="border-border bg-secondary text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
               />
             </div>
 
@@ -178,11 +163,15 @@ export default function SignupPage() {
               disabled={loading}
               className="mt-2 h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
-              {loading ? "Creating account..." : "Create account"}
+              {loading ? "Sending link..." : "Send sign-in link"}
             </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              No password required — we&apos;ll email you a secure link to
+              finish.
+            </p>
           </form>
 
-          <p className="mt-6 text-center text-sm text-slate-400">
+          <p className="mt-6 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link
               href="/login"
