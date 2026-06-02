@@ -1,0 +1,50 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "wacrm",
+	"compatibility_date": "2025-01-01",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"services": [
+		{
+			// Self-reference binding required by OpenNext for incremental cache revalidation.
+			// The service name must match the worker name above.
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "wacrm"
+		}
+	],
+	"r2_buckets": [
+		{
+			// Stores ISR / 'use cache' payloads. Create with:
+			//   npx wrangler r2 bucket create wacrm-opennext-cache
+			"binding": "NEXT_INC_CACHE_R2_BUCKET",
+			"bucket_name": "wacrm-opennext-cache"
+		}
+	],
+	"images": {
+		// Enables Cloudflare Image Optimization for next/image.
+		"binding": "IMAGES"
+	},
+	// CRON NOTE: OpenNext's worker.js only exposes a `fetch` handler,
+	// so Cloudflare Cron Triggers can't call the app routes directly.
+	// Instead, set up an *external* pinger (cron-job.org free tier works)
+	// or a separate tiny Cloudflare Worker to call:
+	//   GET https://<your-worker>.workers.dev/api/automations/cron
+	//   GET https://<your-worker>.workers.dev/api/flows/cron
+	// both with header `x-cron-secret: <AUTOMATION_CRON_SECRET>`, every 5 min.
+	// Only needed if you use Wait steps in Automations.
+	// See docs/cron-setup.md for step-by-step instructions.
+
+	// All secrets are set via Wrangler, never in this file:
+	//   npx wrangler secret put NEXT_PUBLIC_SUPABASE_URL
+	//   npx wrangler secret put NEXT_PUBLIC_SUPABASE_ANON_KEY
+	//   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+	//   npx wrangler secret put ENCRYPTION_KEY
+	//   npx wrangler secret put META_APP_SECRET
+	//   npx wrangler secret put NEXT_PUBLIC_SITE_URL
+	//   npx wrangler secret put AUTOMATION_CRON_SECRET   (if using Wait steps)
+	//   npx wrangler secret put META_APP_ID              (optional)
+}
