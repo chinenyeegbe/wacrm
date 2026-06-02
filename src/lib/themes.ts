@@ -13,11 +13,11 @@
  *   2. Add an entry below. The order here drives the picker grid.
  */
 
-export const THEME_IDS = ["sage", "terracotta"] as const;
+export const THEME_IDS = ["stone", "terracotta", "sage"] as const;
 
 export type ThemeId = (typeof THEME_IDS)[number];
 
-export const DEFAULT_THEME: ThemeId = "sage";
+export const DEFAULT_THEME: ThemeId = "stone";
 
 export const STORAGE_KEY = "wacrm.theme";
 
@@ -36,16 +36,22 @@ export interface ThemeMeta {
 
 export const THEMES: ReadonlyArray<ThemeMeta> = [
   {
-    id: "sage",
-    name: "Sage",
-    tagline: "The default — calm, natural, easy on the eyes.",
-    swatch: "oklch(0.52 0.05 150)",
+    id: "stone",
+    name: "Stone",
+    tagline: "The default — greyscale-first, terracotta only where it counts.",
+    swatch: "oklch(0.55 0.13 40)",
   },
   {
     id: "terracotta",
     name: "Terracotta",
-    tagline: "Warm and earthy — friendly clay tones for SMB teams.",
+    tagline: "Warm and earthy — clay tones tint the whole surface.",
     swatch: "oklch(0.56 0.13 42)",
+  },
+  {
+    id: "sage",
+    name: "Sage",
+    tagline: "Calm and green — natural sage across the UI.",
+    swatch: "oklch(0.52 0.05 150)",
   },
 ];
 
