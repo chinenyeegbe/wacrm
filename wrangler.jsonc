@@ -1,0 +1,41 @@
+{
+  // Cloudflare Workers config for the OpenNext build of wacrm.
+  // Docs: https://opennext.js.org/cloudflare  |  https://developers.cloudflare.com/workers/wrangler/configuration/
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "wacrm",
+  "main": ".open-next/worker.js",
+
+  // nodejs_compat is required: the app's API routes use Node built-ins
+  // (crypto for AES-256-GCM token encryption + webhook HMAC, Buffer,
+  // etc.) via the Supabase server SDK. The compatibility_date must be
+  // 2024-09-23 or later for nodejs_compat to be honoured.
+  "compatibility_date": "2025-03-25",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Static assets emitted by the OpenNext build (hashed /_next/static
+  // chunks, public/). Served directly from Cloudflare's edge; only
+  // cache-misses / dynamic routes fall through to the worker.
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+
+  // ── Scheduled jobs (automations Wait-steps + flow timers) ──────────
+  // The two cron endpoints (/api/automations/cron, /api/flows/cron) are
+  // guarded by the `x-cron-secret` header (AUTOMATION_CRON_SECRET). The
+  // OpenNext worker only exports `fetch`, so a `crons` trigger here
+  // would have no `scheduled` handler to run. Drive them instead with a
+  // tiny separate Cron Worker (or any external pinger) that fetches the
+  // deployed URL with the secret header. See docs/deployment-cloudflare.md.
+  //
+  // Public env (safe to commit). Secrets — SUPABASE_SERVICE_ROLE_KEY,
+  // ENCRYPTION_KEY, META_APP_SECRET, AUTOMATION_CRON_SECRET — must be
+  // set with `wrangler secret put <NAME>`, never listed here.
+  // "vars": {
+  //   "NEXT_PUBLIC_SITE_URL": "https://crm.example.com"
+  // }
+}
