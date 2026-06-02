@@ -11,6 +11,9 @@ import {
   Check,
   X,
   Building2,
+  Send,
+  Copy,
+  Link2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +30,14 @@ interface Member {
   email: string | null;
   full_name: string | null;
   role: string;
+}
+
+interface PendingInvite {
+  id: string;
+  phone: string | null;
+  role: string;
+  join_url: string;
+  expires_at: string;
 }
 
 export function AgencyPanel() {
@@ -261,19 +272,28 @@ function WorkspaceRow({
 
 function MemberManager({ workspaceId }: { workspaceId: string }) {
   const [members, setMembers] = useState<Member[]>([]);
+  const [invites, setInvites] = useState<PendingInvite[]>([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'member' | 'admin'>('member');
   const [adding, setAdding] = useState(false);
+  // WhatsApp / link invite state
+  const [phone, setPhone] = useState('');
+  const [inviteRole, setInviteRole] = useState<'member' | 'admin'>('member');
+  const [inviting, setInviting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(
-        `/api/agency/members?workspace_id=${encodeURIComponent(workspaceId)}`
-      );
-      const data = await res.json();
-      if (res.ok) setMembers(data.members ?? []);
+      const qs = `workspace_id=${encodeURIComponent(workspaceId)}`;
+      const [mRes, iRes] = await Promise.all([
+        fetch(`/api/agency/members?${qs}`),
+        fetch(`/api/agency/invites?${qs}`),
+      ]);
+      const mData = await mRes.json();
+      if (mRes.ok) setMembers(mData.members ?? []);
+      const iData = await iRes.json();
+      if (iRes.ok) setInvites(iData.invites ?? []);
     } finally {
       setLoading(false);
     }
@@ -282,6 +302,67 @@ function MemberManager({ workspaceId }: { workspaceId: string }) {
   useEffect(() => {
     load();
   }, [load]);
+
+  async function sendInvite() {
+    setInviting(true);
+    try {
+      const res = await fetch('/api/agency/invites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace_id: workspaceId,
+          phone: phone.trim() || undefined,
+          role: inviteRole,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error ?? 'Failed to create invite');
+        return;
+      }
+      if (phone.trim()) {
+        if (data.whatsapp_sent) {
+          toast.success('WhatsApp invite sent');
+        } else {
+          toast.warning(
+            `Invite link created, but WhatsApp delivery failed: ${
+              data.whatsapp_error ?? 'unknown error'
+            }. Share the link manually.`
+          );
+        }
+      } else {
+        toast.success('Invite link created — copy and share it');
+      }
+      setPhone('');
+      await load();
+    } finally {
+      setInviting(false);
+    }
+  }
+
+  async function revokeInvite(id: string) {
+    const res = await fetch('/api/agency/invites', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      toast.error(data.error ?? 'Failed to revoke');
+      return;
+    }
+    toast.success('Invite revoked');
+    await load();
+  }
+
+  async function copyLink(url: string) {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Link copied');
+    } catch {
+      toast.error('Could not copy — copy it manually');
+    }
+  }
 
   async function add() {
     const value = email.trim();
@@ -395,6 +476,82 @@ function MemberManager({ workspaceId }: { workspaceId: string }) {
           ))}
         </ul>
       )}
+
+      {/* Invite via WhatsApp / shareable link */}
+      <div className="space-y-2 border-t border-slate-800 pt-4">
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          Invite by WhatsApp or link
+        </p>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') sendInvite();
+            }}
+            placeholder="+15551234567 (optional)"
+            type="tel"
+            className="flex-1 border-slate-700 bg-slate-800 text-white placeholder:text-slate-500"
+          />
+          <select
+            value={inviteRole}
+            onChange={(e) =>
+              setInviteRole(e.target.value as 'member' | 'admin')
+            }
+            className="h-9 rounded-md border border-slate-700 bg-slate-800 px-2 text-sm text-white"
+          >
+            <option value="member">Member</option>
+            <option value="admin">Admin</option>
+          </select>
+          <Button size="sm" onClick={sendInvite} disabled={inviting}>
+            {inviting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : phone.trim() ? (
+              <Send className="h-4 w-4" />
+            ) : (
+              <Link2 className="h-4 w-4" />
+            )}
+            {phone.trim() ? 'Send WhatsApp invite' : 'Create link'}
+          </Button>
+        </div>
+        <p className="text-xs text-slate-500">
+          Enter a number to send the invite over WhatsApp from this
+          workspace&apos;s number, or leave it blank to just create a link to
+          share yourself.
+        </p>
+
+        {invites.length > 0 ? (
+          <ul className="space-y-1 pt-1">
+            {invites.map((inv) => (
+              <li
+                key={inv.id}
+                className="flex items-center gap-2 rounded-md bg-slate-800/40 px-2 py-1.5"
+              >
+                <Link2 className="h-4 w-4 shrink-0 text-slate-500" />
+                <span className="min-w-0 flex-1 truncate text-xs text-slate-300">
+                  {inv.phone ? inv.phone : 'Link invite'} · {inv.role}
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => copyLink(inv.join_url)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => revokeInvite(inv.id)}
+                  className="text-slate-400 hover:text-red-400"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
     </div>
   );
 }

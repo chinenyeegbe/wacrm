@@ -1,8 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+
+/** Only allow internal relative redirects (no protocol-relative / absolute URLs). */
+function safeNext(value: string | null): string {
+  if (value && value.startsWith("/") && !value.startsWith("//")) return value;
+  return "/dashboard";
+}
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +30,10 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+  const next = safeNext(searchParams.get("next"));
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,19 +51,32 @@ export default function SignupPage() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name: fullName,
         },
+        // Carry `next` (e.g. an invite link) through email confirmation
+        // so the user lands back where they started after confirming.
+        emailRedirectTo:
+          typeof window !== "undefined"
+            ? `${window.location.origin}${next}`
+            : undefined,
       },
     });
 
     if (error) {
       setError(error.message);
       setLoading(false);
+      return;
+    }
+
+    // When email confirmation is disabled, signUp returns a live session
+    // — go straight to `next` instead of showing the check-your-email card.
+    if (data.session) {
+      router.push(next);
       return;
     }
 
