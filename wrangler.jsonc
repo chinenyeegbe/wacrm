@@ -4,6 +4,14 @@
   "name": "wacrm",
   "compatibility_date": "2025-03-01",
   "compatibility_flags": ["nodejs_compat"],
+  // Run the OpenNext build before deploying. This lets Cloudflare's
+  // default `wrangler deploy` produce `.open-next/worker.js` itself, so
+  // the Workers Builds integration works without a custom dashboard
+  // build command. (Env vars from CLOUDFLARE_DEPLOY.md must still be set
+  // in the build environment — `next build` needs them.)
+  "build": {
+    "command": "npx opennextjs-cloudflare build"
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

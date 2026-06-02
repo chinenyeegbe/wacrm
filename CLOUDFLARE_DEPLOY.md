@@ -42,14 +42,18 @@ In **Cloudflare → your project → Settings → Variables and Secrets**, add
 
 **This is already wired up in the repo** — `@opennextjs/cloudflare` +
 `wrangler` are in `devDependencies`, with `wrangler.jsonc`,
-`open-next.config.ts`, and `cf:*` npm scripts. You don't need to add
-anything; you only need to point Cloudflare at the right command.
+`open-next.config.ts`, and `cf:*` npm scripts. Crucially, `wrangler.jsonc`
+has a `build.command` of `npx opennextjs-cloudflare build`, so **wrangler
+generates `.open-next/worker.js` itself** right before it uploads —
+the Workers Builds integration works with its default commands, no
+dashboard changes required.
 
-In **Cloudflare → Workers & Pages → wacrm → Settings → Build**:
-
-- **Build command:** `npx opennextjs-cloudflare build`
-- **Deploy command:** `npx wrangler deploy`
-- Make sure the env vars from step 1 are set for the build/runtime.
+> **Optional tidy-up:** the default Workers Builds *build command* is
+> `npm run build` (a plain `next build`), which is now redundant since
+> wrangler rebuilds via OpenNext during upload. To avoid building twice,
+> set the dashboard **Build command** to empty (or `echo skip`) and
+> leave the **Deploy command** as `npx wrangler versions upload` /
+> `npx wrangler deploy`.
 
 That produces `.open-next/worker.js` and deploys it using
 `wrangler.jsonc`. To do it from your machine instead:
