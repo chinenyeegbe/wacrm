@@ -71,36 +71,50 @@ See `.env.local.example` for the full annotated list, and `docs/ai.md` /
 
 ## Hosting on Cloudflare (instead of Vercel)
 
-Yes, Cloudflare can host the whole app, with one important choice of adapter:
+Yes, Cloudflare can host the whole app, and the config is **already
+scaffolded** in this repo:
 
-- **Use `@opennextjs/cloudflare`** (the OpenNext Cloudflare adapter). It runs
-  Next.js on Cloudflare Workers with the **Node.js runtime**, which Moldlane
-  needs: our token/payment encryption and webhook signature checks use
-  Node's `crypto` (AES-256-GCM, HMAC).
-- **Do not use `@cloudflare/next-on-pages`** for this app. It forces the
-  **edge** runtime on every server route, which does not provide Node
-  `crypto`, so the encryption and webhook routes would break.
+- `open-next.config.ts` and `wrangler.jsonc` (Worker name `moldlane`,
+  `nodejs_compat` on).
+- `npm run cf:preview` / `npm run cf:deploy` scripts.
+- `@opennextjs/cloudflare` + `wrangler` are dev dependencies.
 
-Steps (run locally once or in a CI runner, not on a weak laptop):
+We use **`@opennextjs/cloudflare`** (the OpenNext adapter), which runs
+Next.js on Cloudflare Workers with the **Node.js runtime**, the thing
+Moldlane needs: token/payment encryption and webhook signature checks use
+Node's `crypto` (AES-256-GCM, HMAC). We deliberately do **not** use
+`@cloudflare/next-on-pages` (edge-only, no Node `crypto`, would break those
+routes). The adapter officially supports our Next.js version (16.2.6).
+
+### Deploy steps
+
+Run these on a machine or CI runner that can build (not a weak laptop, see
+the next section):
 
 ```bash
-npm install --save-dev @opennextjs/cloudflare wrangler
-npx opennextjs-cloudflare build      # builds a Workers bundle
-npx opennextjs-cloudflare deploy     # deploys (or `preview` to test)
+npm install
+# Log in once so Wrangler can deploy to your Cloudflare account:
+npx wrangler login
+# Build + deploy (or use cf:preview to test locally on the Workers runtime):
+npm run cf:deploy
 ```
 
-Add a minimal `wrangler.toml` (the adapter's docs give the current shape;
-it sets the Worker name, `compatibility_date`, and `nodejs_compat`), and put
-the same environment variables from the section above into **Cloudflare →
-Workers & Pages → your project → Settings → Variables** (mark secrets as
-encrypted). For the simplest path, connect the GitHub repo in the Cloudflare
-dashboard and let it build on push, the same way Vercel does.
+Or, simplest, connect the GitHub repo in **Cloudflare dashboard -> Workers &
+Pages -> Create -> Import a repository**, and it builds on every push.
 
-Honest note: this adds an adapter and a config file Vercel does not need, and
-I have not been able to run the Cloudflare build from here. If you want, I can
-scaffold the `wrangler.toml` + the build scripts and you run one deploy to
-confirm. If you just want the fastest live URL, Vercel is the shortest path;
-Cloudflare is great once you want its network / pricing.
+### Set the environment variables
+
+Put the same variables from the Supabase section above into **Cloudflare ->
+your Worker -> Settings -> Variables**, marking secrets as encrypted (or use
+`npx wrangler secret put NEXT_PUBLIC_SUPABASE_URL`, etc.). The landing pages
+render with no variables at all; the dashboard/AI/payments need them.
+
+Honest note: I scaffolded and verified the config and that the normal app
+builds, but I could not run the actual Cloudflare build/deploy from here, so
+do one `npm run cf:preview` to confirm before you point a domain at it. If
+you hit an adapter-specific error, send it over and I'll fix the config.
+If you just want the fastest live URL with zero config, Vercel is still the
+shortest path.
 
 ## If `npm install` crashes your machine
 
