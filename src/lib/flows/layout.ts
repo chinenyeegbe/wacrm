@@ -2,7 +2,7 @@
  * Dagre-based auto-layout for the flow canvas.
  *
  * The canvas reads `flow_nodes.position_x` / `position_y` (added in
- * migration 010 as `INTEGER NOT NULL DEFAULT 0` — reserved precisely
+ * migration 010 as `INTEGER NOT NULL DEFAULT 0`, reserved precisely
  * for this view). Brand-new flows and every flow authored before the
  * canvas shipped have all-zero positions, which would render as a
  * single overlapping pile at the origin. This module computes
@@ -26,7 +26,7 @@ import Dagre from "@dagrejs/dagre";
 
 export interface LayoutNode {
   id: string;
-  /** Optional measured size — falls back to defaults if not provided. */
+  /** Optional measured size, falls back to defaults if not provided. */
   width?: number;
   height?: number;
 }
@@ -63,7 +63,7 @@ const DEFAULTS: Required<LayoutOptions> = {
 };
 
 /**
- * True iff every node sits at the origin — the signal that no human
+ * True iff every node sits at the origin, the signal that no human
  * has positioned this flow yet and auto-layout is safe to run.
  *
  * Why `every`, not `some`: a partially-laid-out flow (some nodes at
@@ -84,7 +84,7 @@ export function shouldAutoLayout(
  * Compute positions for every node id. Returns a map keyed by node
  * id; consumers merge it into their React-Flow nodes array. The
  * returned coordinates are the TOP-LEFT corner (matches React-Flow's
- * coordinate space — dagre internally tracks centers, we translate).
+ * coordinate space, dagre internally tracks centers, we translate).
  */
 export function autoLayout(
   nodes: LayoutNode[],
@@ -107,7 +107,7 @@ export function autoLayout(
   }
   for (const e of edges) {
     // Dagre tolerates edges to/from non-existent nodes by inserting
-    // them as zero-size — that would silently warp the layout. Skip
+    // them as zero-size, that would silently warp the layout. Skip
     // dangling edges instead; the canvas's edge derivation already
     // filters them but defending here keeps this helper standalone.
     if (g.node(e.source) && g.node(e.target)) {

@@ -9,10 +9,10 @@ Versions follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Pre-1.0, `MINOR` bumps cover new modules; `PATCH` bumps cover bug fixes
 and polish.
 
-## [0.2.2] — 2026-05-29
+## [0.2.2], 2026-05-29
 
 Flow nodes can now send media. Closes the most-requested gap from user
-feedback after the v0.2.0 Flows launch — flows were text-only and
+feedback after the v0.2.0 Flows launch, flows were text-only and
 couldn't deliver an invoice, receipt, product photo, or short demo
 video mid-conversation.
 
@@ -24,7 +24,7 @@ video mid-conversation.
   uploads to the new `flow-media` Supabase Storage bucket, and Meta
   fetches the public URL at send time. Optional caption (1024 char cap,
   supports `{{vars.X}}` interpolation); documents also take an optional
-  filename shown in the recipient's chat. Auto-advances after send —
+  filename shown in the recipient's chat. Auto-advances after send, 
   same suspend semantics as `send_message`.
   ([#156](https://github.com/ArnasDon/wacrm/pull/156))
 
@@ -32,7 +32,7 @@ video mid-conversation.
 
 Apply against your Supabase project before deploying this version:
 
-- `supabase/migrations/016_flow_media.sql` — does two things:
+- `supabase/migrations/016_flow_media.sql`, does two things:
   1. Adds `'send_media'` to the `flow_nodes.node_type` CHECK
      constraint. Without this the `send_media` node fails to save with
      a constraint violation.
@@ -40,12 +40,12 @@ Apply against your Supabase project before deploying this version:
      file-size cap, image / video / document MIME allowlist) plus
      per-user RLS policies (path prefix = `auth.uid()`). Without this
      the builder's file picker fails on upload. Same shape as the
-     `avatars` bucket from migration 008 — the bucket is **public** so
+     `avatars` bucket from migration 008, the bucket is **public** so
      Meta can fetch the URL without credentials.
 
 The migration is idempotent and safe to re-run.
 
-## [0.2.1] — 2026-05-26
+## [0.2.1], 2026-05-26
 
 Bug-fix release. Plugs a silent inbound-message drop that triggered
 when two users on the same instance saved the same WhatsApp
@@ -56,7 +56,7 @@ when two users on the same instance saved the same WhatsApp
 - **Inbound WhatsApp messages no longer silently disappear** when two
   users have claimed the same `phone_number_id`. Previously the
   webhook used `.single()` to look up the owning config, which errors
-  `PGRST116` for both 0 rows *and* ≥2 rows — the second user's save
+  `PGRST116` for both 0 rows *and* ≥2 rows, the second user's save
   put the DB into the ≥2-row state and every inbound message was
   dropped while the log misleadingly reported *"No config found for
   phone_number_id"*. Three layers of fix: `POST /api/whatsapp/config`
@@ -73,7 +73,7 @@ when two users on the same instance saved the same WhatsApp
 Apply against your Supabase project before deploying this version:
 
 - `supabase/migrations/013_whatsapp_config_phone_number_id_unique.sql`
-  — adds `UNIQUE(phone_number_id)` to `whatsapp_config`. **Fails
+, adds `UNIQUE(phone_number_id)` to `whatsapp_config`. **Fails
   loudly with a copy-pasteable resolution hint** if duplicate rows
   already exist; auto-deduping would destroy encrypted tokens, so
   the operator picks which row keeps the number. To check first:
@@ -92,12 +92,12 @@ Apply against your Supabase project before deploying this version:
 
 wacrm is intentionally **single-tenant per WhatsApp number**. RLS on
 `conversations`/`messages` is `auth.uid() = user_id`, so a second
-user physically cannot read messages routed to a different owner —
+user physically cannot read messages routed to a different owner, 
 two users sharing one number was never supported. If you need
 multiple humans handling the same inbox, run them under one shared
 account.
 
-## [0.2.0] — 2026-05-22
+## [0.2.0], 2026-05-22
 
 The **Flows** release. Adds a no-code, branching, button-driven WhatsApp
 conversation engine that runs alongside Automations. Also ships a
@@ -105,7 +105,7 @@ conversation engine that runs alongside Automations. Also ships a
 
 ### Added
 
-#### Flows — branching chatbot conversations
+#### Flows, branching chatbot conversations
 
 - **Module + schema.** New `flows`, `flow_nodes`, `flow_runs`,
   `flow_run_events` tables with partial unique indexes that enforce
@@ -133,7 +133,7 @@ conversation engine that runs alongside Automations. Also ships a
   in send_message + collect_input prompts. Per-flow run-history
   viewer at `/flows/[id]/runs`.
   ([#117](https://github.com/ArnasDon/wacrm/pull/117))
-- **Stale-run sweep cron** at `GET /api/flows/cron` — marks runs
+- **Stale-run sweep cron** at `GET /api/flows/cron`, marks runs
   past their configured timeout (default 24h) as `timed_out` so
   abandoned conversations free up the contact for new triggers.
   Reuses `AUTOMATION_CRON_SECRET`.
@@ -148,7 +148,7 @@ conversation engine that runs alongside Automations. Also ships a
   `layout.tsx` replays the choice before first paint so there's no
   flash of the default.
   ([#132](https://github.com/ArnasDon/wacrm/pull/132))
-- **Theme tokenization sweep** — every previously hard-coded
+- **Theme tokenization sweep**, every previously hard-coded
   `violet-*` Tailwind class replaced with `primary` tokens across
   ~49 files. Picking a non-violet theme now themes the whole app,
   not just the chrome.
@@ -156,7 +156,7 @@ conversation engine that runs alongside Automations. Also ships a
 
 ### Changed
 
-#### Flows — soft-GA
+#### Flows, soft-GA
 
 - **Flows is now available to every authenticated user.** The
   per-account beta gate is gone; the sidebar entry + page header
@@ -187,11 +187,11 @@ conversation engine that runs alongside Automations. Also ships a
 
 #### Engine reliability
 
-- **Atomic `execution_count` increment** via SECURITY DEFINER RPC —
+- **Atomic `execution_count` increment** via SECURITY DEFINER RPC, 
   prevents lost counts when two webhooks start runs concurrently.
   Mirrors the automations engine pattern.
   ([#124](https://github.com/ArnasDon/wacrm/pull/124))
-- **Preload all flow_nodes once per dispatch** — one SELECT per
+- **Preload all flow_nodes once per dispatch**, one SELECT per
   inbound instead of one per advance-loop iteration. A 5-node
   auto-advance chain now costs 1 round trip, not 5.
   ([#125](https://github.com/ArnasDon/wacrm/pull/125))
@@ -202,7 +202,7 @@ conversation engine that runs alongside Automations. Also ships a
 
 ### Security
 
-- **PII redacted from `reply_received` event payload** — customer
+- **PII redacted from `reply_received` event payload**, customer
   text is no longer persisted to `flow_run_events.payload`; only
   the length is. A `collect_input` prompt asking "what's your card
   number?" used to leave the PAN sitting in the events table.
@@ -224,16 +224,16 @@ conversation engine that runs alongside Automations. Also ships a
 
 Apply, in order, against your Supabase project:
 
-1. `supabase/migrations/010_flows.sql` — Flows core tables, indexes,
+1. `supabase/migrations/010_flows.sql`, Flows core tables, indexes,
    RLS policies, and the `messages` schema widening.
-2. `supabase/migrations/011_profile_beta_features.sql` — adds the
+2. `supabase/migrations/011_profile_beta_features.sql`, adds the
    `profiles.beta_features` column. Surviving for future betas;
    Flows no longer reads it.
-3. `supabase/migrations/012_flows_increment_counter.sql` — atomic
+3. `supabase/migrations/012_flows_increment_counter.sql`, atomic
    counter RPC. Without this the engine still runs but
    `flows.execution_count` is racy.
 
-Each migration is idempotent — safe to re-run if you're not sure
+Each migration is idempotent, safe to re-run if you're not sure
 whether you applied a previous one.
 
 ### Removed
@@ -245,7 +245,7 @@ whether you applied a previous one.
 
 ---
 
-## [0.1.1] — 2026-05-19
+## [0.1.1], 2026-05-19
 
 ### Added
 
@@ -260,7 +260,7 @@ whether you applied a previous one.
 - Apply `supabase/migrations/009_message_actions.sql` to your
   Supabase project. It adds `messages.reply_to_message_id` and the
   new `message_reactions` table (with RLS and realtime). The
-  migration is idempotent — safe to re-run.
+  migration is idempotent, safe to re-run.
 
 ### Changed
 

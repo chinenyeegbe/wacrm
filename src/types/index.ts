@@ -66,6 +66,169 @@ export interface ContactNote {
   created_at: string;
 }
 
+// ============================================================
+// Workspaces / agency mode (migration 019)
+// ============================================================
+
+export type WorkspaceKind = 'personal' | 'business';
+
+export interface Workspace {
+  id: string;
+  name: string;
+  owner_id: string | null;
+  kind: WorkspaceKind;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Mirrors the role union in src/lib/workspaces/roles.ts. */
+export type WorkspaceMemberRole = 'viewer' | 'agent' | 'operator' | 'owner';
+
+export interface WorkspaceMember {
+  id: string;
+  workspace_id: string;
+  user_id: string;
+  role: WorkspaceMemberRole;
+  created_at: string;
+  /** Joined from profiles when listing members. */
+  profile?: Profile;
+}
+
+// ============================================================
+// Partner / reseller network (migration 020)
+// ============================================================
+
+export type PartnerStatus = 'active' | 'suspended';
+
+export interface Partner {
+  id: string;
+  user_id: string;
+  /** Normalised shareable code (see lib/referrals/codes.ts). */
+  code: string;
+  share_bps: number;
+  referred_count: number;
+  total_earned_minor: number;
+  payout_details?: string | null;
+  status: PartnerStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Referral {
+  id: string;
+  partner_id: string;
+  workspace_id: string | null;
+  source?: string | null;
+  status: 'active' | 'churned';
+  created_at: string;
+}
+
+export type ReferralEarningStatus = 'accrued' | 'paid' | 'reversed';
+
+export interface ReferralEarning {
+  id: string;
+  partner_id: string;
+  referral_id: string | null;
+  payment_request_id: string | null;
+  gross_minor: number;
+  platform_fee_minor: number;
+  amount_minor: number;
+  share_bps: number;
+  currency: string;
+  status: ReferralEarningStatus;
+  /** Set once the earning is claimed into a payout (migration 021). */
+  payout_id?: string | null;
+  created_at: string;
+}
+
+export type PartnerPayoutStatus = 'pending' | 'paid' | 'rejected';
+
+export interface PartnerPayout {
+  id: string;
+  partner_id: string;
+  amount_minor: number;
+  currency: string;
+  destination?: string | null;
+  status: PartnerPayoutStatus;
+  note?: string | null;
+  requested_at: string;
+  resolved_at?: string | null;
+}
+
+/**
+ * How autonomous the AI is allowed to be. Human-in-the-loop is the
+ * default and safest, but businesses choose their own structure:
+ *  - 'assist', AI only drafts (inbox ✨); never auto-sends.
+ *  - 'human_loop', AI auto-answers routine chats, routes flagged ones
+ *                   (hot leads, complaints) to a human. DEFAULT.
+ *  - 'autonomous', AI handles everything itself, no human routing.
+ */
+export type AIAutonomy = 'assist' | 'human_loop' | 'autonomous';
+
+export interface AISettings {
+  id: string;
+  user_id: string;
+  business_context?: string | null;
+  ai_enabled: boolean;
+  autonomy: AIAutonomy;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================================
+// Payments (migration 018), the commission rail
+// ============================================================
+
+export type PaymentProvider = 'paystack' | 'flutterwave' | 'manual';
+
+export interface PaymentConfig {
+  id: string;
+  user_id: string;
+  provider: PaymentProvider;
+  /** Secret key, encrypted at rest (AES-256-GCM) exactly like WhatsApp tokens. */
+  secret_key?: string | null;
+  /** For 'manual': bank/mobile-money instructions sent verbatim to the customer. */
+  manual_instructions?: string | null;
+  /** Default ISO-4217 currency for new requests. */
+  default_currency: string;
+  /**
+   * Platform commission in basis points (1% = 100 bps) taken on collected
+   * payments. The whole monetization model lives here: 0 means "off"
+   * (self-hosters keep 100%); a hosted deployment sets it per its pricing.
+   */
+  platform_fee_bps: number;
+  status: 'connected' | 'disconnected';
+  created_at: string;
+  updated_at: string;
+}
+
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled';
+
+export interface PaymentRequest {
+  id: string;
+  user_id: string;
+  contact_id: string | null;
+  conversation_id: string | null;
+  /** Set when an automation raised the request, for attribution. */
+  automation_id?: string | null;
+  provider: PaymentProvider;
+  /** Provider-side reference (Paystack/Flutterwave tx ref). Idempotency key. */
+  reference: string;
+  /** Minor units (kobo/cents) to avoid float drift, like Stripe/Paystack. */
+  amount_minor: number;
+  currency: string;
+  description?: string | null;
+  /** The hosted checkout URL we send to the customer. */
+  checkout_url?: string | null;
+  status: PaymentStatus;
+  /** Commission captured at settlement, in minor units. */
+  platform_fee_minor: number;
+  paid_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  contact?: Contact;
+}
+
 export type ConversationStatus = 'open' | 'pending' | 'closed';
 
 export interface Conversation {
@@ -109,7 +272,7 @@ export interface Message {
   created_at: string;
   reply_to_message_id?: string;
   /**
-   * Only set when `content_type === 'interactive'` — the stable id of
+   * Only set when `content_type === 'interactive'`, the stable id of
    * the button or list row the customer tapped. The Flows engine uses
    * this to route the next node; the inbox bubble uses it as a styling
    * cue (renders with a "↩ button reply" affordance).
@@ -141,7 +304,7 @@ export interface WhatsAppConfig {
   /**
    * Set when POST /{phone_number_id}/register last succeeded. NULL
    * means the number was saved but never actually subscribed for
-   * webhooks on Meta's side — inbound events will be silently lost.
+   * webhooks on Meta's side, inbound events will be silently lost.
    */
   registered_at?: string;
   /** Set when POST /{waba_id}/subscribed_apps last succeeded. */
@@ -151,7 +314,7 @@ export interface WhatsAppConfig {
 }
 
 // Raw Meta status enum. We persist this verbatim from Meta (sync + webhook)
-// rather than collapsing to a local TitleCase set — distinctions like
+// rather than collapsing to a local TitleCase set, distinctions like
 // PAUSED vs DISABLED vs IN_APPEAL drive the edit/resubmit/delete flows.
 // DRAFT is the local-only state before the row is submitted to Meta.
 export type MessageTemplateStatus =
@@ -222,7 +385,7 @@ export interface Deal {
   pipeline_id: string;
   stage_id: string;
   /**
-   * Nullable after migration 004 — becomes NULL when the referenced
+   * Nullable after migration 004, becomes NULL when the referenced
    * contact is deleted (ON DELETE SET NULL). History preserved.
    */
   contact_id: string | null;
@@ -267,7 +430,7 @@ export interface BroadcastRecipient {
   id: string;
   broadcast_id: string;
   /**
-   * Nullable after migration 004 — becomes NULL when the referenced
+   * Nullable after migration 004, becomes NULL when the referenced
    * contact is deleted (ON DELETE SET NULL). History preserved; the
    * UI renders "Unknown" for orphaned rows.
    */
@@ -304,6 +467,9 @@ export type AutomationTriggerType =
 export type AutomationStepType =
   | 'send_message'
   | 'send_template'
+  | 'ai_reply'
+  | 'ai_classify'
+  | 'request_payment'
   | 'add_tag'
   | 'remove_tag'
   | 'assign_conversation'
@@ -343,6 +509,43 @@ export interface SendMessageStepConfig {
   text: string;
 }
 
+/**
+ * AI reply step (migration 017). Generates the next reply from the
+ * conversation history using a free LLM and sends it via WhatsApp, 
+ * a true 24/7 auto-responder. `instructions` steers the model for this
+ * specific automation (e.g. "only answer FAQs, never quote prices");
+ * the workspace-wide catalogue/prices live in ai_settings.business_context.
+ */
+export interface AIReplyStepConfig {
+  instructions?: string;
+}
+
+/**
+ * AI classify step (the qualifier/router). Reads the conversation and
+ * writes results into the run's context vars so downstream Condition
+ * steps can branch on them. No config needed, it always emits the same
+ * fields (ai_intent, ai_sentiment, ai_hot_lead, ai_needs_human,
+ * ai_summary). Sends nothing to the customer.
+ */
+export type AIClassifyStepConfig = Record<string, never>;
+
+/**
+ * Request-payment step (migration 018). Generates a payment link via the
+ * merchant's connected provider and sends it to the customer on WhatsApp.
+ * This is the rail that makes commission collectable: money moves through
+ * a link we mint, so the platform fee is taken at settlement instead of
+ * invoiced. `amount` and `description` may use {{vars.x}} interpolation so
+ * an AI step upstream can set the agreed price.
+ */
+export interface RequestPaymentStepConfig {
+  /** Numeric string or {{vars.amount}}. Parsed to a number at runtime. */
+  amount: string;
+  /** ISO 4217, e.g. NGN, KES, GHS, ZAR. Falls back to provider default. */
+  currency?: string;
+  /** What the customer is paying for, shown on the link + the message. */
+  description?: string;
+}
+
 export interface SendTemplateStepConfig {
   template_name: string;
   language?: string;
@@ -379,13 +582,14 @@ export type ConditionSubject =
   | 'contact_field'
   | 'tag_presence'
   | 'message_content'
-  | 'time_of_day';
+  | 'time_of_day'
+  | 'variable';
 
 export interface ConditionStepConfig {
   subject: ConditionSubject;
   /** e.g. field name, tag id, substring, or "HH:mm-HH:mm" depending on subject */
   operand?: string;
-  /** For contact_field equals / message_content contains — comparison value */
+  /** For contact_field equals / message_content contains, comparison value */
   value?: string;
 }
 
@@ -398,6 +602,9 @@ export interface SendWebhookStepConfig {
 export type AutomationStepConfig =
   | SendMessageStepConfig
   | SendTemplateStepConfig
+  | AIReplyStepConfig
+  | AIClassifyStepConfig
+  | RequestPaymentStepConfig
   | TagStepConfig
   | AssignConversationStepConfig
   | UpdateContactFieldStepConfig

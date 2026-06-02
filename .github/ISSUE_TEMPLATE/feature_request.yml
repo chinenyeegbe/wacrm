@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the idea — but read this first.
+        Thanks for the idea, but read this first.
 
         This is a **template**, not a collaborative product. The
         upstream scope is intentionally narrow, so most feature
@@ -22,7 +22,7 @@ body:
           than a bet on your specific workflow.
 
         If the feature is really for your own deployment, fork and
-        build it there — see
+        build it there, see
         [CONTRIBUTING.md](https://github.com/ArnasDon/wacrm/blob/main/CONTRIBUTING.md).
 
   - type: textarea
@@ -59,7 +59,7 @@ body:
     id: scope
     attributes:
       label: Scope
-      description: Your guess — we'll re-scope if needed.
+      description: Your guess, we'll re-scope if needed.
       options:
         - Small (a couple of hours)
         - Medium (a couple of days)

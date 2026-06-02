@@ -51,7 +51,7 @@ describe("phonesMatch", () => {
   });
 
   it("rejects very short inputs that would false-positive on tail match", () => {
-    // Only 7 digits — the last-8 fallback is gated to len>=8 on both
+    // Only 7 digits, the last-8 fallback is gated to len>=8 on both
     // sides to avoid declaring "12345" and "67890-12345" a match.
     expect(phonesMatch("1234567", "1234567")).toBe(true);
     expect(phonesMatch("1234567", "9991234567")).toBe(false);
@@ -67,8 +67,8 @@ describe("isValidE164", () => {
   it("accepts numbers 7–15 digits with optional + and non-zero start", () => {
     expect(isValidE164("+37063949836")).toBe(true);
     expect(isValidE164("37063949836")).toBe(true);
-    expect(isValidE164("+1234567")).toBe(true); // 7 digits — lower bound
-    expect(isValidE164("+123456789012345")).toBe(true); // 15 digits — upper bound
+    expect(isValidE164("+1234567")).toBe(true); // 7 digits, lower bound
+    expect(isValidE164("+123456789012345")).toBe(true); // 15 digits, upper bound
   });
 
   it("rejects numbers that start with 0 in international form", () => {
@@ -103,7 +103,7 @@ describe("phoneVariants", () => {
   });
 
   it("inserts a trunk 0 after each plausible country-code length", () => {
-    // Input "37063949836" — CC-1 → "3" + "0" + "7063949836",
+    // Input "37063949836", CC-1 → "3" + "0" + "7063949836",
     //                       CC-3 → "370" + "0" + "63949836".
     // CC-2 is skipped because "063949836" already starts with 0.
     const out = phoneVariants("37063949836");
@@ -117,7 +117,7 @@ describe("phoneVariants", () => {
   });
 
   it("removes a leading 0 after the country code when present", () => {
-    // Input "370063949836" — CC-2 strips one leading 0 from
+    // Input "370063949836", CC-2 strips one leading 0 from
     // "0063949836" → "37" + "063949836" = "37063949836". Only one zero
     // comes off per pass; that's what the live retry loop needs.
     const out = phoneVariants("370063949836");

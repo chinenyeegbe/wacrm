@@ -16,6 +16,21 @@ import type {
 } from '@/types'
 import { supabaseAdmin } from './admin-client'
 import { engineSendText, engineSendTemplate } from './meta-send'
+import { chatComplete, isAIConfigured } from '@/lib/ai/client'
+import { buildReplyPrompt, buildClassifyPrompt, parseClassification } from '@/lib/ai/prompts'
+import {
+  createCheckout,
+  paymentMessage,
+  computePlatformFee,
+} from '@/lib/payments/providers'
+import { parseAmountToMinor, generateReference } from '@/lib/payments/amount'
+import { decrypt } from '@/lib/whatsapp/encryption'
+import type { AIReplyStepConfig, RequestPaymentStepConfig } from '@/types'
+
+// How many recent messages to feed the model for an automated reply.
+// Matches the inbox suggest_reply budget, enough context, safely inside
+// free-tier token limits.
+const AI_REPLY_HISTORY_LIMIT = 15
 
 // ------------------------------------------------------------
 // Public API
@@ -44,7 +59,7 @@ export interface DispatchInput {
 /**
  * Fire all active automations matching the given trigger for a user.
  *
- * Must never throw — callers use fire-and-forget from the webhook.
+ * Must never throw, callers use fire-and-forget from the webhook.
  * All errors are caught and logged; per-automation failures are
  * recorded into automation_logs with status='failed'.
  */
@@ -161,7 +176,7 @@ async function executeAutomation(automation: Automation, input: DispatchInput) {
 
   // Atomic counter update via the SQL function from migration 007.
   // Doing this with a client-side read-modify-write raced when the
-  // same automation fired for two contacts simultaneously — both
+  // same automation fired for two contacts simultaneously, both
   // would read N and both write N+1, losing one count permanently.
   const { error: rpcErr } = await db.rpc('increment_automation_execution_count', {
     p_automation_id: automation.id,
@@ -289,7 +304,7 @@ async function executeStepsFrom(args: ExecuteArgs): Promise<void> {
   if (args.parentStepId === null) {
     await appendResults(args.logId, results, status, errorMessage)
   } else {
-    // Nested branch — just append results; parent scope decides final status.
+    // Nested branch, just append results; parent scope decides final status.
     await appendResults(args.logId, results, null, errorMessage)
   }
 }
@@ -345,6 +360,231 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
         params,
       })
       return `template sent via Meta (${whatsapp_message_id})`
+    }
+
+    case 'ai_reply': {
+      const cfg = step.step_config as AIReplyStepConfig
+      if (!args.contactId) throw new Error('ai_reply needs a contact')
+      if (!isAIConfigured()) {
+        throw new Error('AI not configured (set OPENROUTER_API_KEY)')
+      }
+
+      const conversationId = await resolveConversationId(args)
+
+      // Respect the workspace master switch and autonomy level. These let a
+      // business choose its own structure: the master switch pauses every
+      // auto-responder at once; 'assist' autonomy keeps AI as a draft-only
+      // helper (never auto-sends) while still powering the inbox ✨ button.
+      const { data: aiSettings } = await db
+        .from('ai_settings')
+        .select('business_context, ai_enabled, autonomy')
+        .eq('user_id', args.automation.user_id)
+        .maybeSingle()
+      if (aiSettings && aiSettings.ai_enabled === false) {
+        return 'skipped: AI disabled for this workspace'
+      }
+      if (aiSettings?.autonomy === 'assist') {
+        return 'skipped: AI is in assist-only mode (drafts, never auto-sends)'
+      }
+
+      const { data: contact } = await db
+        .from('contacts')
+        .select('name, company')
+        .eq('id', args.contactId)
+        .maybeSingle()
+
+      const { data: history } = await db
+        .from('messages')
+        .select('sender_type, content_text, content_type, created_at')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: false })
+        .limit(AI_REPLY_HISTORY_LIMIT)
+
+      const turns = (history ?? [])
+        .slice()
+        .reverse()
+        .filter((m) => m.content_text)
+        .map((m) => ({
+          fromCustomer: m.sender_type === 'customer',
+          text:
+            m.content_type === 'text'
+              ? (m.content_text as string)
+              : `[${m.content_type}] ${m.content_text}`,
+        }))
+
+      // Per-step instructions are appended to the workspace context so a
+      // single automation can be scoped ("only answer FAQs") without
+      // touching the global catalogue.
+      const businessContext = [aiSettings?.business_context, cfg.instructions]
+        .filter((s): s is string => !!s && s.trim().length > 0)
+        .join('\n\n')
+
+      const { system, messages } = buildReplyPrompt({
+        contactName: contact?.name,
+        contactCompany: contact?.company,
+        history: turns,
+        businessContext: businessContext || null,
+      })
+
+      const reply = await chatComplete({ system, messages, temperature: 0.6 })
+      const text = reply.trim()
+      if (!text) throw new Error('AI returned an empty reply')
+
+      const { whatsapp_message_id } = await engineSendText({
+        userId: args.automation.user_id,
+        conversationId,
+        contactId: args.contactId,
+        text,
+      })
+      return `AI reply sent via Meta (${whatsapp_message_id})`
+    }
+
+    case 'ai_classify': {
+      // The qualifier/router. Reads the conversation, classifies it, and
+      // writes results into the run's context vars so downstream Condition
+      // steps can branch (subject 'variable'). Sends nothing to the
+      // customer, pure routing.
+      if (!isAIConfigured()) {
+        throw new Error('AI not configured (set OPENROUTER_API_KEY)')
+      }
+      const conversationId = await resolveConversationId(args)
+
+      const { data: aiSettings } = await db
+        .from('ai_settings')
+        .select('business_context')
+        .eq('user_id', args.automation.user_id)
+        .maybeSingle()
+
+      const { data: history } = await db
+        .from('messages')
+        .select('sender_type, content_text, content_type, created_at')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: false })
+        .limit(AI_REPLY_HISTORY_LIMIT)
+
+      const turns = (history ?? [])
+        .slice()
+        .reverse()
+        .filter((m) => m.content_text)
+        .map((m) => ({
+          fromCustomer: m.sender_type === 'customer',
+          text:
+            m.content_type === 'text'
+              ? (m.content_text as string)
+              : `[${m.content_type}] ${m.content_text}`,
+        }))
+
+      const { system, messages } = buildClassifyPrompt({
+        history: turns,
+        businessContext: aiSettings?.business_context ?? null,
+      })
+
+      // Low temperature, we want stable, repeatable labels, not creativity.
+      const raw = await chatComplete({ system, messages, temperature: 0, maxTokens: 200 })
+      const c = parseClassification(raw)
+
+      // Persist into context.vars so Condition steps (and webhooks) can read
+      // them via {{vars.ai_intent}} etc. Mutating args.context here flows to
+      // the nested executeStepsFrom calls, which pass the same context object.
+      args.context.vars = {
+        ...(args.context.vars ?? {}),
+        ai_intent: c.intent,
+        ai_sentiment: c.sentiment,
+        ai_hot_lead: String(c.hot_lead),
+        ai_needs_human: String(c.needs_human),
+        ai_summary: c.summary,
+      }
+
+      return `classified: intent=${c.intent}, sentiment=${c.sentiment}, hot_lead=${c.hot_lead}, needs_human=${c.needs_human}`
+    }
+
+    case 'request_payment': {
+      // The commission rail: mint a payment link via the merchant's PSP,
+      // persist it with attribution (conversation + automation), and send
+      // it to the customer on WhatsApp. The platform fee is recorded now
+      // and confirmed at settlement by the PSP webhook.
+      const cfg = step.step_config as RequestPaymentStepConfig
+      if (!args.contactId) throw new Error('request_payment needs a contact')
+
+      const amountMinor = parseAmountToMinor(interpolate(cfg.amount ?? '', args))
+      if (amountMinor == null) {
+        throw new Error(`request_payment: invalid amount "${cfg.amount}"`)
+      }
+
+      const { data: payCfg } = await db
+        .from('payment_config')
+        .select('*')
+        .eq('user_id', args.automation.user_id)
+        .maybeSingle()
+      if (!payCfg) {
+        throw new Error('payments not configured (Settings → Payments)')
+      }
+
+      const { data: contact } = await db
+        .from('contacts')
+        .select('id, email')
+        .eq('id', args.contactId)
+        .eq('user_id', args.automation.user_id)
+        .maybeSingle()
+      if (!contact) throw new Error('contact not found for this user')
+
+      const conversationId = await resolveConversationId(args)
+      const currency = cfg.currency || payCfg.default_currency
+      const description = cfg.description
+        ? interpolate(cfg.description, args)
+        : undefined
+      const reference = generateReference()
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://wacrm.tech'
+
+      const checkout = await createCheckout({
+        provider: payCfg.provider,
+        secretKey: payCfg.secret_key ? decrypt(payCfg.secret_key) : null,
+        amountMinor,
+        currency,
+        reference,
+        // PSPs require an email; synthesise a stable placeholder when the
+        // contact has none (common for WhatsApp-only customers).
+        email: contact.email || `${reference}@pay.wacrm.tech`,
+        description,
+        callbackUrl: `${siteUrl}/pay/return`,
+        manualInstructions: payCfg.manual_instructions ?? undefined,
+      })
+
+      const platformFeeMinor = computePlatformFee(
+        amountMinor,
+        payCfg.platform_fee_bps ?? 0,
+      )
+
+      await db.from('payment_requests').insert({
+        user_id: args.automation.user_id,
+        contact_id: args.contactId,
+        conversation_id: conversationId,
+        automation_id: args.automation.id,
+        provider: payCfg.provider,
+        reference: checkout.providerReference,
+        amount_minor: amountMinor,
+        currency,
+        description: description ?? null,
+        checkout_url: checkout.checkoutUrl,
+        status: 'pending',
+        platform_fee_minor: platformFeeMinor,
+      })
+
+      const text = paymentMessage(checkout, { amountMinor, currency, description })
+      const { whatsapp_message_id } = await engineSendText({
+        userId: args.automation.user_id,
+        conversationId,
+        contactId: args.contactId,
+        text,
+      })
+
+      // Expose the reference downstream (e.g. webhook/condition use).
+      args.context.vars = {
+        ...(args.context.vars ?? {}),
+        payment_reference: checkout.providerReference,
+      }
+
+      return `payment request ${checkout.providerReference} sent via Meta (${whatsapp_message_id})`
     }
 
     case 'add_tag': {
@@ -456,7 +696,7 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
  * Pick the conversation a send-type step should use. Prefer the id the
  * webhook handed us (it's the one that just got the inbound message);
  * fall back to the contact's conversation for resumed/wait paths and
- * manual engine POSTs. Throws if none exists — send steps have
+ * manual engine POSTs. Throws if none exists, send steps have
  * no meaningful target without a conversation.
  */
 async function resolveConversationId(args: ExecuteArgs): Promise<string> {
@@ -513,8 +753,18 @@ async function evaluateCondition(cfg: ConditionStepConfig, args: ExecuteArgs): P
       const text = (args.context.message_text ?? '').toString()
       return text.toLowerCase().includes((cfg.value ?? '').toLowerCase())
     }
+    case 'variable': {
+      // Branch on a run variable (e.g. one written by an ai_classify step).
+      // operand = variable name (ai_intent, ai_hot_lead, …); value =
+      // expected value. Equality is case-insensitive string compare, so
+      // booleans stored as "true"/"false" and labels like "buying" both work.
+      if (!cfg.operand) return false
+      const actual = args.context.vars?.[cfg.operand]
+      if (actual == null) return false
+      return String(actual).toLowerCase() === String(cfg.value ?? '').toLowerCase()
+    }
     case 'time_of_day': {
-      // operand form "HH:mm-HH:mm" — true if now is within that window
+      // operand form "HH:mm-HH:mm", true if now is within that window
       // (supports over-midnight ranges like "18:00-09:00").
       const [from, to] = (cfg.operand ?? '').split('-')
       if (!from || !to) return false
@@ -565,7 +815,7 @@ async function appendResults(
     ...newItems,
   ]
   const update: Record<string, unknown> = { steps_executed: merged }
-  // Only overwrite status on the outermost scope — nested branches pass null.
+  // Only overwrite status on the outermost scope, nested branches pass null.
   if (status !== null) {
     update.status = status
   }

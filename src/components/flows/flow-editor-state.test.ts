@@ -85,7 +85,7 @@ describe("defaultConfigFor", () => {
     expect(cfg.var_key).toMatch(/^[a-zA-Z_][a-zA-Z0-9_]*$/);
   });
 
-  it("end's default is an empty object (terminal — no config)", () => {
+  it("end's default is an empty object (terminal, no config)", () => {
     expect(defaultConfigFor("end")).toEqual({});
   });
 });

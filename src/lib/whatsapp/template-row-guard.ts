@@ -2,14 +2,14 @@
  * Minimal shape check for a `message_templates` row loaded via Supabase.
  *
  * Supabase queries return `any` for untyped clients, so the routes
- * cast with `as MessageTemplate`. That cast is a lie — a row from
+ * cast with `as MessageTemplate`. That cast is a lie, a row from
  * sync, a webhook race, or a malformed insert can land without the
  * fields the send-builder needs. When that happens, the builder
  * crashes deep inside the call stack with a TypeError that looks
  * like a 500 to the user and gives no hint about which row was bad.
  *
  * Catch it at the boundary: assert the few fields the send path
- * actually requires (name + language + body_text — strings) and
+ * actually requires (name + language + body_text, strings) and
  * fail fast with a specific message naming the row id.
  *
  * Per-property validators (buttons shape, sample_values shape) live
@@ -31,7 +31,7 @@ export function isMessageTemplate(row: unknown): row is MessageTemplate {
 }
 
 /**
- * Convenience wrapper for routes — narrows or throws a descriptive
+ * Convenience wrapper for routes, narrows or throws a descriptive
  * Error the route can render as a 500 with the row id mentioned.
  */
 export function assertMessageTemplate(
@@ -44,7 +44,7 @@ export function assertMessageTemplate(
         ? String((row as { id: unknown }).id)
         : '(unknown id)';
     throw new Error(
-      `Malformed message_templates row ${id} in ${context} — missing required fields (id, user_id, name, body_text).`,
+      `Malformed message_templates row ${id} in ${context}, missing required fields (id, user_id, name, body_text).`,
     );
   }
   return row;

@@ -8,7 +8,7 @@
     falls in empty space; no icon is ever cut in half by a seam.
   - Icon shapes are taken verbatim from lucide-react (which the app already
     ships) so they sit visually consistent with every other icon in the UI.
-  - Stroke color is slate-500 (#64748b) at 22% opacity — visible against
+  - Stroke color is slate-500 (#64748b) at 22% opacity, visible against
     bg-slate-950 (#020617) without competing with message text.
   - All shapes use stroke + fill:none + round caps to match the lucide
     line-art style.

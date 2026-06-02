@@ -20,9 +20,9 @@
  *
  * What does NOT live here:
  *   - List-view UI state (expanded card set, scroll refs,
- *     flash-on-jump) — those are list-only and stay in
+ *     flash-on-jump), those are list-only and stay in
  *     `flow-builder.tsx`.
- *   - Canvas-view UI state (selected node id, side-sheet open) —
+ *   - Canvas-view UI state (selected node id, side-sheet open), 
  *     those are canvas-only and stay in `flow-canvas.tsx`.
  *
  * `removeNode` does NOT auto-clean inbound edges. The list-view's
@@ -76,7 +76,7 @@ export interface FlowEditorContextValue {
   /**
    * Dirty-tracking React setState. Flips `dirty` on every call. Used
    * by the list view's existing subcomponents (Header, TriggerPanel,
-   * EntryPicker) which mutate multiple fields atomically — granular
+   * EntryPicker) which mutate multiple fields atomically, granular
    * setters below would force them to fan out the update.
    */
   setState: (
@@ -106,7 +106,7 @@ export interface FlowEditorContextValue {
 
   /**
    * Transient "look here" signal. Set when the validation panel's
-   * issue is clicked — both views subscribe: list scrolls the row
+   * issue is clicked, both views subscribe: list scrolls the row
    * into view and flashes its border, canvas pans the viewport to
    * the node and flashes its card. Auto-clears after 1600ms so the
    * flash is a one-shot.
@@ -120,7 +120,7 @@ export interface FlowEditorContextValue {
 }
 
 // ============================================================
-// Helpers — node_key generation + per-type default configs
+// Helpers, node_key generation + per-type default configs
 // ============================================================
 
 export function uniqueNodeKey(base: string, existing: BuilderNode[]): string {
@@ -272,7 +272,7 @@ export function FlowEditorProvider({
   );
 
   // Browser-level reload / tab-close / external-link guard. SPA
-  // navigation (sidebar links, back button) isn't covered — Next 16
+  // navigation (sidebar links, back button) isn't covered, Next 16
   // routes through the App Router and beforeunload doesn't fire on
   // client-side route changes. That's a follow-up; this catches the
   // accidental refresh / closed-window class of data loss.
@@ -347,7 +347,7 @@ export function FlowEditorProvider({
       setActivating(true);
       try {
         // Always save first so the activation validator sees the
-        // latest state — the user shouldn't have to remember "save
+        // latest state, the user shouldn't have to remember "save
         // then activate".
         if (next === "active") {
           await save();

@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # Runtime + dev dependencies. Weekly on Mondays — keeps the noise
+  # Runtime + dev dependencies. Weekly on Mondays, keeps the noise
   # predictable and aligns with a normal review cycle.
   - package-ecosystem: npm
     directory: "/"

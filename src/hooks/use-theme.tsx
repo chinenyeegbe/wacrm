@@ -17,7 +17,7 @@ import {
 } from "@/lib/themes";
 
 /**
- * ThemeProvider — wraps the whole app, owns the active theme state.
+ * ThemeProvider, wraps the whole app, owns the active theme state.
  *
  * The boot script in `src/app/layout.tsx` has already applied
  * `document.documentElement.dataset.theme` before React hydrates, so
@@ -27,7 +27,7 @@ import {
  *
  * Persistence is localStorage only (device-scoped). A future
  * follow-up could mirror to `profiles.preferences` for cross-device
- * sync, but a per-device choice is also defensible — your phone may
+ * sync, but a per-device choice is also defensible, your phone may
  * deserve a different theme than your laptop.
  */
 
@@ -70,7 +70,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Sync from other tabs — if you change your theme in tab A, tab B
+  // Sync from other tabs, if you change your theme in tab A, tab B
   // catches up without a refresh.
   useEffect(() => {
     function onStorage(e: StorageEvent) {
@@ -94,7 +94,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
   if (!ctx) {
-    // Fallback for components rendered outside the provider — return a
+    // Fallback for components rendered outside the provider, return a
     // no-op setter so callers don't crash. The boot script still
     // applied the right CSS attribute, so visually the page is fine.
     return {

@@ -47,7 +47,7 @@ describe('registerPhoneNumber', () => {
   });
 
   it('treats "already registered" as success (idempotent re-save)', async () => {
-    // This is the silent-failure case we're guarding against — Meta
+    // This is the silent-failure case we're guarding against, Meta
     // returns 400 + "Phone number is already registered" when the
     // number was previously registered to THIS app. From the user's
     // POV that's the desired outcome, surface it as success.

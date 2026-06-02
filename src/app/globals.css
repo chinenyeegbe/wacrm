@@ -35,6 +35,12 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  /* Deep state (rust) + tinted surfaces, exposes the existing
+     --primary-* tokens as Tailwind utilities (bg-primary-hover,
+     text-primary-hover, bg-primary-soft, …). */
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-2: var(--primary-soft-2);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -54,22 +60,22 @@
  * 5 dark themes sharing structure, swapping only the primary
  * accent (and a tiny hue rotation on the slate base). Switched
  * at runtime by setting `document.documentElement.dataset.theme`
- * — see ThemeProvider + the inline boot script in layout.tsx.
+ *, see ThemeProvider + the inline boot script in layout.tsx.
  *
- * `:root` mirrors Violet so default visitors render correctly
- * before JS runs. `[data-theme="violet"]` is included for the
- * explicit-select path (settings UI sets it after a pick).
+ * `:root` mirrors Moldlane (the brand default) so first-paint
+ * renders correctly before JS runs. Each `[data-theme="..."]`
+ * block (including moldlane) is the explicit-select path the
+ * settings UI sets after a pick.
  *
  * The three `--primary-*` extras (hover / soft / soft-2) are
- * new — used for hovered primary buttons and tinted-primary
+ * new, used for hovered primary buttons and tinted-primary
  * surfaces (sidebar active pill, validation badges). Components
  * that don't use them remain backward-compatible.
  *
  * Token shapes come straight from the design handoff at
- * project/Color Themes.html — change one, change the other.
+ * project/Color Themes.html, change one, change the other.
  * ============================================================ */
 
-:root,
 html[data-theme="violet"] {
   --background: oklch(0.13 0.01 260);
   --foreground: oklch(0.985 0 0);
@@ -256,6 +262,57 @@ html[data-theme="rose"] {
   --sidebar-ring: oklch(0.645 0.22 16);
 }
 
+/* ------------------------------------------------------------
+ * Moldlane, the brand theme (default). A LIGHT, Notion-esque,
+ * earthy system:
+ *   bone  #F7F5F0  → canvas (--background)
+ *   ink   warm near-black → text (--foreground)
+ *   terracotta #C87A50 → primary accent
+ *   rust  #B3543A → primary's deep state (hover/active/emphasis)
+ *   sage  #7A9A85 → secondary / positive / money (chart-2)
+ * Restraint is the point: one warm accent, sage used sparingly for
+ * positive signals, warm-neutral grays for structure (never cold
+ * slate). Values are oklch to match the rest of the file.
+ * ------------------------------------------------------------ */
+:root,
+html[data-theme="moldlane"] {
+  --background: oklch(0.967 0.006 90);          /* bone F7F5F0 */
+  --foreground: oklch(0.275 0.012 60);          /* warm ink */
+  --card: oklch(0.995 0.003 90);                /* near-white, warm */
+  --card-foreground: oklch(0.275 0.012 60);
+  --popover: oklch(0.995 0.003 90);
+  --popover-foreground: oklch(0.275 0.012 60);
+  --primary: oklch(0.645 0.105 52);             /* terracotta C87A50 */
+  --primary-foreground: oklch(0.985 0.004 90);  /* bone-white on terracotta */
+  --primary-hover: oklch(0.52 0.125 38);        /* rust B3543A (deeper) */
+  --primary-soft: oklch(0.645 0.105 52 / 0.12);
+  --primary-soft-2: oklch(0.645 0.105 52 / 0.2);
+  --secondary: oklch(0.93 0.008 85);            /* warm taupe surface */
+  --secondary-foreground: oklch(0.3 0.012 60);
+  --muted: oklch(0.93 0.008 85);
+  --muted-foreground: oklch(0.52 0.014 65);     /* warm gray text */
+  --accent: oklch(0.91 0.012 80);               /* hover surface */
+  --accent-foreground: oklch(0.3 0.012 60);
+  --destructive: oklch(0.55 0.2 27);            /* clear error red, distinct from terracotta */
+  --border: oklch(0.89 0.008 80);
+  --input: oklch(0.89 0.008 80);
+  --ring: oklch(0.645 0.105 52);
+  --chart-1: oklch(0.645 0.105 52);             /* terracotta */
+  --chart-2: oklch(0.62 0.045 158);             /* sage, positive / money */
+  --chart-3: oklch(0.52 0.125 38);              /* rust */
+  --chart-4: oklch(0.74 0.09 75);               /* warm ochre */
+  --chart-5: oklch(0.55 0.02 65);               /* warm gray */
+  --radius: 0.5rem;
+  --sidebar: oklch(0.945 0.008 88);             /* faint warm gray, just off canvas */
+  --sidebar-foreground: oklch(0.3 0.012 60);
+  --sidebar-primary: oklch(0.645 0.105 52);
+  --sidebar-primary-foreground: oklch(0.985 0.004 90);
+  --sidebar-accent: oklch(0.91 0.012 80);
+  --sidebar-accent-foreground: oklch(0.3 0.012 60);
+  --sidebar-border: oklch(0.89 0.008 80);
+  --sidebar-ring: oklch(0.645 0.105 52);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -265,5 +322,35 @@ html[data-theme="rose"] {
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* ------------------------------------------------------------
+ * Scroll reveal (the <Reveal> marketing primitive).
+ *
+ * Progressive enhancement: the hidden "from" state ONLY applies under
+ * html.js (set by the boot script before first paint). With JS off, the
+ * content is visible and unstyled, so it is SEO/no-JS safe and never
+ * flashes. The Reveal component flips data-shown="true" when the element
+ * scrolls into view; reduced-motion users get the content with no movement.
+ * ------------------------------------------------------------ */
+[data-reveal] {
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+}
+[data-reveal][data-shown="true"] {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

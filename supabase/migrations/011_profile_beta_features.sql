@@ -22,7 +22,7 @@
 -- out of every beta feature on apply. NOT NULL keeps callers from
 -- having to defend against `beta_features == null` at every site.
 --
--- Idempotent — safe to run multiple times.
+-- Idempotent, safe to run multiple times.
 -- ============================================================
 
 ALTER TABLE profiles

@@ -19,8 +19,8 @@ interface Profile {
   role: string | null;
   /**
    * Opted-in beta feature keys for this account. No current feature
-   * reads this — Flows was the last user and went to soft-GA in PR
-   * #134 — but the column survives for future beta gates.
+   * reads this, Flows was the last user and went to soft-GA in PR
+   * #134, but the column survives for future beta gates.
    */
   beta_features: string[];
 }
@@ -38,13 +38,13 @@ interface AuthContextValue {
   /**
    * Profile-row loading. Stays true until `fetchProfile` settles
    * (success, missing row, or error). Code that branches on
-   * `profile.beta_features` MUST gate on this — otherwise it sees the
+   * `profile.beta_features` MUST gate on this, otherwise it sees the
    * `{ loading: false, profile: null }` window during initial load
    * and may take the "not opted in" branch incorrectly.
    */
   profileLoading: boolean;
   signOut: () => Promise<void>;
-  /** Re-fetch the current user's profile row — call after a save from
+  /** Re-fetch the current user's profile row, call after a save from
    *  the settings form so header/sidebar reflect the change without a
    *  full page reload. */
   refreshProfile: () => Promise<void>;
@@ -53,7 +53,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 /**
- * AuthProvider — wrap this around the dashboard layout.
+ * AuthProvider, wrap this around the dashboard layout.
  * Makes ONE getSession() call for the whole tree instead of one per
  * component, avoiding internal lock contention in the Supabase client.
  */
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Tracked separately from `loading`. The session settles fast (one
   // local cookie read); the profile fetch crosses the network and
   // settles later. Callers that gate on `profile.*` need to know which
-  // window they're in — see the type doc above.
+  // window they're in, see the type doc above.
   const [profileLoading, setProfileLoading] = useState(true);
 
   // Shared across init, auth-state-change listener, and the exposed
@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data) {
         // `beta_features` is `NOT NULL DEFAULT ARRAY[]` in the DB, but
         // narrow defensively in case the column hasn't been migrated yet
-        // (older deployments running 011 lazily) — `null` reads as no
+        // (older deployments running 011 lazily), `null` reads as no
         // opt-ins, which is the safe default for any future beta gate.
         setProfile({
           ...data,
@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(currentUser);
 
         if (currentUser) {
-          // Don't block session loading on profile fetch — chrome
+          // Don't block session loading on profile fetch, chrome
           // (header, sidebar) can render from the user object alone,
           // profile enriches async. Callers that need to branch on
           // profile data gate on `profileLoading` instead.
@@ -201,7 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 /**
- * useAuth — read the shared auth state from context.
+ * useAuth, read the shared auth state from context.
  * Must be used inside an <AuthProvider>.
  */
 export function useAuth(): AuthContextValue {

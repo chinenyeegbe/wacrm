@@ -6,7 +6,7 @@ on:
   push:
     branches: [main]
 
-# Cancel older CI runs for the same branch when a new commit arrives —
+# Cancel older CI runs for the same branch when a new commit arrives, 
 # saves minutes when someone pushes a stack of fixes to one PR.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     # Dummy env vars so `next build` doesn't fail when it reads the
     # public Supabase config at build time. These never leave CI and
-    # never hit a real service — they just satisfy the `!` non-null
+    # never hit a real service, they just satisfy the `!` non-null
     # assertions in the client factories. ENCRYPTION_KEY and
     # META_APP_SECRET are read at module-load by lib/whatsapp/*; the
     # test suite asserts behaviour around these values, so any non-

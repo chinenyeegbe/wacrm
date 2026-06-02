@@ -1,6 +1,6 @@
-# wacrm — CRM Template for WhatsApp
+# wacrm, CRM Template for WhatsApp
 
-> Self-hostable CRM template for WhatsApp® — shared inbox, contacts,
+> Self-hostable CRM template for WhatsApp®, shared inbox, contacts,
 > sales pipelines, broadcasts, and no-code automations. Fork it, brand
 > it, host it.
 
@@ -14,38 +14,52 @@
 
 The marketing site and self-host docs live in a separate repo:
 [ArnasDon/wacrm-site](https://github.com/ArnasDon/wacrm-site)
-([wacrm.tech](https://wacrm.tech)). This repo is the product —
+([wacrm.tech](https://wacrm.tech)). This repo is the product, 
 clone or fork it to run your own CRM.
+
+> **New here / feeling lost?** Read
+> **[docs/what-is-this.md](./docs/what-is-this.md)** first, a plain-English
+> explainer with journey maps and flowcharts of how the whole system fits
+> together (the AI employee, payments, and how it makes money). The growth
+> plan is in [`STRATEGY.md`](./STRATEGY.md).
+>
+> **Want a live URL to test on your phone?** See
+> **[DEPLOY.md](./DEPLOY.md)** (Vercel + Supabase, free).
 
 ## What you get out of the box
 
-- **Shared inbox** on the official WhatsApp Business API — multiple
+- **Shared inbox** on the official WhatsApp Business API, multiple
   agents working one number, per-conversation assignment, status, and
   notes.
 - **Contacts + tags + custom fields**, CSV import, deduplication.
 - **Sales pipelines** (Kanban) with deals linked to conversations.
 - **Broadcasts** with Meta-approved templates, delivery + read
   tracking, per-recipient variable substitution.
-- **No-code automations** — triggers on inbound messages, new
+- **No-code automations**, triggers on inbound messages, new
   contacts, keywords, or schedule; conditional branches, waits,
   tags, webhooks. Visual builder.
-- **Real-time dashboard** — response times, daily volume, pipeline
+- **AI assistant on free LLMs**, suggest the next reply, rewrite a
+  draft, and generate broadcast + social copy, all matched to the
+  customer's language. Runs on free models (OpenRouter / Nvidia
+  Nemotron), one env var, $0 to start. See [`docs/ai.md`](./docs/ai.md)
+  and the growth plan in [`STRATEGY.md`](./STRATEGY.md).
+- **Real-time dashboard**, response times, daily volume, pipeline
   value, cross-module activity feed.
-- **Account management** — email, password, avatar, global sign-out.
+- **Account management**, email, password, avatar, global sign-out.
 
 ## Why fork this?
 
 This is a **template**, not a product. Forking means you get:
 
-- **Full ownership** — your code, your Supabase project, your domain,
+- **Full ownership**, your code, your Supabase project, your domain,
   your data. No SaaS lock-in, no seat pricing, no trust dance.
-- **Full customisation** — add the fields your team needs, remove the
+- **Full customisation**, add the fields your team needs, remove the
   modules you don't, redesign anything. The stack is boring on
   purpose (Next.js + Supabase + Tailwind) so the learning curve is
   short.
-- **Zero ops to start** — Hostinger Managed Node.js deploys a fork in
+- **Zero ops to start**, Hostinger Managed Node.js deploys a fork in
   a few clicks. No Docker, no Kubernetes, no infra team needed.
-- **Real security primitives** — token encryption (AES-256-GCM), RLS
+- **Real security primitives**, token encryption (AES-256-GCM), RLS
   on every table, HMAC-verified webhooks, CSP, rate limiting, CI
   typecheck/build on every PR.
 
@@ -68,8 +82,8 @@ Open <http://localhost:3000>. You'll be redirected to `/login` (or
 
 ## Documentation
 
-Full self-host documentation — Supabase migrations, WhatsApp Business
-API config, and production deploy — lives at
+Full self-host documentation, Supabase migrations, WhatsApp Business
+API config, and production deploy, lives at
 **[wacrm.tech/docs](https://wacrm.tech/docs)**
 (source: [ArnasDon/wacrm-site](https://github.com/ArnasDon/wacrm-site)).
 
@@ -84,13 +98,13 @@ Key pages:
 
 ## Stack
 
-- **App** — Next.js 16 (App Router), React 19, TypeScript, Tailwind v4.
-- **Data** — Supabase (Postgres + Auth + Storage + RLS).
-- **WhatsApp** — Meta Cloud API (official WhatsApp Business API).
+- **App**, Next.js 16 (App Router), React 19, TypeScript, Tailwind v4.
+- **Data**, Supabase (Postgres + Auth + Storage + RLS).
+- **WhatsApp**, Meta Cloud API (official WhatsApp Business API).
 
 ## Contributing
 
-This is a template, not a collaborative product — the expected flow is
+This is a template, not a collaborative product, the expected flow is
 fork → customise → deploy, **not** upstream contribution. Bug reports
 and security issues are welcome; feature PRs often belong in your fork
 rather than here. Details in

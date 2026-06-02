@@ -1,5 +1,5 @@
 -- ============================================================
--- Idempotent migration — safe to run multiple times.
+-- Idempotent migration, safe to run multiple times.
 -- Uses IF NOT EXISTS for tables/indexes and DROP IF EXISTS
 -- for policies/triggers (Postgres has no CREATE POLICY IF NOT EXISTS).
 -- ============================================================
@@ -349,7 +349,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Apply to tables with updated_at — drop existing triggers first to avoid conflicts
+-- Apply to tables with updated_at, drop existing triggers first to avoid conflicts
 DROP TRIGGER IF EXISTS set_updated_at ON profiles;
 DROP TRIGGER IF EXISTS set_updated_at ON contacts;
 DROP TRIGGER IF EXISTS set_updated_at ON conversations;
@@ -370,7 +370,7 @@ CREATE TRIGGER set_updated_at BEFORE UPDATE ON broadcasts FOR EACH ROW EXECUTE F
 -- AUTO-CREATE PROFILE ON USER SIGNUP
 -- Uses SECURITY DEFINER with owner=postgres (bypasses RLS).
 -- EXCEPTION block ensures signup still succeeds even if profile
--- insert fails — profile can be created later if needed.
+-- insert fails, profile can be created later if needed.
 -- ============================================================
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 DROP FUNCTION IF EXISTS public.handle_new_user();

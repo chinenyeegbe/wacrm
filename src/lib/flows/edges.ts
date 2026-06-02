@@ -5,7 +5,7 @@
  * list row / condition branch carries its own `next_node_key`). The
  * canvas needs them as a separate `{ source, target, label,
  * sourceHandle }` list to render arrows, and the labels need to be
- * meaningful — a `send_buttons` node with three buttons isn't useful
+ * meaningful, a `send_buttons` node with three buttons isn't useful
  * on the canvas if the three outgoing arrows are unlabeled.
  *
  * Why this lives in lib/flows (not next to flow-canvas.tsx): the
@@ -25,7 +25,7 @@
 import type { BuilderNode } from "@/components/flows/shared";
 
 export interface CanvasEdge {
-  /** Stable per-edge id — required by React-Flow. */
+  /** Stable per-edge id, required by React-Flow. */
   id: string;
   /** node_key of the source node. */
   source: string;
@@ -140,7 +140,7 @@ export function deriveCanvasEdges(nodes: BuilderNode[]): CanvasEdge[] {
 
       case "handoff":
       case "end":
-        // Terminal nodes — no outgoing edges.
+        // Terminal nodes, no outgoing edges.
         break;
     }
   }
@@ -149,18 +149,18 @@ export function deriveCanvasEdges(nodes: BuilderNode[]): CanvasEdge[] {
 }
 
 // ============================================================
-// Inverse operations — used by the canvas's drag-to-connect and
+// Inverse operations, used by the canvas's drag-to-connect and
 // delete-with-cleanup handlers (PR 2b). Kept in lib/flows so the
 // canvas component stays free of edge-bookkeeping logic.
 // ============================================================
 
 /**
- * Outgoing-slot list for a node — used by the canvas to render one
+ * Outgoing-slot list for a node, used by the canvas to render one
  * source-side Handle per slot, labelled with the slot's user-facing
  * name. Order follows the order the slots appear in the node's
  * config so visual layout matches the form layout.
  *
- * Terminal nodes (handoff / end) return an empty list — they have
+ * Terminal nodes (handoff / end) return an empty list, they have
  * no outgoing edges and no source handles.
  */
 export interface OutgoingSlot {
@@ -235,7 +235,7 @@ export function outgoingSlots(node: BuilderNode): OutgoingSlot[] {
 /**
  * Compute the config patch to apply when the user drags an edge from
  * `sourceHandle` on a node to `targetKey`. Returns `null` when the
- * handle isn't recognised on the node type (defensive — React-Flow
+ * handle isn't recognised on the node type (defensive, React-Flow
  * would have to misroute for this to fire).
  *
  * For `send_buttons` and `send_list`, only the button/row with the
@@ -319,7 +319,7 @@ export function applyEdgeConnection(
 /**
  * Walk every node and clear any `next_node_key` / `true_next` /
  * `false_next` / `button.next_node_key` / `row.next_node_key`
- * reference to `deletedKey`. Cleared refs become the empty string —
+ * reference to `deletedKey`. Cleared refs become the empty string, 
  * the same "no target picked" sentinel the builder forms use.
  *
  * Returns a new array; original nodes are left untouched. Nodes

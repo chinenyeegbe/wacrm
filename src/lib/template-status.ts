@@ -2,7 +2,7 @@
  * Shared display config for message_templates.status.
  *
  * The DB stores Meta's raw enum (DRAFT / APPROVED / PENDING / REJECTED /
- * PAUSED / DISABLED / IN_APPEAL / PENDING_DELETION) — the UI maps it to
+ * PAUSED / DISABLED / IN_APPEAL / PENDING_DELETION), the UI maps it to
  * a human label + dark-theme badge classes here so the template manager,
  * inbox picker, and broadcast picker stay aligned.
  */

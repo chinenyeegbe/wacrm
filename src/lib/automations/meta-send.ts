@@ -15,7 +15,7 @@ import { supabaseAdmin } from './admin-client'
 // the service-role client (engine has no cookies) and accepts the
 // user / conversation / contact identifiers the engine already has
 // on hand. Kept here (rather than refactoring the user-facing send
-// route) to avoid risk to the working manual-send path — they can
+// route) to avoid risk to the working manual-send path, they can
 // converge in a later refactor.
 // ------------------------------------------------------------
 
@@ -55,7 +55,7 @@ async function sendViaMeta(input: SendInput): Promise<{ whatsapp_message_id: str
   // Scope the contact lookup by user_id. The engine uses the
   // service-role client (bypassing RLS), and the public
   // /api/automations/engine endpoint accepts contact_id from the
-  // request body — without this filter, an authenticated user could
+  // request body, without this filter, an authenticated user could
   // fire their own automations against another tenant's contact UUID
   // and send via their own WhatsApp config to that contact's phone.
   // Practical risk is low (UUIDs are unguessable) but the check is
@@ -107,7 +107,7 @@ async function sendViaMeta(input: SendInput): Promise<{ whatsapp_message_id: str
     return r.messageId
   }
 
-  // Same phone-variant retry as /api/whatsapp/send — Meta sandbox and
+  // Same phone-variant retry as /api/whatsapp/send, Meta sandbox and
   // numbers registered with/without a trunk 0 both require this to
   // reliably land a message.
   const variants = phoneVariants(sanitized)

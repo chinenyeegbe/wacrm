@@ -46,13 +46,13 @@ export function ConversationsChart({ series, loading, range, onRangeChange }: Co
   }, [data])
 
   return (
-    <section className="flex h-full flex-col rounded-xl border border-slate-800 bg-slate-900">
-      <header className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+    <section className="flex h-full flex-col rounded-xl border border-border bg-card">
+      <header className="flex items-center justify-between border-b border-border px-5 py-4">
         <div>
-          <h2 className="text-sm font-semibold text-white">Conversations Over Time</h2>
-          <p className="mt-0.5 text-xs text-slate-500">Daily message volume by direction</p>
+          <h2 className="text-sm font-semibold text-foreground">Conversations Over Time</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">Daily message volume by direction</p>
         </div>
-        <div className="flex items-center gap-1 rounded-lg bg-slate-800/60 p-1">
+        <div className="flex items-center gap-1 rounded-lg bg-muted p-1">
           {[7, 30, 90].map((r) => (
             <button
               key={r}
@@ -61,8 +61,8 @@ export function ConversationsChart({ series, loading, range, onRangeChange }: Co
               className={cn(
                 'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
                 range === r
-                  ? 'bg-slate-700 text-white'
-                  : 'text-slate-400 hover:text-white',
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:text-foreground',
               )}
             >
               {r} days
@@ -85,7 +85,7 @@ export function ConversationsChart({ series, loading, range, onRangeChange }: Co
         )}
       </div>
 
-      <footer className="flex items-center gap-4 border-t border-slate-800 px-5 py-3 text-xs text-slate-400">
+      <footer className="flex items-center gap-4 border-t border-border px-5 py-3 text-xs text-muted-foreground">
         <LegendDot color="#3b82f6" label="Incoming" />
         <LegendDot color="#7c3aed" label="Outgoing" />
       </footer>
@@ -134,7 +134,7 @@ function LineSvg({
   // assumed the viewBox filled the SVG DOM box linearly, but
   // `preserveAspectRatio="xMidYMid meet"` (the SVG default)
   // letterboxes the content horizontally when the container is
-  // wider than the viewBox aspect — so hover snapped hundreds of
+  // wider than the viewBox aspect, so hover snapped hundreds of
   // pixels off on wide layouts. CTM-inverse correctly accounts for
   // letterboxing, scaling, and any future transform changes.
   useEffect(() => {
@@ -159,7 +159,7 @@ function LineSvg({
         Math.min(data.length - 1, Math.round(stepX === 0 ? 0 : relative / stepX)),
       )
       // Map the snapped data-point's viewBox x back to screen, then
-      // subtract the wrapper's left edge — that pixel offset is what
+      // subtract the wrapper's left edge, that pixel offset is what
       // the absolutely-positioned tooltip div consumes. `xFor` is
       // inlined here so the effect deps stay stable (it's a closure
       // that'd otherwise be a new reference every render).
@@ -215,7 +215,7 @@ function LineSvg({
                 y={y}
                 textAnchor="end"
                 dominantBaseline="middle"
-                className="fill-slate-500 text-[10px]"
+                className="fill-muted-foreground text-[10px]"
               >
                 {t}
               </text>
@@ -231,7 +231,7 @@ function LineSvg({
               x={xFor(i)}
               y={VB_H - 8}
               textAnchor="middle"
-              className="fill-slate-500 text-[10px]"
+              className="fill-muted-foreground text-[10px]"
             >
               {shortDayLabel(p.day)}
             </text>
@@ -274,16 +274,16 @@ function LineSvg({
         )}
       </svg>
 
-      {/* Tooltip — absolute-positioned div so we get crisp text, not
+      {/* Tooltip, absolute-positioned div so we get crisp text, not
           SVG-rendered text. The left offset comes from the CTM-based
           mapping so it lines up with the actual crosshair pixel, not a
           letterboxed viewBox percentage. */}
       {hovered && hover !== null && (
         <div
-          className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 rounded-md border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-[11px] shadow-lg"
+          className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 rounded-md border border-border bg-background px-2.5 py-1.5 text-[11px] shadow-lg"
           style={{ left: `${hover.tooltipLeftPx}px` }}
         >
-          <div className="font-medium text-white">{longDayLabel(hovered.day)}</div>
+          <div className="font-medium text-foreground">{longDayLabel(hovered.day)}</div>
           <div className="mt-1 flex flex-col gap-0.5">
             <span className="flex items-center gap-1.5 text-blue-300">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500" />

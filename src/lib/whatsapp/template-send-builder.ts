@@ -2,7 +2,7 @@
  * Build the Meta `components` array used by POST /{phone_number_id}/messages
  * when sending an APPROVED template.
  *
- * Distinct from `template-components.ts` — that module builds the
+ * Distinct from `template-components.ts`, that module builds the
  * `components` for TEMPLATE CREATION (where you describe headers,
  * footers, buttons, examples). This module builds the per-send
  * `components` (where you fill in variable values and supply the
@@ -22,7 +22,7 @@
  *     and PHONE_NUMBER buttons, don't need send-time parameters.
  *   - COPY_CODE buttons need the actual code to display. We fall
  *     back to the template's `example` value if the caller doesn't
- *     override — that matches the most common use case (a static
+ *     override, that matches the most common use case (a static
  *     promo code) without forcing UI work.
  *
  * Validation throws here (not at the Meta API boundary) so a missing
@@ -85,7 +85,7 @@ function buildHeaderComponent(
     const value = params.headerText;
     if (!value || !value.trim()) {
       throw new Error(
-        'Header text variable {{1}} requires a value — pass headerText.',
+        'Header text variable {{1}} requires a value, pass headerText.',
       );
     }
     return {
@@ -94,14 +94,14 @@ function buildHeaderComponent(
     };
   }
 
-  // image / video / document — Meta requires the media component on
+  // image / video / document, Meta requires the media component on
   // every send. Prefer the caller's explicit override; fall back to
   // the template's stored sample.
   const link = params.headerMediaUrl ?? template.header_media_url;
   const id = params.headerMediaId ?? template.header_handle;
   if (!link && !id) {
     throw new Error(
-      `${headerType} header requires a media link or id at send time — set header_media_url on the template or pass headerMediaUrl/headerMediaId.`,
+      `${headerType} header requires a media link or id at send time, set header_media_url on the template or pass headerMediaUrl/headerMediaId.`,
     );
   }
   const mediaPayload: { link?: string; id?: string } = id ? { id } : { link };
@@ -129,7 +129,7 @@ function buildBodyComponent(
       `Body has ${varCount} variable(s) but only ${body.length} value(s) were supplied.`,
     );
   }
-  // Trim to the variable count — extra values are dropped silently so
+  // Trim to the variable count, extra values are dropped silently so
   // a legacy caller that passes too many doesn't error out.
   const values = body.slice(0, varCount);
   return {
@@ -169,7 +169,7 @@ function buildButtonComponent(
       // the button's index in the template's buttons array.
       if (!override || !override.trim()) {
         throw new Error(
-          `URL button #${index + 1} uses {{1}} — requires a buttonParams[${index}] value.`,
+          `URL button #${index + 1} uses {{1}}, requires a buttonParams[${index}] value.`,
         );
       }
       return {
@@ -190,7 +190,7 @@ function buildButtonComponent(
     }
     case 'QUICK_REPLY': {
       // Only included when the caller explicitly overrides the
-      // payload (rare — usually QR buttons use their default text).
+      // payload (rare, usually QR buttons use their default text).
       return {
         type: 'button',
         sub_type: 'quick_reply',
@@ -199,7 +199,7 @@ function buildButtonComponent(
       };
     }
     case 'PHONE_NUMBER':
-      // PHONE_NUMBER buttons never accept send-time params per Meta —
+      // PHONE_NUMBER buttons never accept send-time params per Meta, 
       // return null even if an override snuck through.
       return null;
   }

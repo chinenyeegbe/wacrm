@@ -13,10 +13,17 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "wacrm",
-    template: "%s — wacrm",
+    default: "Moldlane",
+    template: "%s, Moldlane",
   },
-  description: "Self-hostable CRM template for WhatsApp.",
+  description:
+    "Moldlane, the AI employee that runs your WhatsApp: replies, sells, and collects payment 24/7.",
+  applicationName: "Moldlane",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Moldlane",
+  },
   robots: {
     index: false,
     follow: false,
@@ -32,21 +39,31 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#020617",
-  colorScheme: "dark",
+  // Matches the Moldlane bone canvas so the mobile browser chrome blends in.
+  themeColor: "#F7F5F0",
+  colorScheme: "light",
+  // Mobile-first: lock the layout to the device width and allow safe-area
+  // insets (notches / home indicators) to be read in CSS via env().
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
-// Inline boot script — runs before React hydrates so the user's
+// Inline boot script, runs before React hydrates so the user's
 // chosen theme is on the <html> element before first paint. Without
 // this every page load flashes the default Violet for a frame before
 // the React tree mounts and applies the picked theme.
 //
-// Kept dependency-free (no imports, no JSX) — must be a string the
+// Kept dependency-free (no imports, no JSX), must be a string the
 // browser can run as a single <script>. Knowledge of valid theme IDs
 // is sourced from the THEME_IDS constant so adding a theme doesn't
 // silently break the boot path.
 const THEME_BOOT_SCRIPT = `
 (function(){
+  // Mark that JS is on, BEFORE first paint. Scroll-reveal hides its content
+  // only under html.js, so with JS off the content is simply visible (no
+  // flash, SEO/no-JS safe).
+  document.documentElement.classList.add('js');
   try {
     var STORAGE_KEY = ${JSON.stringify(STORAGE_KEY)};
     var DEFAULT = ${JSON.stringify(DEFAULT_THEME)};
@@ -81,14 +98,16 @@ export default function RootLayout({
       <body className="min-h-full bg-background text-foreground font-sans">
         <ThemeProvider>
           {children}
+          {/* Toaster styled from theme tokens so it follows the active
+              theme (light bone by default) instead of a hardcoded dark. */}
           <Toaster
-            theme="dark"
+            theme="light"
             position="top-right"
             toastOptions={{
               style: {
-                background: "rgb(30 41 59)",
-                border: "1px solid rgb(51 65 85)",
-                color: "white",
+                background: "var(--popover)",
+                border: "1px solid var(--border)",
+                color: "var(--popover-foreground)",
               },
             }}
           />

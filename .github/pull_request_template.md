@@ -26,7 +26,7 @@ Tick the boxes as you go.
 -->
 
 - [ ] `npm run typecheck` clean.
-- [ ] `npm run lint` — no new errors beyond the pre-existing backlog.
+- [ ] `npm run lint`, no new errors beyond the pre-existing backlog.
 - [ ] `npm run build` succeeds.
 - [ ] Feature / fix manually exercised in the browser (or the reason it can't be).
 

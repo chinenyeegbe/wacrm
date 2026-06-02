@@ -5,7 +5,7 @@ import {
   submitMessageTemplate,
 } from './meta-api';
 
-// We mock fetch and assert on the request URL/method/body — these
+// We mock fetch and assert on the request URL/method/body, these
 // helpers have no validation of their own (they trust the validators
 // upstream), so the contract we care about is the exact wire shape.
 

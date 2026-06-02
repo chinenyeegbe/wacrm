@@ -51,7 +51,7 @@ describe("encryption", () => {
     it("rejects ciphertext tampered after encryption", () => {
       const ct = encrypt("secret");
       const [ivHex, ctHex, tagHex] = ct.split(":");
-      // Flip a byte in the ciphertext body — auth tag will mismatch.
+      // Flip a byte in the ciphertext body, auth tag will mismatch.
       const tamperedCtHex =
         (parseInt(ctHex.slice(0, 2), 16) ^ 0xff).toString(16).padStart(2, "0") +
         ctHex.slice(2);

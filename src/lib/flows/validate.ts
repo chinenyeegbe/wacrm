@@ -1,18 +1,18 @@
 /**
  * Save-time validation for flows.
  *
- * Run before activation (not on every draft save) — drafts are
+ * Run before activation (not on every draft save), drafts are
  * intentionally allowed to be incomplete so users can save progress
  * mid-build. The builder calls these from BOTH client (so the user
  * sees issues live) and server (so a broken POST/PUT can't slip in
  * via direct API call).
  *
  * Three rule categories:
- *   1. Trigger sanity — keyword flows need keywords, etc.
- *   2. Graph integrity — entry node exists, all next_node_key
+ *   1. Trigger sanity, keyword flows need keywords, etc.
+ *   2. Graph integrity, entry node exists, all next_node_key
  *      references resolve, no unreachable nodes, non-terminal nodes
  *      have an outgoing edge.
- *   3. Meta API limits — button title ≤20 chars, ≤3 buttons per
+ *   3. Meta API limits, button title ≤20 chars, ≤3 buttons per
  *      send_buttons, ≤10 list rows total, ≤24 chars per list row
  *      title. Mirrors the runtime checks inside
  *      `src/lib/whatsapp/meta-api.ts` so save-time and send-time
@@ -115,7 +115,7 @@ export function validateFlowForActivation(
     issues.push(...validateNode(n, keys));
   }
 
-  // Reachability — every non-orphan node must be reachable from the
+  // Reachability, every non-orphan node must be reachable from the
   // entry. Done after per-node validation so we don't double-report
   // when a node has bad config AND is unreachable.
   if (flow.entry_node_id && keys.has(flow.entry_node_id)) {
@@ -158,7 +158,7 @@ function validateTrigger(
       });
     } else {
       // Empty / whitespace-only keywords are silent no-ops at match
-      // time — call them out so the user doesn't think they configured
+      // time, call them out so the user doesn't think they configured
       // a keyword that never fires.
       const blanks = keywords.filter(
         (k) => typeof k !== "string" || !k.trim(),
@@ -168,7 +168,7 @@ function validateTrigger(
           severity: "warning",
           scope: "trigger",
           field: "trigger_config.keywords",
-          message: `${blanks} keyword${blanks === 1 ? " is" : "s are"} blank — they won't match anything.`,
+          message: `${blanks} keyword${blanks === 1 ? " is" : "s are"} blank, they won't match anything.`,
         });
       }
     }
@@ -631,7 +631,7 @@ function validateNode(
           scope: "node",
           node_key: node.node_key,
           field: "value",
-          message: `Operator "${cfg.operator}" usually expects a comparison value — empty value will only match empty subjects.`,
+          message: `Operator "${cfg.operator}" usually expects a comparison value, empty value will only match empty subjects.`,
         });
       }
       for (const branch of ["true_next", "false_next"] as const) {
@@ -720,7 +720,7 @@ function validateNode(
 }
 
 // ============================================================
-// Reachability — BFS from the entry, follow outgoing edges per node
+// Reachability, BFS from the entry, follow outgoing edges per node
 // ============================================================
 
 export function reachableFromEntry(

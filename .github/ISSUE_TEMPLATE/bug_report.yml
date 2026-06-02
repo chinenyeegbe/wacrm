@@ -70,7 +70,7 @@ body:
     id: logs
     attributes:
       label: Logs / screenshots
-      description: Server logs, browser console errors, network tab — anything that looks suspicious. Scrub tokens before pasting.
+      description: Server logs, browser console errors, network tab, anything that looks suspicious. Scrub tokens before pasting.
       render: text
     validations:
       required: false

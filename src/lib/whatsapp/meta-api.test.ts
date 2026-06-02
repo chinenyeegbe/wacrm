@@ -21,7 +21,7 @@ const BASE_ARGS = {
   bodyText: "Body text",
 } as const;
 
-describe("sendInteractiveButtons — validation", () => {
+describe("sendInteractiveButtons, validation", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn(neverFetch));
   });
@@ -141,7 +141,7 @@ describe("sendInteractiveButtons — validation", () => {
   });
 });
 
-describe("sendInteractiveList — validation", () => {
+describe("sendInteractiveList, validation", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn(neverFetch));
   });

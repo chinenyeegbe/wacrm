@@ -4,7 +4,7 @@ import type { NextConfig } from "next";
  * Baseline security headers applied to every response.
  *
  * CSP ships as `Content-Security-Policy-Report-Only` so the browser
- * surfaces violations in the console without blocking anything — once
+ * surfaces violations in the console without blocking anything, once
  * we have confidence nothing legit trips it (two deploys, a pass on
  * every route), flip the key to `Content-Security-Policy` to enforce.
  *
@@ -62,17 +62,17 @@ const nextConfig: NextConfig = {
    *   prerendered HTML pages by default. When a new deploy shipped
    *   fresh Turbopack chunk hashes, the edge kept serving year-old
    *   HTML referencing chunk filenames that no longer existed on
-   *   disk — result: HTML 200, every /_next/static/*.js and .css
+   *   disk, result: HTML 200, every /_next/static/*.js and .css
    *   came back 404, the page rendered unstyled. Private/incognito
    *   did nothing because the cache is server-side.
    *
    * Strategy:
-   *   - /_next/static/* — immutable for a year. Filenames are
+   *   - /_next/static/*, immutable for a year. Filenames are
    *     content-hashed, so a new build produces new filenames; the
    *     old ones are safe to keep indefinitely in caches.
-   *   - /api/*          — no-store. API responses are per-user and
+   *   - /api/*, no-store. API responses are per-user and
    *     must never be shared across requests at the edge.
-   *   - Everything else — public, brief s-maxage + generous
+   *   - Everything else, public, brief s-maxage + generous
    *     stale-while-revalidate. The edge serves instantly from cache
    *     for the first 5 min, then returns cached content while
    *     refreshing in the background for up to 24 h. A deploy's
@@ -80,14 +80,14 @@ const nextConfig: NextConfig = {
    *     visible latency.
    *
    *   Note: dynamic dashboard routes (/inbox, /contacts, /pipelines,
-   *   /broadcasts, etc.) are server-rendered per request — Next.js
+   *   /broadcasts, etc.) are server-rendered per request, Next.js
    *   and Supabase auth already prevent them from being served
    *   from a shared cache. The s-maxage here is a ceiling; Next.js
    *   and auth middleware still set `private` / `no-store` for
    *   per-user responses.
    *
    * Security headers are appended via a separate catch-all rule
-   * below — Next.js merges headers from every matching rule, so
+   * below, Next.js merges headers from every matching rule, so
    * they apply to every response regardless of which cache rule
    * matched.
    */

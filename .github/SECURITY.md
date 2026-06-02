@@ -11,7 +11,7 @@ lands.
 Instead, please report privately via one of:
 
 - [GitHub Security Advisories](https://github.com/ArnasDon/wacrm/security/advisories/new)
-  (preferred — keeps the disclosure, fix, and CVE all in one place).
+  (preferred, keeps the disclosure, fix, and CVE all in one place).
 - Email: `a.donauskas@hostinger.com` with `[CRM template security]` in the subject.
 
 Include, if you can:
@@ -36,12 +36,12 @@ Include, if you can:
 In scope:
 - Anything in this repository (`ArnasDon/wacrm`), including webhook and auth
   flows, token encryption, RLS policies, and the built-in cron endpoints.
-- Default configurations shipped in `docs/` — e.g. if the setup guide leaves
+- Default configurations shipped in `docs/`, e.g. if the setup guide leaves
   an unsafe default.
 
 Out of scope:
 - Vulnerabilities in Supabase, Next.js, Node.js, or other upstream
-  dependencies — please report those to their maintainers. We'll happily
+  dependencies, please report those to their maintainers. We'll happily
   bump versions on request.
 - Issues that require a pre-compromised deployment (e.g. a leaked
   service-role key) unless they widen the blast radius beyond the initial

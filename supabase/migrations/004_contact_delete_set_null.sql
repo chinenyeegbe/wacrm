@@ -10,7 +10,7 @@
 --   ERROR 23503: update or delete on table "contacts" violates
 --   foreign key constraint ... on table <other>
 --
--- CASCADE is the wrong fix — it would silently wipe historical
+-- CASCADE is the wrong fix, it would silently wipe historical
 -- broadcast recipient rows (breaking audit + retroactively moving
 -- broadcasts.sent_count / delivered_count / read_count etc. via the
 -- aggregate trigger) and deal rows.
@@ -19,7 +19,7 @@
 -- contact_id. The UI is already null-safe (contact?.name ?? 'Unknown',
 -- contact?.phone, etc.).
 --
--- Idempotent — safe to run multiple times.
+-- Idempotent, safe to run multiple times.
 -- ============================================================
 
 -- ── broadcast_recipients.contact_id ────────────────────────────

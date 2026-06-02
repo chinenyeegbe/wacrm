@@ -1,7 +1,7 @@
 -- ============================================================
--- 006_automations.sql — Automations feature
+-- 006_automations.sql, Automations feature
 --
--- Idempotent migration — safe to run multiple times.
+-- Idempotent migration, safe to run multiple times.
 -- Follows the same conventions as 001_initial_schema.sql:
 --   IF NOT EXISTS on tables/indexes, DROP IF EXISTS before
 --   re-creating policies/triggers (Postgres has no
@@ -43,11 +43,11 @@ CREATE TRIGGER set_updated_at BEFORE UPDATE ON automations
 -- ============================================================
 -- AUTOMATION_STEPS
 --
--- `position`       — order within parent scope (root scope or a branch).
--- `parent_step_id` — NULL for root-level steps; set to the Condition
+-- `position`, order within parent scope (root scope or a branch).
+-- `parent_step_id`, NULL for root-level steps; set to the Condition
 --                    step's id for steps that live inside one of its
 --                    branches.
--- `branch`         — NULL for root steps. For children of a Condition,
+-- `branch`, NULL for root steps. For children of a Condition,
 --                    'yes' or 'no' identifying which path.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS automation_steps (
@@ -113,7 +113,7 @@ CREATE POLICY "Users can view own automation logs" ON automation_logs FOR ALL
 -- 'pending', flips them to 'running', and resumes the automation
 -- from `next_step_position` with the saved `context` jsonb.
 --
--- Service-role only — writes never originate from the browser, and
+-- Service-role only, writes never originate from the browser, and
 -- the engine uses the service-role client. No user policy exposed.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS automation_pending_executions (
@@ -136,5 +136,5 @@ CREATE INDEX IF NOT EXISTS idx_automation_pending_due
   ON automation_pending_executions(run_at) WHERE status = 'pending';
 
 ALTER TABLE automation_pending_executions ENABLE ROW LEVEL SECURITY;
--- No SELECT/INSERT/UPDATE/DELETE policy for authenticated users — all
+-- No SELECT/INSERT/UPDATE/DELETE policy for authenticated users, all
 -- access is server-side via the service-role key.

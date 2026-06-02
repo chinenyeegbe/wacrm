@@ -11,26 +11,26 @@
 --
 --   2. `flow-media` Supabase Storage bucket where the builder uploads
 --      the file the customer will receive. Public bucket so Meta can
---      pull the URL without auth — same trade-off as the avatars
+--      pull the URL without auth, same trade-off as the avatars
 --      bucket (see migration 008). Per-user RLS on writes scopes the
 --      bucket so one tenant can't read/overwrite another's media.
 --
 --      Path convention:
 --        flow-media/{auth.uid()}/<timestamp>-<basename>.<ext>
---      First path segment must equal auth.uid()::text — same shape
+--      First path segment must equal auth.uid()::text, same shape
 --      migration 008 uses for avatars so the policy code reads the
 --      same.
 --
---      Size limit 16 MB — Meta's WhatsApp Cloud API caps documents at
+--      Size limit 16 MB, Meta's WhatsApp Cloud API caps documents at
 --      100 MB but videos at 16 MB and images at 5 MB; we pick the
 --      tightest universal cap that still works for the document case
 --      that prompted this feature (PDF invoices / receipts).
 --
--- Idempotent — safe to re-run.
+-- Idempotent, safe to re-run.
 -- ============================================================
 
 -- ============================================================
--- 1. flow_nodes.node_type — add 'send_media'
+-- 1. flow_nodes.node_type, add 'send_media'
 -- ============================================================
 ALTER TABLE flow_nodes
   DROP CONSTRAINT IF EXISTS flow_nodes_node_type_check;

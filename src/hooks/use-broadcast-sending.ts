@@ -22,7 +22,7 @@ export interface AudienceConfig {
 }
 
 /**
- * Variable mapping — each template placeholder (by key, usually "1",
+ * Variable mapping, each template placeholder (by key, usually "1",
  * "2", …) is resolved at send time. `field` maps to a built-in contact
  * field (name/phone/email/company); `custom_field` maps to a
  * contact_custom_values.value row keyed by the custom_fields.id stored
@@ -81,7 +81,7 @@ export function resolveVariables(
   contact: Contact,
   customValues?: Map<string, string>,
 ): string[] {
-  // Keys are typically "1","2",... — numeric-aware sort keeps
+  // Keys are typically "1","2",..., numeric-aware sort keeps
   // {{1}} before {{10}}.
   const keys = Object.keys(variables).sort((a, b) => {
     const an = Number(a);
@@ -204,7 +204,7 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
    * resolved set.
    *
    * Pre-existing implementation synthesized `csv-N` strings as
-   * contact_id, which failed the UUID cast on insert — every CSV
+   * contact_id, which failed the UUID cast on insert, every CSV
    * broadcast silently created zero recipients.
    */
   async function upsertCsvContacts(
@@ -244,7 +244,7 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
     }
 
     // Insert only missing contacts, in one batch per 200 rows (PostgREST
-    // has a default payload cap — 200 keeps individual requests small).
+    // has a default payload cap, 200 keeps individual requests small).
     const missing = phones
       .filter((p) => !byPhone.has(p))
       .map((phone) => ({
@@ -281,7 +281,7 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
     const { fieldId, operator, value } = filter;
 
     // Build the WHERE clause for the operator. PostgREST supports
-    // eq/neq/ilike via the query builder — use ilike with wildcards
+    // eq/neq/ilike via the query builder, use ilike with wildcards
     // for "contains" so the match is case-insensitive.
     let query = supabase
       .from('contact_custom_values')
@@ -317,7 +317,7 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
       // ── Step 0: Resolve current user ──────────────────────────────
       // broadcasts.user_id is NOT NULL + guarded by RLS
       // (auth.uid() = user_id). Without this, the INSERT below was
-      // silently failing with 23502 / 42501 — the wizard would
+      // silently failing with 23502 / 42501, the wizard would
       // no-op with no feedback.
       const {
         data: { session },
@@ -382,7 +382,7 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
           .from('broadcast_recipients')
           .insert(batch);
         if (recipientError) {
-          // Previous impl logged and marched on — the broadcast then ran
+          // Previous impl logged and marched on, the broadcast then ran
           // with an incomplete recipient set, so webhook status updates
           // couldn't find some rows and the aggregate counts drifted.
           // Flip the broadcast to failed so the user sees the problem

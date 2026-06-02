@@ -23,7 +23,7 @@ export type FallbackAction =
   | { type: "handoff" }
   /** End the run with status='completed' (the `end` exhaust option). */
   | { type: "end" }
-  /** Do nothing — the message wasn't for us. */
+  /** Do nothing, the message wasn't for us. */
   | { type: "ignore" };
 
 /**
@@ -81,7 +81,7 @@ export function decideFallback(args: {
   if (policy.on_unknown_reply === "ignore") return { type: "ignore" };
   if (policy.on_unknown_reply === "handoff") return { type: "handoff" };
 
-  // 'reprompt' — guarded by max_reprompts.
+  // 'reprompt', guarded by max_reprompts.
   if (reprompt_count <= policy.max_reprompts) {
     return { type: "reprompt" };
   }

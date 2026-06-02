@@ -1,6 +1,6 @@
 /**
  * Sanitize phone number for Meta WhatsApp API.
- * Meta requires digits only — no + prefix, no spaces, no dashes.
+ * Meta requires digits only, no + prefix, no spaces, no dashes.
  * e.g. "+370 63949836" → "37063949836"
  */
 export function sanitizePhoneForMeta(phone: string): string {

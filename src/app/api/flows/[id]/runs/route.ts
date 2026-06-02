@@ -31,7 +31,7 @@ export async function GET(
   }
 
   // Confirm flow exists + caller owns it (RLS does this) before doing
-  // the run query — gives us a clean 404 instead of empty array.
+  // the run query, gives us a clean 404 instead of empty array.
   const { data: flow } = await supabase
     .from('flows')
     .select('id, name')
@@ -71,7 +71,7 @@ export async function GET(
       .in('flow_run_id', runIds)
       .order('created_at', { ascending: true })
     if (evsErr) {
-      // Non-fatal — the page can still show runs without timelines.
+      // Non-fatal, the page can still show runs without timelines.
       console.error('[flows-runs] events fetch failed:', evsErr.message)
     } else if (evs) {
       events = evs as typeof events

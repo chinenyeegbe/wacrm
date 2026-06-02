@@ -93,7 +93,7 @@ describe("autoLayout", () => {
   });
 
   it("ignores edges whose endpoints aren't in the node list", () => {
-    // Defensive — the canvas filters dangling edges but the helper
+    // Defensive, the canvas filters dangling edges but the helper
     // shouldn't blow up if a stale edge slips through.
     const positions = autoLayout(
       [{ id: "only" }],

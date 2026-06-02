@@ -6,7 +6,7 @@ import type { ComponentType } from 'react'
 
 // Quick-action shortcuts. Each navigates to the page that owns the
 // relevant "create" flow. We deliberately don't try to auto-open any
-// modal on the target page — that'd require touching those pages,
+// modal on the target page, that'd require touching those pages,
 // which is out of scope here.
 interface Action {
   label: string
@@ -31,12 +31,12 @@ export function QuickActions() {
           <Link
             key={a.href}
             href={a.href}
-            className="group flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 transition-colors hover:border-slate-700 hover:bg-slate-800/60"
+            className="group flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:border-border hover:bg-muted"
           >
-            <div className={`flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800 ${a.tint}`}>
+            <div className={`flex h-9 w-9 items-center justify-center rounded-lg bg-muted ${a.tint}`}>
               <Icon className="h-4 w-4" />
             </div>
-            <span className="text-sm font-medium text-white">{a.label}</span>
+            <span className="text-sm font-medium text-foreground">{a.label}</span>
           </Link>
         )
       })}

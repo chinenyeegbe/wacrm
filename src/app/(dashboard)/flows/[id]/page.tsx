@@ -15,7 +15,7 @@ import type { FlowRow, FlowNodeRow } from "@/lib/flows/types";
  * `<FlowBuilder>`. Owns the loading/error state so the builder can
  * focus purely on editing.
  *
- * Open to every authenticated user — the beta gate that previously
+ * Open to every authenticated user, the beta gate that previously
  * 404'd non-beta accounts was removed in PR #134. The API still
  * 404s on a flow id the caller doesn't own (RLS), which becomes the
  * "Flow not found" state below.
@@ -65,14 +65,14 @@ export default function FlowEditorPage() {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-slate-500" />
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
   if (notFound || !flow) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3">
-        <p className="text-sm text-slate-400">Flow not found.</p>
+        <p className="text-sm text-muted-foreground">Flow not found.</p>
         <button
           type="button"
           onClick={() => router.push("/flows")}

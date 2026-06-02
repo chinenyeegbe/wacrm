@@ -29,7 +29,7 @@
 -- function is retained so ops can run it manually if counts ever
 -- drift (e.g. after bulk DB surgery).
 --
--- Idempotent — safe to run multiple times.
+-- Idempotent, safe to run multiple times.
 -- ============================================================
 
 -- Delta a single column by +1 / -1.
@@ -98,10 +98,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
--- Trigger itself remains the same (INSERT/UPDATE/DELETE) — just its
+-- Trigger itself remains the same (INSERT/UPDATE/DELETE), just its
 -- body has been replaced.
 
--- Safety net — rebuild counts from scratch. Retained as-is so ops can
+-- Safety net, rebuild counts from scratch. Retained as-is so ops can
 -- run it on demand if something ever drifts. Matches the incremental
 -- trigger's semantic model exactly.
 CREATE OR REPLACE FUNCTION public.recompute_broadcast_counts(bid UUID)

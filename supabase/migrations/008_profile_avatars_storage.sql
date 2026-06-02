@@ -9,7 +9,7 @@
 --   avatars/{auth.uid()}/avatar-<timestamp>.<ext>
 -- The policies rely on the first path segment matching auth.uid()::text.
 --
--- Idempotent — safe to re-run.
+-- Idempotent, safe to re-run.
 -- ============================================================
 
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)

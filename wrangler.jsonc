@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "moldlane",
+  "main": ".open-next/worker.js",
+  // nodejs_compat (plus a recent compatibility date) gives the Worker the
+  // Node APIs Moldlane needs: AES-256-GCM token/payment encryption and the
+  // HMAC webhook checks all use Node `crypto`. This is exactly why we use
+  // the OpenNext adapter rather than next-on-pages (which is edge-only).
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat"],
+  // Static assets bundled by the OpenNext build.
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  },
+  "observability": {
+    "enabled": true
+  }
+  // Environment variables / secrets are NOT put here. Set them in the
+  // Cloudflare dashboard (Workers & Pages -> your project -> Settings ->
+  // Variables), or with `npx wrangler secret put NAME`. See DEPLOY.md for
+  // the full list (Supabase keys, ENCRYPTION_KEY, OPENROUTER_API_KEY, ...).
+}

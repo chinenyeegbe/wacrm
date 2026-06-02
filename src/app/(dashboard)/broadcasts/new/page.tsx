@@ -59,7 +59,7 @@ export default function NewBroadcastPage() {
       });
       router.push(`/broadcasts/${broadcastId}`);
     } catch (err) {
-      // Previously swallowed with console.error — the wizard would
+      // Previously swallowed with console.error, the wizard would
       // just no-op, leaving the user confused. Surface the reason.
       const message = err instanceof Error ? err.message : 'Broadcast failed';
       console.error('Broadcast failed:', err);
@@ -68,7 +68,7 @@ export default function NewBroadcastPage() {
   }
 
   /**
-   * Writes a draft broadcast row — no recipients, no sending. The user
+   * Writes a draft broadcast row, no recipients, no sending. The user
    * can revisit it via the list page to finish the flow later. We
    * don't persist the in-progress audience/variable config here
    * because the current schema doesn't carry it past `audience_filter`
@@ -122,8 +122,8 @@ export default function NewBroadcastPage() {
     <div className="mx-auto max-w-3xl space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">New Broadcast</h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <h1 className="text-2xl font-bold text-foreground">New Broadcast</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Create and send a broadcast message to your contacts.
         </p>
       </div>
@@ -143,14 +143,14 @@ export default function NewBroadcastPage() {
                       ? 'bg-primary text-primary-foreground'
                       : isActive
                         ? 'border-2 border-primary bg-primary/10 text-primary'
-                        : 'border border-slate-700 bg-slate-800 text-slate-500'
+                        : 'border border-border bg-muted text-muted-foreground'
                   }`}
                 >
                   {isCompleted ? <Check className="h-4 w-4" /> : index + 1}
                 </div>
                 <span
                   className={`hidden text-sm font-medium sm:block ${
-                    isActive ? 'text-white' : isCompleted ? 'text-primary' : 'text-slate-500'
+                    isActive ? 'text-foreground' : isCompleted ? 'text-primary' : 'text-muted-foreground'
                   }`}
                 >
                   {step.label}
@@ -159,7 +159,7 @@ export default function NewBroadcastPage() {
               {index < steps.length - 1 && (
                 <div
                   className={`mx-3 h-px flex-1 ${
-                    index < currentStep ? 'bg-primary' : 'bg-slate-800'
+                    index < currentStep ? 'bg-primary' : 'bg-muted'
                   }`}
                 />
               )}

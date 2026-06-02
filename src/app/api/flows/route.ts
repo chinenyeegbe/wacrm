@@ -4,8 +4,8 @@ import { supabaseAdmin } from '@/lib/flows/admin-client'
 import { getFlowTemplate } from '@/lib/flows/templates'
 
 /**
- * GET /api/flows — list the caller's flows.
- * POST /api/flows — create a new (draft) flow.
+ * GET /api/flows, list the caller's flows.
+ * POST /api/flows, create a new (draft) flow.
  *
  * Available to every authenticated user. The previous per-account
  * beta gate was removed when Flows went to soft-GA; the UI still

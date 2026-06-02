@@ -11,7 +11,7 @@ import { buildMetaTemplatePayload } from '@/lib/whatsapp/template-components'
 import { normalizeStatus } from '@/lib/whatsapp/template-status-normalize'
 
 /**
- * Shared upsert payload builder — both the Meta-failure path and the
+ * Shared upsert payload builder, both the Meta-failure path and the
  * Meta-success path write nearly identical rows; dropping the shared
  * fields here means adding a column later only touches one spot.
  */
@@ -69,7 +69,7 @@ async function upsertTemplateRow(
  * insert a row with a synthetic `dry-run-<uuid>` meta_template_id so
  * CI / local dev can exercise the full UI without a real Meta App.
  *
- * On the Meta side this is a one-way trip — a row can only be
+ * On the Meta side this is a one-way trip, a row can only be
  * submitted; editing or deleting requires hsm_id and lives in PR 4.
  */
 export async function POST(request: Request) {
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            'AUTHENTICATION templates are not yet supported here — create them in Meta WhatsApp Manager and use "Sync from Meta".',
+            'AUTHENTICATION templates are not yet supported here, create them in Meta WhatsApp Manager and use "Sync from Meta".',
         },
         { status: 400 },
       )
@@ -190,7 +190,7 @@ export async function POST(request: Request) {
 
     if (upsertErr) {
       // The submit succeeded on Meta's side but we failed to persist
-      // locally. That's a data-drift state — surface the meta_template_id
+      // locally. That's a data-drift state, surface the meta_template_id
       // so the user can recover via "Sync from Meta".
       return NextResponse.json(
         {

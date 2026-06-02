@@ -124,7 +124,7 @@ export async function POST(request: Request) {
 
     // Self-heal legacy CBC-encrypted tokens. Fire-and-forget: we
     // return from the send without waiting, so a failed upgrade just
-    // means the next send tries again. The upgrade is idempotent —
+    // means the next send tries again. The upgrade is idempotent, 
     // concurrent sends both produce valid GCM ciphertexts of the same
     // plaintext, last write wins.
     if (isLegacyFormat(config.access_token)) {
@@ -144,7 +144,7 @@ export async function POST(request: Request) {
 
     // Resolve the reply target (if any) to its Meta message_id, which is
     // what `context.message_id` on the outgoing Meta payload needs. The
-    // parent must belong to this same conversation — otherwise a caller
+    // parent must belong to this same conversation, otherwise a caller
     // could quote messages they can't see by guessing UUIDs.
     let contextMessageId: string | undefined
     if (reply_to_message_id) {
@@ -162,7 +162,7 @@ export async function POST(request: Request) {
         )
       }
       if (!parent.message_id) {
-        // Parent never reached Meta (still in 'sending' or 'failed') — we
+        // Parent never reached Meta (still in 'sending' or 'failed'), we
         // can't quote it on WhatsApp. Send without context rather than
         // dropping the message entirely.
         console.warn(
@@ -173,7 +173,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // Send via Meta API — retry with phone-number variants if Meta rejects
+    // Send via Meta API, retry with phone-number variants if Meta rejects
     // with "recipient not in allowed list" (common in sandbox / when a
     // number was registered with/without a trunk 0). If an alternate
     // format succeeds, we persist it back to the contact row so the
@@ -183,8 +183,8 @@ export async function POST(request: Request) {
 
     // For template sends, load the row so sendTemplateMessage can
     // build header + button components from the template definition.
-    // Match on (user_id, name, language) — same triple the unique
-    // index enforces — so multi-language templates work correctly.
+    // Match on (user_id, name, language), same triple the unique
+    // index enforces, so multi-language templates work correctly.
     // Missing template falls through with `templateRow = null` and
     // the legacy body-only path runs.
     // Load the template row so sendTemplateMessage can build header
@@ -204,7 +204,7 @@ export async function POST(request: Request) {
         return NextResponse.json(
           {
             error:
-              'Template row is malformed locally — run "Sync from Meta" in Settings to repair it.',
+              'Template row is malformed locally, run "Sync from Meta" in Settings to repair it.',
           },
           { status: 500 },
         )
@@ -222,7 +222,7 @@ export async function POST(request: Request) {
           language: template_language || 'en_US',
           template: templateRow ?? undefined,
           messageParams: template_message_params ?? undefined,
-          // Legacy body-only fallback — only consulted when
+          // Legacy body-only fallback, only consulted when
           // messageParams.body isn't set.
           params: template_params || [],
           contextMessageId,
@@ -285,7 +285,7 @@ export async function POST(request: Request) {
         .eq('id', contact.id)
     }
 
-    // Insert message into DB — field names MUST match the messages schema
+    // Insert message into DB, field names MUST match the messages schema
     // (see supabase/migrations/001_initial_schema.sql):
     //   conversation_id, sender_type, content_type, content_text,
     //   media_url, template_name, message_id, status, created_at
@@ -323,12 +323,12 @@ export async function POST(request: Request) {
       })
       .eq('id', conversation_id)
 
-    // Pause any active Flow run for this contact — the agent stepping
+    // Pause any active Flow run for this contact, the agent stepping
     // in is the strongest "yield, human is here" signal. See PR #2
     // plan for why we pause (not end): preserves diagnostic state +
     // lets the agent or the 24h timeout sweep cleanly resolve the
     // run later. For accounts with no active runs the UPDATE matches
-    // zero rows — cheap and harmless.
+    // zero rows, cheap and harmless.
     try {
       const { error: pauseErr } = await supabaseAdmin()
         .from('flow_runs')
@@ -341,7 +341,7 @@ export async function POST(request: Request) {
         .eq('contact_id', contact.id)
         .eq('status', 'active')
       if (pauseErr) {
-        // Best-effort — log + continue. The agent's message already
+        // Best-effort, log + continue. The agent's message already
         // landed at Meta; don't fail the response over a bookkeeping
         // miss. Worst case: a stale active run gets caught by the
         // stale-run cron sweep within 24h.

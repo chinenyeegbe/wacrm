@@ -2,7 +2,7 @@
  * Translate our local template row shape into the `components` array
  * shape that Meta's POST /{waba_id}/message_templates endpoint expects.
  *
- * Keep this function pure and JSON-shaped — the submit route and the
+ * Keep this function pure and JSON-shaped, the submit route and the
  * (future) edit route both call it, and unit tests assert the exact
  * payload by snapshot.
  *
@@ -73,7 +73,7 @@ function buildBodyComponent(payload: TemplatePayload): MetaComponent {
   };
   const bodySample = payload.sample_values?.body;
   if (bodySample && bodySample.length > 0) {
-    // Meta expects body_text as a 2D array — outer is "examples",
+    // Meta expects body_text as a 2D array, outer is "examples",
     // inner is the values for each variable. We submit a single
     // example row.
     component.example = { body_text: [bodySample] };

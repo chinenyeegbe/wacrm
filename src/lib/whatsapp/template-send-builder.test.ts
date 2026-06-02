@@ -15,7 +15,7 @@ function row(overrides: Partial<MessageTemplate> = {}): MessageTemplate {
   };
 }
 
-describe('buildSendComponents — body', () => {
+describe('buildSendComponents, body', () => {
   it('returns [] for a fully-static template (no vars, no media header)', () => {
     expect(buildSendComponents(row())).toEqual([]);
   });
@@ -56,7 +56,7 @@ describe('buildSendComponents — body', () => {
   });
 });
 
-describe('buildSendComponents — header', () => {
+describe('buildSendComponents, header', () => {
   it('skips static TEXT headers (template carries them)', () => {
     expect(
       buildSendComponents(
@@ -137,7 +137,7 @@ describe('buildSendComponents — header', () => {
   });
 });
 
-describe('buildSendComponents — buttons', () => {
+describe('buildSendComponents, buttons', () => {
   it('omits URL buttons without variables (template carries the URL)', () => {
     const components = buildSendComponents(
       row({
@@ -242,7 +242,7 @@ describe('buildSendComponents — buttons', () => {
   });
 });
 
-describe('buildSendComponents — end-to-end mix', () => {
+describe('buildSendComponents, end-to-end mix', () => {
   it('orders components header → body → buttons and includes all', () => {
     const components = buildSendComponents(
       row({
