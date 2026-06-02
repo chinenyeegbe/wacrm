@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useTotalUnread } from "@/hooks/use-total-unread";
+import { WorkspaceSwitcher } from "@/components/layout/workspace-switcher";
 import {
   LayoutDashboard,
   MessageSquare,
@@ -139,6 +140,12 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           >
             <X className="h-5 w-5" />
           </button>
+        </div>
+
+        {/* Active workspace (agency mode). Renders a static label for
+            single-workspace installs, a switcher when there are more. */}
+        <div className="shrink-0 border-b border-slate-800 px-2 py-2">
+          <WorkspaceSwitcher />
         </div>
 
         {/* Main navigation */}
