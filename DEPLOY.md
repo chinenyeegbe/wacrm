@@ -6,8 +6,10 @@ This is the honest, shortest path from this repo to a working link.
 
 GitHub Pages only serves **static files**. Moldlane is a full app with API
 routes (the WhatsApp webhook, the AI endpoint, payments), login/auth, and
-server rendering, so it needs a host that runs a Node server. Pages would
-only ever show a hollow shell. Use **Vercel** (free, built for Next.js).
+server rendering, so it needs a host that runs a server. Pages would only
+ever show a hollow shell. Two good hosts that run the whole thing:
+**Vercel** (zero config) and **Cloudflare** (a little more setup). Both
+build in the cloud, so your own laptop never has to.
 
 ## The fast path: Vercel
 
@@ -66,6 +68,62 @@ and payments need the setup below.)
 
 See `.env.local.example` for the full annotated list, and `docs/ai.md` /
 `docs/payments.md` for those features.
+
+## Hosting on Cloudflare (instead of Vercel)
+
+Yes, Cloudflare can host the whole app, with one important choice of adapter:
+
+- **Use `@opennextjs/cloudflare`** (the OpenNext Cloudflare adapter). It runs
+  Next.js on Cloudflare Workers with the **Node.js runtime**, which Moldlane
+  needs: our token/payment encryption and webhook signature checks use
+  Node's `crypto` (AES-256-GCM, HMAC).
+- **Do not use `@cloudflare/next-on-pages`** for this app. It forces the
+  **edge** runtime on every server route, which does not provide Node
+  `crypto`, so the encryption and webhook routes would break.
+
+Steps (run locally once or in a CI runner, not on a weak laptop):
+
+```bash
+npm install --save-dev @opennextjs/cloudflare wrangler
+npx opennextjs-cloudflare build      # builds a Workers bundle
+npx opennextjs-cloudflare deploy     # deploys (or `preview` to test)
+```
+
+Add a minimal `wrangler.toml` (the adapter's docs give the current shape;
+it sets the Worker name, `compatibility_date`, and `nodejs_compat`), and put
+the same environment variables from the section above into **Cloudflare →
+Workers & Pages → your project → Settings → Variables** (mark secrets as
+encrypted). For the simplest path, connect the GitHub repo in the Cloudflare
+dashboard and let it build on push, the same way Vercel does.
+
+Honest note: this adds an adapter and a config file Vercel does not need, and
+I have not been able to run the Cloudflare build from here. If you want, I can
+scaffold the `wrangler.toml` + the build scripts and you run one deploy to
+confirm. If you just want the fastest live URL, Vercel is the shortest path;
+Cloudflare is great once you want its network / pricing.
+
+## If `npm install` crashes your machine
+
+A laptop **restart** during `npm install` (or `npm run dev`) almost always
+means it ran out of memory or overheated, not a bug in the project. You have
+options, easiest first:
+
+1. **Don't install locally at all.** Deploy to Vercel or Cloudflare (above),
+   which build in the cloud. You get a live URL to test on your phone without
+   your laptop doing the heavy lifting. This is the recommended path for a
+   low-spec machine.
+2. **Use a cloud dev environment.** Open the repo in **GitHub Codespaces**
+   (github.com → your repo → Code → Codespaces → Create) or Gitpod. It runs
+   the install and `npm run dev` on their servers; you just see it in the
+   browser. Zero load on your laptop.
+3. **If you must run locally,** make the install lighter and avoid running
+   other heavy apps at the same time:
+   ```bash
+   npm install --no-audit --no-fund --prefer-offline
+   ```
+   The heaviest step is usually `npm run dev` (the Turbopack dev server), not
+   the install. Run it alone, and prefer `npm run build` once over keeping
+   dev running for long sessions. Adding swap space to your OS also helps.
 
 ## Run it locally first (optional)
 
