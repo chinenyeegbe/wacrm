@@ -83,3 +83,40 @@ export async function canAccessWorkspace(workspaceId: string): Promise<boolean> 
   const accessible = await getAccessibleWorkspaces()
   return accessible.some((w) => w.id === workspaceId)
 }
+
+export interface OwnedAgency {
+  id: string
+  name: string
+}
+
+/**
+ * The agency the signed-in user owns (every user bootstraps exactly one
+ * in migration 017), or null if signed out / not found. Agency
+ * management — creating client workspaces, inviting members — is gated
+ * on owning an agency.
+ */
+export async function getOwnedAgency(): Promise<OwnedAgency | null> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data, error } = await supabase
+    .from('agencies')
+    .select('id, name')
+    .eq('owner_user_id', user.id)
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  if (error || !data) return null
+  return { id: data.id as string, name: data.name as string }
+}
+
+/** True when the user owns the agency that the given workspace is under. */
+export async function ownsWorkspace(workspaceId: string): Promise<boolean> {
+  const ws = await getAccessibleWorkspaces()
+  const target = ws.find((w) => w.id === workspaceId)
+  return !!target?.is_agency_owner
+}
