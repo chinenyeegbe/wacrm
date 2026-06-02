@@ -40,38 +40,33 @@ In **Cloudflare → your project → Settings → Variables and Secrets**, add
 
 ## 3. Build for Cloudflare Workers (OpenNext adapter)
 
+**This is already wired up in the repo** — `@opennextjs/cloudflare` +
+`wrangler` are in `devDependencies`, with `wrangler.jsonc`,
+`open-next.config.ts`, and `cf:*` npm scripts. You don't need to add
+anything; you only need to point Cloudflare at the right command.
+
+In **Cloudflare → Workers & Pages → wacrm → Settings → Build**:
+
+- **Build command:** `npx opennextjs-cloudflare build`
+- **Deploy command:** `npx wrangler deploy`
+- Make sure the env vars from step 1 are set for the build/runtime.
+
+That produces `.open-next/worker.js` and deploys it using
+`wrangler.jsonc`. To do it from your machine instead:
+
 ```bash
-npm install --save-dev @opennextjs/cloudflare wrangler
+npx wrangler login
+npm run cf:deploy        # builds with OpenNext, then wrangler deploy
+# or just preview locally on the Workers runtime:
+npm run cf:preview
 ```
-
-Add a minimal `wrangler.toml` at the repo root:
-
-```toml
-name = "moldlane"
-compatibility_date = "2025-03-01"
-compatibility_flags = ["nodejs_compat"]
-main = ".open-next/worker.js"
-
-[assets]
-directory = ".open-next/assets"
-binding = "ASSETS"
-```
-
-Add scripts to `package.json`:
-
-```jsonc
-"cf:build": "opennextjs-cloudflare build",
-"cf:deploy": "opennextjs-cloudflare build && wrangler deploy",
-"cf:preview": "opennextjs-cloudflare build && wrangler dev"
-```
-
-Then connect the Git repo in the Cloudflare dashboard with:
-
-- **Build command:** `npm run cf:build`
-- **Deploy command:** `wrangler deploy`
-- (or run `npm run cf:deploy` locally with `wrangler login`).
 
 Point `app.moldlane.com` at the Worker under **Custom domains**.
+
+> Note: the default "Workers Builds" command (a plain `next build` /
+> framework auto-detect) is what was failing — Next.js middleware + SSR
+> can't run as a static build. Switching the build command to
+> `npx opennextjs-cloudflare build` is the fix.
 
 Reference: <https://opennext.js.org/cloudflare>
 
