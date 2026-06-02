@@ -131,13 +131,13 @@ export function AISettings() {
   };
 
   return (
-    <Card className="border-slate-800 bg-slate-900/40">
+    <Card className="border-border bg-card">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-white">
+        <CardTitle className="flex items-center gap-2 text-foreground">
           <Sparkles className="size-4 text-fuchsia-400" />
           AI assistant
         </CardTitle>
-        <CardDescription className="text-slate-400">
+        <CardDescription className="text-muted-foreground">
           Teach the AI about your business so its replies, in the inbox and in
           your <span className="font-medium">AI Reply</span> automations, quote
           real prices and stay on-brand. Runs on free models; never makes up
@@ -147,10 +147,10 @@ export function AISettings() {
 
       <CardContent className="space-y-6">
         {/* Master switch */}
-        <div className="flex items-start justify-between gap-4 rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+        <div className="flex items-start justify-between gap-4 rounded-lg border border-border bg-card p-4">
           <div>
-            <Label className="text-slate-200">Enable AI auto-replies</Label>
-            <p className="mt-1 text-xs text-slate-500">
+            <Label className="text-foreground">Enable AI auto-replies</Label>
+            <p className="mt-1 text-xs text-muted-foreground">
               When off, your <span className="font-medium">AI Reply</span>{' '}
               automation steps are skipped, a fast kill-switch without editing
               each automation. The inbox ✨ button still works on demand.
@@ -167,8 +167,8 @@ export function AISettings() {
         {/* Autonomy, how much the AI does on its own. Human-in-the-loop is
             the default, but each business picks the structure it trusts. */}
         <div className="space-y-2">
-          <Label className="text-slate-200">How should the AI work?</Label>
-          <p className="text-xs text-slate-500">
+          <Label className="text-foreground">How should the AI work?</Label>
+          <p className="text-xs text-muted-foreground">
             Human-in-the-loop is optional, pick the structure that fits your
             team. You can change it anytime.
           </p>
@@ -185,7 +185,7 @@ export function AISettings() {
                     'rounded-lg border px-4 py-3 text-left transition-colors',
                     selected
                       ? 'border-primary bg-primary/10'
-                      : 'border-slate-800 bg-slate-900/60 hover:border-slate-700',
+                      : 'border-border bg-card hover:border-border',
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -194,7 +194,7 @@ export function AISettings() {
                         'flex size-4 items-center justify-center rounded-full border',
                         selected
                           ? 'border-primary'
-                          : 'border-slate-600',
+                          : 'border-border',
                       )}
                     >
                       {selected && (
@@ -204,13 +204,13 @@ export function AISettings() {
                     <span
                       className={cn(
                         'text-sm font-medium',
-                        selected ? 'text-white' : 'text-slate-300',
+                        selected ? 'text-foreground' : 'text-foreground',
                       )}
                     >
                       {opt.label}
                     </span>
                   </div>
-                  <p className="mt-1 pl-6 text-xs text-slate-500">{opt.hint}</p>
+                  <p className="mt-1 pl-6 text-xs text-muted-foreground">{opt.hint}</p>
                 </button>
               );
             })}
@@ -219,10 +219,10 @@ export function AISettings() {
 
         {/* Business context */}
         <div className="space-y-2">
-          <Label htmlFor="ai-business-context" className="text-slate-200">
+          <Label htmlFor="ai-business-context" className="text-foreground">
             Business context
           </Label>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Catalogue, prices, delivery, payment details, hours, and the tone
             you want. The more concrete, the better the replies.
           </p>
@@ -234,17 +234,17 @@ export function AISettings() {
             }
             placeholder={PLACEHOLDER}
             disabled={loading || saving}
-            className="min-h-64 bg-slate-800 font-mono text-xs leading-relaxed text-white"
+            className="min-h-64 bg-muted font-mono text-xs leading-relaxed text-foreground"
           />
           <div className="flex justify-end">
-            <span className="text-[11px] text-slate-600">
+            <span className="text-[11px] text-muted-foreground">
               {businessContext.length} / {MAX_CONTEXT_CHARS}
             </span>
           </div>
         </div>
 
         {loading && (
-          <p className="flex items-center gap-2 text-sm text-slate-400">
+          <p className="flex items-center gap-2 text-sm text-muted-foreground">
             <CircleAlert className="size-4" />
             Loading your AI settings…
           </p>

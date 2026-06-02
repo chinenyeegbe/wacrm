@@ -106,9 +106,9 @@ export function PaymentsConfig() {
   const needsKey = provider === 'paystack' || provider === 'flutterwave';
 
   return (
-    <Card className="border-slate-800 bg-slate-900/40">
+    <Card className="border-border bg-card">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-white">
+        <CardTitle className="flex items-center gap-2 text-foreground">
           <CreditCard className="size-4 text-emerald-400" />
           Payments
           {status === 'connected' && (
@@ -118,7 +118,7 @@ export function PaymentsConfig() {
             </span>
           )}
         </CardTitle>
-        <CardDescription className="text-slate-400">
+        <CardDescription className="text-muted-foreground">
           Let the CRM send payment links right inside the chat, so the AI
           doesn&apos;t just close the sale, it collects. Connect a gateway, or
           start with manual bank / mobile-money instructions.
@@ -128,12 +128,12 @@ export function PaymentsConfig() {
       <CardContent className="space-y-6">
         {/* Provider */}
         <div className="space-y-2">
-          <Label className="text-slate-200">Provider</Label>
+          <Label className="text-foreground">Provider</Label>
           <select
             value={provider}
             onChange={(e) => setProvider(e.target.value as PaymentProvider)}
             disabled={loading || saving}
-            className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white"
+            className="w-full rounded-md border border-border bg-muted px-3 py-2 text-sm text-foreground"
           >
             {(Object.keys(PROVIDER_LABEL) as PaymentProvider[]).map((p) => (
               <option key={p} value={p}>
@@ -145,7 +145,7 @@ export function PaymentsConfig() {
 
         {needsKey && (
           <div className="space-y-2">
-            <Label htmlFor="pay-secret" className="text-slate-200">
+            <Label htmlFor="pay-secret" className="text-foreground">
               {PROVIDER_LABEL[provider]} secret key
             </Label>
             <Input
@@ -157,9 +157,9 @@ export function PaymentsConfig() {
                 hasSecret ? '•••••••• (leave blank to keep current)' : 'sk_live_…'
               }
               disabled={loading || saving}
-              className="bg-slate-800 font-mono text-white"
+              className="bg-muted font-mono text-foreground"
             />
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Encrypted (AES-256-GCM) before it&apos;s stored, same as your
               WhatsApp token. We never show it again after saving.
             </p>
@@ -168,7 +168,7 @@ export function PaymentsConfig() {
 
         {provider === 'manual' && (
           <div className="space-y-2">
-            <Label htmlFor="pay-manual" className="text-slate-200">
+            <Label htmlFor="pay-manual" className="text-foreground">
               Payment instructions
             </Label>
             <Textarea
@@ -179,16 +179,16 @@ export function PaymentsConfig() {
                 'Bank transfer: 0123456789 GTBank, Adaeze Stores.\nOr M-Pesa Till 567890. Send proof after paying.'
               }
               disabled={loading || saving}
-              className="min-h-28 bg-slate-800 text-white"
+              className="min-h-28 bg-muted text-foreground"
             />
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Sent to the customer verbatim when a Request Payment step runs.
             </p>
           </div>
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="pay-currency" className="text-slate-200">
+          <Label htmlFor="pay-currency" className="text-foreground">
             Default currency
           </Label>
           <Input
@@ -197,14 +197,14 @@ export function PaymentsConfig() {
             onChange={(e) => setCurrency(e.target.value.toUpperCase().slice(0, 3))}
             placeholder="NGN"
             disabled={loading || saving}
-            className="w-32 bg-slate-800 font-mono text-white"
+            className="w-32 bg-muted font-mono text-foreground"
           />
         </div>
 
         {feeBps > 0 && (
-          <p className="rounded-md border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs text-slate-400">
+          <p className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
             Platform fee on collected payments:{' '}
-            <span className="font-medium text-slate-200">
+            <span className="font-medium text-foreground">
               {(feeBps / 100).toFixed(2)}%
             </span>
             . You only ever pay it on money you actually receive.
@@ -212,7 +212,7 @@ export function PaymentsConfig() {
         )}
 
         {loading && (
-          <p className="flex items-center gap-2 text-sm text-slate-400">
+          <p className="flex items-center gap-2 text-sm text-muted-foreground">
             <CircleAlert className="size-4" />
             Loading payment settings…
           </p>
