@@ -28,8 +28,6 @@ export default function SignupPage() {
 function SignupForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -41,23 +39,17 @@ function SignupForm() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
-
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    // Magic-link signup: no password. `options.data` is written to the
+    // new user's metadata on first verification, so the name and role
+    // are captured the moment the account is created. `signInWithOtp`
+    // creates the user if they don't exist yet, so this doubles as
+    // "sign in" for anyone who already signed up.
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           full_name: fullName,
           role: isAgent ? "agent" : "business",
@@ -87,9 +79,9 @@ function SignupForm() {
               Check your email
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              We&apos;ve sent a confirmation link to{" "}
-              <span className="text-foreground">{email}</span>. Please check your
-              inbox and click the link to verify your account.
+              We&apos;ve sent a sign-in link to{" "}
+              <span className="text-foreground">{email}</span>. Click it to
+              confirm your email and finish creating your account.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -166,43 +158,17 @@ function SignupForm() {
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password" className="text-foreground">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="border-border bg-secondary text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="confirmPassword" className="text-foreground">
-                Confirm password
-              </Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Repeat your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="border-border bg-secondary text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
-
             <Button
               type="submit"
               disabled={loading}
               className="mt-2 h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
-              {loading ? "Creating account..." : "Create account"}
+              {loading ? "Sending link..." : "Send sign-in link"}
             </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              No password required — we&apos;ll email you a secure link to
+              finish.
+            </p>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">

@@ -38,8 +38,7 @@ export async function middleware(request: NextRequest) {
   // Auth pages - redirect to dashboard if already logged in
   if (user && (
     request.nextUrl.pathname === '/login' ||
-    request.nextUrl.pathname === '/signup' ||
-    request.nextUrl.pathname === '/forgot-password'
+    request.nextUrl.pathname === '/signup'
   )) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
