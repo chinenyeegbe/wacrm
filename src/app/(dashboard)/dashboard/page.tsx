@@ -27,6 +27,7 @@ import type {
 import { MetricCard } from '@/components/dashboard/metric-card'
 import { SkeletonCard } from '@/components/dashboard/skeleton'
 import { QuickActions } from '@/components/dashboard/quick-actions'
+import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist'
 import { ConversationsChart } from '@/components/dashboard/conversations-chart'
 import { PipelineDonut } from '@/components/dashboard/pipeline-donut'
 import { ResponseTimeChart } from '@/components/dashboard/response-time-chart'
@@ -124,6 +125,9 @@ export default function DashboardPage() {
           Live analytics across conversations, contacts, deals, broadcasts, and automations.
         </p>
       </div>
+
+      {/* Onboarding — self-hides once dismissed or fully complete */}
+      <OnboardingChecklist />
 
       {/* Metric cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

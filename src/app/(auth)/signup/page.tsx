@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,15 @@ import {
 import { MessageSquare, CheckCircle } from "lucide-react";
 
 export default function SignupPage() {
+  // useSearchParams needs a Suspense boundary in the App Router.
+  return (
+    <Suspense fallback={null}>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,6 +33,9 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  // "agent" when arriving from the agent-program CTA (/signup?role=agent),
+  // otherwise a regular business signup.
+  const isAgent = useSearchParams().get("role") === "agent";
   const supabase = createClient();
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -47,6 +60,7 @@ export default function SignupPage() {
       options: {
         data: {
           full_name: fullName,
+          role: isAgent ? "agent" : "business",
         },
       },
     });
@@ -100,10 +114,19 @@ export default function SignupPage() {
           <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
             <MessageSquare className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-xl text-foreground">Create account</CardTitle>
+          <CardTitle className="text-xl text-foreground">
+            {isAgent ? "Become an agent" : "Create account"}
+          </CardTitle>
           <CardDescription className="text-muted-foreground">
-            Get started with CRM Template for WhatsApp
+            {isAgent
+              ? "Sign up to start onboarding local businesses to Moldlane"
+              : "Get started with Moldlane"}
           </CardDescription>
+          {isAgent && (
+            <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
+              Agent application
+            </span>
+          )}
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignup} className="flex flex-col gap-4">
