@@ -1,10 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
-import { Toaster } from "sonner";
 import "./globals.css";
 import { ThemeProvider } from "@/hooks/use-theme";
-import { DEFAULT_THEME, STORAGE_KEY, THEME_IDS } from "@/lib/themes";
+import { ThemedToaster } from "@/components/layout/themed-toaster";
+import {
+  DEFAULT_MODE,
+  DEFAULT_THEME,
+  MODE_IDS,
+  MODE_STORAGE_KEY,
+  STORAGE_KEY,
+  THEME_IDS,
+} from "@/lib/themes";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -33,7 +40,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#020617",
-  colorScheme: "dark",
+  // Both modes are supported; the active one is applied via data-mode.
+  // "dark light" keeps dark as the default for native UI (scrollbars,
+  // form controls) before the boot script runs.
+  colorScheme: "dark light",
 };
 
 // Inline boot script — runs before React hydrates so the user's
@@ -47,15 +57,22 @@ export const viewport: Viewport = {
 // silently break the boot path.
 const THEME_BOOT_SCRIPT = `
 (function(){
+  var el = document.documentElement;
   try {
-    var STORAGE_KEY = ${JSON.stringify(STORAGE_KEY)};
-    var DEFAULT = ${JSON.stringify(DEFAULT_THEME)};
-    var ALLOWED = ${JSON.stringify(THEME_IDS)};
-    var saved = localStorage.getItem(STORAGE_KEY);
-    var theme = ALLOWED.indexOf(saved) !== -1 ? saved : DEFAULT;
-    document.documentElement.dataset.theme = theme;
+    var THEME_KEY = ${JSON.stringify(STORAGE_KEY)};
+    var THEME_DEFAULT = ${JSON.stringify(DEFAULT_THEME)};
+    var THEMES = ${JSON.stringify(THEME_IDS)};
+    var savedTheme = localStorage.getItem(THEME_KEY);
+    el.dataset.theme = THEMES.indexOf(savedTheme) !== -1 ? savedTheme : THEME_DEFAULT;
+
+    var MODE_KEY = ${JSON.stringify(MODE_STORAGE_KEY)};
+    var MODE_DEFAULT = ${JSON.stringify(DEFAULT_MODE)};
+    var MODES = ${JSON.stringify(MODE_IDS)};
+    var savedMode = localStorage.getItem(MODE_KEY);
+    el.dataset.mode = MODES.indexOf(savedMode) !== -1 ? savedMode : MODE_DEFAULT;
   } catch (_e) {
-    document.documentElement.dataset.theme = ${JSON.stringify(DEFAULT_THEME)};
+    el.dataset.theme = ${JSON.stringify(DEFAULT_THEME)};
+    el.dataset.mode = ${JSON.stringify(DEFAULT_MODE)};
   }
 })();
 `;
@@ -69,6 +86,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-theme={DEFAULT_THEME}
+      data-mode={DEFAULT_MODE}
       className={`${inter.variable} h-full antialiased`}
     >
       <head>
@@ -81,17 +99,7 @@ export default function RootLayout({
       <body className="min-h-full bg-background text-foreground font-sans">
         <ThemeProvider>
           {children}
-          <Toaster
-            theme="dark"
-            position="top-right"
-            toastOptions={{
-              style: {
-                background: "rgb(30 41 59)",
-                border: "1px solid rgb(51 65 85)",
-                color: "white",
-              },
-            }}
-          />
+          <ThemedToaster />
         </ThemeProvider>
       </body>
     </html>

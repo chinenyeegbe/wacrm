@@ -27,6 +27,29 @@ export const DEFAULT_THEME: ThemeId = "violet";
 
 export const STORAGE_KEY = "wacrm.theme";
 
+/**
+ * Light/dark mode — a second axis orthogonal to the accent theme.
+ * `data-theme` picks the accent; `data-mode` picks the neutral chrome.
+ * The CSS lives in globals.css under `html[data-mode="light"]`.
+ *
+ * Default is dark so existing installs render unchanged until a user
+ * opts into light. Persisted under its own localStorage key.
+ */
+export const MODE_IDS = ["dark", "light"] as const;
+
+export type ThemeMode = (typeof MODE_IDS)[number];
+
+export const DEFAULT_MODE: ThemeMode = "dark";
+
+export const MODE_STORAGE_KEY = "wacrm.mode";
+
+export function isThemeMode(value: unknown): value is ThemeMode {
+  return (
+    typeof value === "string" &&
+    (MODE_IDS as ReadonlyArray<string>).includes(value)
+  );
+}
+
 export interface ThemeMeta {
   id: ThemeId;
   name: string;

@@ -256,6 +256,54 @@ html[data-theme="rose"] {
   --sidebar-ring: oklch(0.645 0.22 16);
 }
 
+/* ============================================================
+ * LIGHT MODE
+ *
+ * A second, orthogonal axis to the 5 accent themes. `data-theme`
+ * (above) owns the *accent* (--primary + friends, --ring, --chart-1);
+ * `data-mode` owns the *neutral surfaces* (background, card, border,
+ * muted, sidebar). They compose: e.g. <html data-theme="cobalt"
+ * data-mode="light"> = cobalt accent on light chrome.
+ *
+ * This block only overrides the neutral tokens — it deliberately does
+ * NOT touch --primary*, --ring, --sidebar-primary*, or --destructive,
+ * so every accent theme keeps its identity in light mode. Neutrals are
+ * near-zero-chroma slate, so a single light block reads correctly under
+ * all 5 accents (no per-accent light variants needed).
+ *
+ * Placed after the data-theme blocks so that, at equal specificity
+ * (html[data-theme] vs html[data-mode] are both 0,1,1), source order
+ * lets the light neutrals win when both attributes are present.
+ *
+ * Default mode is dark (see DEFAULT_MODE / the boot script) — existing
+ * installs render exactly as before until a user opts into light.
+ * ============================================================ */
+html[data-mode="light"] {
+  --background: oklch(0.985 0.002 247);
+  --foreground: oklch(0.21 0.03 256);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.03 256);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.03 256);
+  --secondary: oklch(0.968 0.004 247);
+  --secondary-foreground: oklch(0.21 0.03 256);
+  --muted: oklch(0.968 0.004 247);
+  --muted-foreground: oklch(0.47 0.02 257);
+  --accent: oklch(0.968 0.004 247);
+  --accent-foreground: oklch(0.21 0.03 256);
+  --border: oklch(0.923 0.005 248);
+  --input: oklch(0.923 0.005 248);
+  --chart-2: oklch(0.6 0.12 250);
+  --chart-3: oklch(0.7 0.1 200);
+  --chart-4: oklch(0.75 0.12 130);
+  --chart-5: oklch(0.7 0.13 60);
+  --sidebar: oklch(0.968 0.004 247);
+  --sidebar-foreground: oklch(0.21 0.03 256);
+  --sidebar-accent: oklch(0.93 0.005 248);
+  --sidebar-accent-foreground: oklch(0.21 0.03 256);
+  --sidebar-border: oklch(0.923 0.005 248);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

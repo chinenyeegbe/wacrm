@@ -5,5 +5,9 @@ build
 coverage
 next-env.d.ts
 package-lock.json
+# Cloudflare / OpenNext build artifacts
+.open-next
+.wrangler
+cloudflare-env.d.ts
 # Generated / vendored
 supabase/migrations
