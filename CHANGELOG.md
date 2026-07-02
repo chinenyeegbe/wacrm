@@ -9,6 +9,50 @@ Versions follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Pre-1.0, `MINOR` bumps cover new modules; `PATCH` bumps cover bug fixes
 and polish.
 
+## [Unreleased]
+
+Reliability and security hardening for message ingestion and the
+internal schedulers. **Migration required.**
+
+### Security
+
+- **Fixed a tenant write-isolation hole in `messages` RLS.** The
+  original `FOR INSERT WITH CHECK (true)` policy applied to the
+  `authenticated` role, letting any signed-in user insert a message row
+  into any other user's conversation. Replaced with a policy scoped to
+  conversations the user owns. Reads were already correctly isolated.
+- **Aligned the automations cron endpoint to a constant-time secret
+  check.** `/api/automations/cron` compared `x-cron-secret` with `!==`
+  (timing-unsafe); both cron endpoints now share `verifyCronSecret`
+  (`src/lib/cron-auth.ts`, `timingSafeEqual`).
+
+### Fixed
+
+- **Inbound webhook processing is now durable.** The webhook handler
+  processed events in a bare floating promise after ACKing Meta, which a
+  serverless runtime (Cloudflare Workers) could tear down mid-flight,
+  silently dropping the message. It now uses `after()` from `next/server`
+  so the platform keeps the invocation alive until processing completes.
+- **Inbound messages are now idempotent.** Meta re-delivers webhooks; a
+  new partial unique index on `messages(conversation_id, message_id)`
+  plus unique-violation handling in the webhook means a re-delivered
+  message is a no-op instead of a duplicate row.
+
+### Added
+
+- **Cron scheduler workflow + docs.** `.github/workflows/cron.yml`
+  drives `/api/automations/cron` and `/api/flows/cron` on a schedule
+  (previously undocumented and unprovisioned, so `wait` steps and flow
+  timeouts never fired). See the new "Provision the scheduler" section
+  in `CLOUDFLARE_DEPLOY.md`.
+
+### Migration required
+
+- Apply `supabase/migrations/017_message_hardening.sql` (RLS fix +
+  dedup + unique index) before deploying this version.
+- Set `AUTOMATION_CRON_SECRET` and provision a scheduler (see
+  `CLOUDFLARE_DEPLOY.md` §4) if you use Automations or Flows.
+
 ## [0.2.2] — 2026-05-29
 
 Flow nodes can now send media. Closes the most-requested gap from user

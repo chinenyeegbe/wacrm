@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { isUniqueViolation } from '@/lib/db-errors'
 import { decrypt, encrypt, isLegacyFormat } from '@/lib/whatsapp/encryption'
 import { getMediaUrl, downloadMedia } from '@/lib/whatsapp/meta-api'
 import { normalizePhone, phonesMatch } from '@/lib/whatsapp/phone-utils'
@@ -181,10 +182,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  // Process asynchronously so we can ack Meta within their timeout.
-  processWebhook(body).catch((error) => {
-    console.error('Error processing webhook:', error)
-  })
+  // Ack Meta within their timeout, but process the event AFTER the
+  // response is sent. `after()` registers the work with the platform's
+  // `waitUntil`, so serverless runtimes (Cloudflare Workers via
+  // OpenNext) keep the invocation alive until processing finishes
+  // instead of tearing down the isolate the moment we return — which a
+  // bare floating promise would let happen, silently dropping the
+  // message.
+  after(() =>
+    processWebhook(body).catch((error) => {
+      console.error('Error processing webhook:', error)
+    }),
+  )
 
   return NextResponse.json({ status: 'received' }, { status: 200 })
 }
@@ -593,6 +602,14 @@ async function processMessage(
   })
 
   if (msgError) {
+    // The partial unique index on (conversation_id, message_id) rejects
+    // a re-delivered Meta wamid we've already stored. Meta retries
+    // webhooks, so treat the duplicate as an already-processed no-op:
+    // skip the conversation update and flow/automation dispatch below
+    // rather than double-handling the same inbound message.
+    if (isUniqueViolation(msgError)) {
+      return
+    }
     console.error('Error inserting message:', msgError)
     return
   }

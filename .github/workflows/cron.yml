@@ -1,0 +1,51 @@
+name: Cron
+
+# Drives the two internal scheduler endpoints that the app cannot fire
+# on its own:
+#
+#   /api/automations/cron — drains due automation `wait` steps
+#   /api/flows/cron        — sweeps abandoned (timed-out) flow runs
+#
+# Without a scheduler hitting these, `wait` steps never resume and
+# stale flow runs pin the one-active-run-per-contact index forever,
+# blocking new triggers. A 5-minute cadence is ample for both (flow
+# timeouts default to 24h).
+#
+# Setup (one time):
+#   1. Add repo secrets:
+#        APP_URL             e.g. https://app.moldlane.com (no trailing slash)
+#        AUTOMATION_CRON_SECRET  the same value set in the app's env
+#   2. That's it — this workflow runs on GitHub's schedule.
+#
+# Note: GitHub's cron scheduler is best-effort and can be delayed under
+# load; for tighter guarantees, provision Cloudflare Workers Cron
+# Triggers instead (see CLOUDFLARE_DEPLOY.md).
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: cron
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    name: Ping scheduler endpoints
+    runs-on: ubuntu-latest
+    steps:
+      - name: Drain automation wait steps
+        run: |
+          curl --fail --silent --show-error --max-time 60 \
+            -H "x-cron-secret: ${{ secrets.AUTOMATION_CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/automations/cron"
+
+      - name: Sweep stale flow runs
+        # Run even if the automations ping failed — the two endpoints
+        # are independent operations.
+        if: ${{ always() }}
+        run: |
+          curl --fail --silent --show-error --max-time 60 \
+            -H "x-cron-secret: ${{ secrets.AUTOMATION_CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/flows/cron"
