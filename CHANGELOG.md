@@ -45,6 +45,18 @@ internal schedulers. **Migration required.**
   (previously undocumented and unprovisioned, so `wait` steps and flow
   timeouts never fired). See the new "Provision the scheduler" section
   in `CLOUDFLARE_DEPLOY.md`.
+- **Optional cross-isolate rate limiting.** The per-user API limiter
+  now uses a Cloudflare KV namespace when a `RATE_LIMIT_KV` binding is
+  present, so the limit holds across Worker isolates instead of being
+  per-instance. Falls back to the in-memory limiter when unbound, so
+  behaviour is unchanged unless you opt in (see `CLOUDFLARE_DEPLOY.md`
+  §5).
+- **Structured logging + error capture** (`src/lib/observability.ts`).
+  Fire-and-forget failures in the webhook, cron, and send paths now emit
+  single-line JSON (indexable by log pipelines) instead of a bare
+  `console.error` that serialized errors to `{}`. Exposes a
+  `setErrorReporter` hook so Sentry (or similar) can be attached without
+  touching call sites.
 
 ### Migration required
 

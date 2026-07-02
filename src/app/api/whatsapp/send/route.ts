@@ -16,6 +16,7 @@ import {
 } from '@/lib/rate-limit'
 import type { MessageTemplate } from '@/types'
 import { isMessageTemplate } from '@/lib/whatsapp/template-row-guard'
+import { captureError } from '@/lib/observability'
 
 export async function POST(request: Request) {
   try {
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
 
     // Per-user rate limit. Bucket key is scoped to this route so
     // `/broadcast` has an independent budget.
-    const limit = checkRateLimit(`send:${user.id}`, RATE_LIMITS.send)
+    const limit = await checkRateLimit(`send:${user.id}`, RATE_LIMITS.send)
     if (!limit.success) {
       return rateLimitResponse(limit)
     }
@@ -306,7 +307,12 @@ export async function POST(request: Request) {
       .single()
 
     if (msgError) {
-      console.error('Error inserting sent message:', msgError)
+      // The message reached Meta but we failed to persist it — a real
+      // inconsistency worth surfacing, not just a console line.
+      captureError('send.message_persist_failed', msgError, {
+        conversation_id,
+        wa_message_id: waMessageId,
+      })
       return NextResponse.json(
         { error: `Message sent to Meta but failed to save to DB: ${msgError.message}` },
         { status: 500 }

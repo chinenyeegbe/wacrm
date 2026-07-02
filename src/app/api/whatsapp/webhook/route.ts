@@ -1,5 +1,6 @@
 import { NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { captureError } from '@/lib/observability'
 import { isUniqueViolation } from '@/lib/db-errors'
 import { decrypt, encrypt, isLegacyFormat } from '@/lib/whatsapp/encryption'
 import { getMediaUrl, downloadMedia } from '@/lib/whatsapp/meta-api'
@@ -191,7 +192,7 @@ export async function POST(request: Request) {
   // message.
   after(() =>
     processWebhook(body).catch((error) => {
-      console.error('Error processing webhook:', error)
+      captureError('webhook.process_failed', error)
     }),
   )
 
@@ -610,7 +611,9 @@ async function processMessage(
     if (isUniqueViolation(msgError)) {
       return
     }
-    console.error('Error inserting message:', msgError)
+    captureError('webhook.message_insert_failed', msgError, {
+      conversation_id: conversation.id,
+    })
     return
   }
 

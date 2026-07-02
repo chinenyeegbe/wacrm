@@ -114,7 +114,38 @@ with the `x-cron-secret` header on a 5-minute interval.
 
 ---
 
-## 5. Verify
+## 5. Optional: cross-isolate rate limiting (KV)
+
+The per-user API rate limits (`/api/whatsapp/send`, `/broadcast`,
+`/react`) default to an **in-memory** counter. On Cloudflare Workers
+each isolate has its own memory, so under load the limit is enforced
+per-isolate, not globally.
+
+To share the counter across every isolate, bind a KV namespace named
+`RATE_LIMIT_KV`. The app auto-detects the binding and switches to it; if
+it's absent (or KV errors), it falls back to the in-memory limiter, so
+this is purely opt-in.
+
+```bash
+npx wrangler kv namespace create RATE_LIMIT_KV
+```
+
+Then add the returned id to `wrangler.jsonc`:
+
+```jsonc
+"kv_namespaces": [
+  { "binding": "RATE_LIMIT_KV", "id": "<the-id-wrangler-printed>" }
+]
+```
+
+> Best-effort by design: KV has no atomic increment, so two exactly
+> simultaneous requests can under-count by one. That's fine for coarse
+> abuse limits; the failure mode is slightly permissive, never a
+> lockout.
+
+---
+
+## 6. Verify
 
 - `https://app.moldlane.com/` → **marketing landing page** (business).
 - `https://app.moldlane.com/agents` → **agent program** page.
