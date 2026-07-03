@@ -12,7 +12,32 @@ and polish.
 ## [Unreleased]
 
 Reliability and security hardening for message ingestion and the
-internal schedulers. **Migration required.**
+internal schedulers, plus the first customer-lifecycle primitives.
+**Migrations required (017 and 018).**
+
+### Added
+
+- **Marketing opt-out (STOP / START).** Inbound `STOP`-family keywords
+  now set `contacts.marketing_opted_out_at`; broadcasts skip opted-out
+  contacts and report them as `skipped`. `START` re-subscribes. Required
+  by WhatsApp policy and UK PECR / GDPR. (`src/lib/whatsapp/opt-out.ts`,
+  migration 018.)
+- **Job-record fields on contacts** — `last_service_date`,
+  `service_type`, `job_value`, `next_due_date`: the minimal service
+  history the reactivation / service-due playbooks build on. (Migration
+  018.)
+- **Request-body validation (zod)** on the WhatsApp send / broadcast /
+  react routes — malformed nested payloads are rejected at the trust
+  boundary with a 400 instead of reaching Supabase or Meta.
+  (`src/lib/api/validation.ts`.)
+
+### Changed
+
+- **Contact lookup on inbound messages is now indexed.** A trigger-
+  maintained `contacts.phone_normalized` column + index replaces the
+  per-message scan that loaded a user's entire contact list and matched
+  in JS; the fuzzy trunk-prefix match remains as a fallback. (Migration
+  018.)
 
 ### Security
 
@@ -61,7 +86,9 @@ internal schedulers. **Migration required.**
 ### Migration required
 
 - Apply `supabase/migrations/017_message_hardening.sql` (RLS fix +
-  dedup + unique index) before deploying this version.
+  dedup + unique index) **and**
+  `supabase/migrations/018_contacts_lifecycle.sql` (normalized phone +
+  opt-out + job-record fields) before deploying this version.
 - Set `AUTOMATION_CRON_SECRET` and provision a scheduler (see
   `CLOUDFLARE_DEPLOY.md` §4) if you use Automations or Flows.
 

@@ -44,7 +44,7 @@
 | Sales pipelines (Kanban) | ✅ Works, wrong for ICP | `(dashboard)/pipelines` |
 | Marketing site + agent recruitment page | ✅ Static only | `src/app/(marketing)/` |
 | **AI / LLM anything** | ❌ Absent | zero AI deps in `package.json` |
-| **Billing / subscriptions** | ❌ Absent | zero Stripe/plan code |
+| **Billing / subscriptions** | ❌ Absent | zero billing/plan code |
 | **Reviews, referrals, reactivation features** | ❌ Absent | no dedicated code |
 | **Bounty / task / workforce backend** | ❌ Absent | `/signup?role=agent` param is unhandled |
 | **Multi-user teams** | ❌ Absent | single-user tenancy; no org/membership tables; `assigned_agent_id` isn't even a foreign key |
@@ -213,7 +213,7 @@ Native virality is structurally weak: campaign messages come *from the business'
 7. **Distributed rate limiting:** replace the in-memory `Map` in `src/lib/rate-limit.ts` (per-isolate, ineffective on Workers) with KV/Durable Object counters; extend beyond send/broadcast/react to config, templates, automations, flows.
 8. **Contact matching at O(1):** `findOrCreateContact` in the webhook loads *all* of a tenant's contacts per inbound message and matches in JS — replace with a normalized-phone (E.164) column + index lookup. Same for the O(all-tenants) webhook GET verify path.
 9. **Zod at the trust boundary** on API routes (nested automation steps, flow nodes, template params are currently hand-checked); explicit origin check or custom-header CSRF defense on state-changing routes rather than relying solely on SameSite defaults.
-10. **Stripe billing** (subscription + metered message overage) and a minimal admin view (tenants, campaign health, Meta quality ratings).
+10. **Billing via Paddle** (subscription + metered message overage) and a minimal admin view (tenants, campaign health, Meta quality ratings). Paddle over Stripe deliberately: as merchant-of-record it handles EU/UK VAT registration, invoicing, and remittance for you — a real burden lifted for a European service-business SaaS selling across VAT jurisdictions, where Stripe would leave tax compliance on you.
 11. **Embedded Signup (Meta Tech Provider):** begin Meta Business verification + Tech Provider onboarding now; ship OAuth-style number connection when approved. Until then, concierge covers it. Handle the **number question** head-on in onboarding: moving a number to the Cloud API historically disabled the WhatsApp Business app on the phone; Meta's app+API coexistence is only partially rolled out. Offer a clear default (dedicated business number, or verified coexistence path) — botching this bricks the tool the owner lives in, and one such story kills you in a trade community.
 
 ### 8.3 Compliance is a feature (before first marketing campaign)
@@ -254,7 +254,7 @@ Org/team model and true multi-seat (single-user tenancy is *correct* for owner-o
 - [ ] Server-side campaign runner (§8.2.6) — makes the promise real.
 - [ ] Job record + the three playbooks as packaged product (templates pre-approved per trade).
 - [ ] Recovered-revenue counter + monthly WhatsApp revenue report to owners.
-- [ ] Stripe billing; convert design partners to £79/month; charge £149 setup for new signups.
+- [ ] Paddle billing; convert design partners to £79/month; charge £149 setup for new signups.
 - [ ] 3 case studies with real numbers; begin partner conversations (motor factors, boiler brands, trade accountants).
 - [ ] Target: 25–50 paying, ≥£25k recovered revenue attributed across customers, churn signal read monthly.
 

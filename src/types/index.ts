@@ -20,10 +20,22 @@ export interface Contact {
   id: string;
   user_id: string;
   phone: string;
+  /** Digits-only form of `phone`, maintained by a DB trigger. Used for
+   *  indexed contact lookup. */
+  phone_normalized?: string;
   name?: string;
   email?: string;
   company?: string;
   avatar_url?: string;
+  /** Set when the customer opted out of marketing (replied STOP).
+   *  Broadcasts skip contacts with a non-null value. */
+  marketing_opted_out_at?: string | null;
+  /** Lightweight service history — foundation for the reactivation /
+   *  service-due playbooks. */
+  last_service_date?: string | null;
+  service_type?: string | null;
+  job_value?: number | null;
+  next_due_date?: string | null;
   created_at: string;
   updated_at: string;
 }
