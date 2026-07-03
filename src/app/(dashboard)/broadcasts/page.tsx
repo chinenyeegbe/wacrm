@@ -85,7 +85,10 @@ export default function BroadcastsPage() {
   }, []);
 
   const anySending = useMemo(
-    () => broadcasts.some((b) => b.status === 'sending'),
+    () =>
+      broadcasts.some(
+        (b) => b.status === 'sending' || b.status === 'queued',
+      ),
     [broadcasts],
   );
 

@@ -17,6 +17,11 @@ server-side broadcast runner. **Migrations required (017, 018, 019).**
 
 ### Added
 
+- **Broadcast scheduling.** The send step now offers "Send now" or
+  "Schedule for later" with a date/time picker; scheduled broadcasts are
+  created `scheduled` and the runner sends them once due. New `queued` /
+  `scheduled` broadcast and `skipped` recipient states are surfaced in
+  the list and detail views.
 - **Server-side broadcast runner.** Broadcasts previously sent from a
   loop running in the wizard browser tab — closing the tab stopped the
   campaign, and `scheduled_at` never fired. The wizard now only

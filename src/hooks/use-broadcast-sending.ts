@@ -31,6 +31,12 @@ interface BroadcastPayload {
   template: MessageTemplate;
   audience: AudienceConfig;
   variables: Record<string, VariableMapping>;
+  /**
+   * ISO timestamp to send at. When set and in the future, the broadcast
+   * is created 'scheduled' and the runner picks it up once due;
+   * otherwise it goes straight to 'queued' for immediate sending.
+   */
+  scheduledAt?: string | null;
 }
 
 interface UseBroadcastSendingReturn {
@@ -240,6 +246,12 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
 
       // ── Step 2: Create broadcast row ──────────────────────────────
       setProgress(10);
+      // Future-dated → 'scheduled' (runner picks it up when due);
+      // otherwise → 'queued' for immediate sending.
+      const scheduledAt =
+        payload.scheduledAt && new Date(payload.scheduledAt) > new Date()
+          ? payload.scheduledAt
+          : null;
       const { data: broadcast, error: broadcastError } = await supabase
         .from('broadcasts')
         .insert({
@@ -254,7 +266,8 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
             customField: payload.audience.customField,
             excludeTagIds: payload.audience.excludeTagIds,
           },
-          status: 'queued',
+          status: scheduledAt ? 'scheduled' : 'queued',
+          scheduled_at: scheduledAt,
           total_recipients: contacts.length,
           sent_count: 0,
           delivered_count: 0,
