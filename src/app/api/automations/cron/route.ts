@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/automations/admin-client'
 import { resumePendingExecution } from '@/lib/automations/engine'
 import type { AutomationContext } from '@/lib/automations/engine'
+import { verifyCronSecret } from '@/lib/cron-auth'
+import { captureError } from '@/lib/observability'
 
 /**
  * Drain due `automation_pending_executions` rows. Meant to be hit
@@ -15,14 +17,8 @@ import type { AutomationContext } from '@/lib/automations/engine'
  * two-step UPDATE-by-id.
  */
 export async function GET(request: Request) {
-  const expected = process.env.AUTOMATION_CRON_SECRET
-  if (!expected) {
-    return NextResponse.json({ error: 'cron not configured' }, { status: 503 })
-  }
-  const supplied = request.headers.get('x-cron-secret')
-  if (supplied !== expected) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const authError = verifyCronSecret(request)
+  if (authError) return authError
 
   const admin = supabaseAdmin()
   const { data: due, error } = await admin
@@ -33,7 +29,10 @@ export async function GET(request: Request) {
     .order('run_at', { ascending: true })
     .limit(50)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    captureError('automations_cron.query_failed', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
   if (!due || due.length === 0) return NextResponse.json({ processed: 0 })
 
   let processed = 0

@@ -16,6 +16,27 @@ import {
 } from '@/lib/rate-limit'
 import type { MessageTemplate } from '@/types'
 import { isMessageTemplate } from '@/lib/whatsapp/template-row-guard'
+import { captureError } from '@/lib/observability'
+import { z } from 'zod'
+import { parseJsonBody } from '@/lib/api/validation'
+import type { SendTimeParams } from '@/lib/whatsapp/template-send-builder'
+
+// Structural validation only — the existing cross-field checks below
+// (text needs content_text, template needs template_name) stay as-is,
+// and `message_type` isn't constrained to a fixed enum so no currently-
+// accepted value regresses. `template_message_params` passes through
+// untouched (SendTimeParams is validated downstream by the send builder).
+const sendMessageSchema = z.object({
+  conversation_id: z.string().min(1),
+  message_type: z.string().min(1),
+  content_text: z.string().nullish(),
+  media_url: z.string().nullish(),
+  template_name: z.string().nullish(),
+  template_language: z.string().nullish(),
+  template_params: z.array(z.string()).optional(),
+  template_message_params: z.custom<SendTimeParams>().optional(),
+  reply_to_message_id: z.string().nullish(),
+})
 
 export async function POST(request: Request) {
   try {
@@ -35,12 +56,13 @@ export async function POST(request: Request) {
 
     // Per-user rate limit. Bucket key is scoped to this route so
     // `/broadcast` has an independent budget.
-    const limit = checkRateLimit(`send:${user.id}`, RATE_LIMITS.send)
+    const limit = await checkRateLimit(`send:${user.id}`, RATE_LIMITS.send)
     if (!limit.success) {
       return rateLimitResponse(limit)
     }
 
-    const body = await request.json()
+    const parsed = await parseJsonBody(request, sendMessageSchema)
+    if (!parsed.ok) return parsed.response
     const {
       conversation_id,
       message_type,
@@ -51,14 +73,7 @@ export async function POST(request: Request) {
       template_params,
       template_message_params,
       reply_to_message_id,
-    } = body
-
-    if (!conversation_id || !message_type) {
-      return NextResponse.json(
-        { error: 'conversation_id and message_type are required' },
-        { status: 400 }
-      )
-    }
+    } = parsed.data
 
     if (message_type === 'text' && !content_text) {
       return NextResponse.json(
@@ -218,7 +233,7 @@ export async function POST(request: Request) {
           phoneNumberId: config.phone_number_id,
           accessToken,
           to: phone,
-          templateName: template_name,
+          templateName: template_name as string,
           language: template_language || 'en_US',
           template: templateRow ?? undefined,
           messageParams: template_message_params ?? undefined,
@@ -233,7 +248,7 @@ export async function POST(request: Request) {
         phoneNumberId: config.phone_number_id,
         accessToken,
         to: phone,
-        text: content_text,
+        text: content_text as string,
         contextMessageId,
       })
       return result.messageId
@@ -306,7 +321,12 @@ export async function POST(request: Request) {
       .single()
 
     if (msgError) {
-      console.error('Error inserting sent message:', msgError)
+      // The message reached Meta but we failed to persist it — a real
+      // inconsistency worth surfacing, not just a console line.
+      captureError('send.message_persist_failed', msgError, {
+        conversation_id,
+        wa_message_id: waMessageId,
+      })
       return NextResponse.json(
         { error: `Message sent to Meta but failed to save to DB: ${msgError.message}` },
         { status: 500 }

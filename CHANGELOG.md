@@ -9,6 +9,89 @@ Versions follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Pre-1.0, `MINOR` bumps cover new modules; `PATCH` bumps cover bug fixes
 and polish.
 
+## [Unreleased]
+
+Reliability and security hardening for message ingestion and the
+internal schedulers, plus the first customer-lifecycle primitives.
+**Migrations required (017 and 018).**
+
+### Added
+
+- **Marketing opt-out (STOP / START).** Inbound `STOP`-family keywords
+  now set `contacts.marketing_opted_out_at`; broadcasts skip opted-out
+  contacts and report them as `skipped`. `START` re-subscribes. Required
+  by WhatsApp policy and UK PECR / GDPR. (`src/lib/whatsapp/opt-out.ts`,
+  migration 018.)
+- **Job-record fields on contacts** — `last_service_date`,
+  `service_type`, `job_value`, `next_due_date`: the minimal service
+  history the reactivation / service-due playbooks build on. (Migration
+  018.)
+- **Request-body validation (zod)** on the WhatsApp send / broadcast /
+  react routes — malformed nested payloads are rejected at the trust
+  boundary with a 400 instead of reaching Supabase or Meta.
+  (`src/lib/api/validation.ts`.)
+
+### Changed
+
+- **Contact lookup on inbound messages is now indexed.** A trigger-
+  maintained `contacts.phone_normalized` column + index replaces the
+  per-message scan that loaded a user's entire contact list and matched
+  in JS; the fuzzy trunk-prefix match remains as a fallback. (Migration
+  018.)
+
+### Security
+
+- **Fixed a tenant write-isolation hole in `messages` RLS.** The
+  original `FOR INSERT WITH CHECK (true)` policy applied to the
+  `authenticated` role, letting any signed-in user insert a message row
+  into any other user's conversation. Replaced with a policy scoped to
+  conversations the user owns. Reads were already correctly isolated.
+- **Aligned the automations cron endpoint to a constant-time secret
+  check.** `/api/automations/cron` compared `x-cron-secret` with `!==`
+  (timing-unsafe); both cron endpoints now share `verifyCronSecret`
+  (`src/lib/cron-auth.ts`, `timingSafeEqual`).
+
+### Fixed
+
+- **Inbound webhook processing is now durable.** The webhook handler
+  processed events in a bare floating promise after ACKing Meta, which a
+  serverless runtime (Cloudflare Workers) could tear down mid-flight,
+  silently dropping the message. It now uses `after()` from `next/server`
+  so the platform keeps the invocation alive until processing completes.
+- **Inbound messages are now idempotent.** Meta re-delivers webhooks; a
+  new partial unique index on `messages(conversation_id, message_id)`
+  plus unique-violation handling in the webhook means a re-delivered
+  message is a no-op instead of a duplicate row.
+
+### Added
+
+- **Cron scheduler workflow + docs.** `.github/workflows/cron.yml`
+  drives `/api/automations/cron` and `/api/flows/cron` on a schedule
+  (previously undocumented and unprovisioned, so `wait` steps and flow
+  timeouts never fired). See the new "Provision the scheduler" section
+  in `CLOUDFLARE_DEPLOY.md`.
+- **Optional cross-isolate rate limiting.** The per-user API limiter
+  now uses a Cloudflare KV namespace when a `RATE_LIMIT_KV` binding is
+  present, so the limit holds across Worker isolates instead of being
+  per-instance. Falls back to the in-memory limiter when unbound, so
+  behaviour is unchanged unless you opt in (see `CLOUDFLARE_DEPLOY.md`
+  §5).
+- **Structured logging + error capture** (`src/lib/observability.ts`).
+  Fire-and-forget failures in the webhook, cron, and send paths now emit
+  single-line JSON (indexable by log pipelines) instead of a bare
+  `console.error` that serialized errors to `{}`. Exposes a
+  `setErrorReporter` hook so Sentry (or similar) can be attached without
+  touching call sites.
+
+### Migration required
+
+- Apply `supabase/migrations/017_message_hardening.sql` (RLS fix +
+  dedup + unique index) **and**
+  `supabase/migrations/018_contacts_lifecycle.sql` (normalized phone +
+  opt-out + job-record fields) before deploying this version.
+- Set `AUTOMATION_CRON_SECRET` and provision a scheduler (see
+  `CLOUDFLARE_DEPLOY.md` §4) if you use Automations or Flows.
+
 ## [0.2.2] — 2026-05-29
 
 Flow nodes can now send media. Closes the most-requested gap from user

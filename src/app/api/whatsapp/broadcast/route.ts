@@ -9,16 +9,35 @@ import {
   isValidE164,
   phoneVariants,
   isRecipientNotAllowedError,
+  normalizePhone,
 } from '@/lib/whatsapp/phone-utils'
 import {
   checkRateLimit,
   rateLimitResponse,
   RATE_LIMITS,
 } from '@/lib/rate-limit'
+import { z } from 'zod'
+import { parseJsonBody } from '@/lib/api/validation'
+
+// Validates both accepted shapes structurally (see the block comment
+// below). Which shape is used, and the `template_name` required check,
+// stay in the normalization logic so behaviour is unchanged.
+const broadcastRecipientSchema = z.object({
+  phone: z.string().min(1),
+  params: z.array(z.string()).optional(),
+  messageParams: z.custom<SendTimeParams>().optional(),
+})
+const broadcastSchema = z.object({
+  recipients: z.array(broadcastRecipientSchema).optional(),
+  phone_numbers: z.array(z.string()).optional(),
+  template_name: z.string().nullish(),
+  template_language: z.string().nullish(),
+  template_params: z.array(z.string()).optional(),
+})
 
 interface BroadcastResult {
   phone: string
-  status: 'sent' | 'failed'
+  status: 'sent' | 'failed' | 'skipped'
   whatsapp_message_id?: string
   error?: string
 }
@@ -74,19 +93,20 @@ export async function POST(request: Request) {
     // Per-user broadcast budget. Note: this limits how often a user
     // can *start* a campaign, not how many messages go out inside
     // one — the fan-out loop below runs without additional gating.
-    const limit = checkRateLimit(`broadcast:${user.id}`, RATE_LIMITS.broadcast)
+    const limit = await checkRateLimit(`broadcast:${user.id}`, RATE_LIMITS.broadcast)
     if (!limit.success) {
       return rateLimitResponse(limit)
     }
 
-    const body = await request.json()
+    const parsed = await parseJsonBody(request, broadcastSchema)
+    if (!parsed.ok) return parsed.response
     const {
       recipients: newRecipients,
       phone_numbers,
       template_name,
       template_language,
       template_params,
-    } = body
+    } = parsed.data
 
     // Normalize to a list of {phone, params} regardless of shape.
     let recipients: NewRecipient[]
@@ -158,11 +178,38 @@ export async function POST(request: Request) {
     }
     const templateRow = rawTemplateRow ?? null
 
+    // Suppression list: contacts who replied STOP. Broadcasts are
+    // marketing messages, so opted-out customers must be skipped
+    // (WhatsApp policy + UK PECR / GDPR). Loaded once; matched on the
+    // normalized phone so format differences don't leak a message
+    // through.
+    const { data: optedOut } = await supabase
+      .from('contacts')
+      .select('phone_normalized')
+      .eq('user_id', user.id)
+      .not('marketing_opted_out_at', 'is', null)
+    const suppressed = new Set(
+      (optedOut ?? [])
+        .map((c: { phone_normalized: string | null }) => c.phone_normalized)
+        .filter((p): p is string => !!p),
+    )
+
     const results: BroadcastResult[] = []
     let sentCount = 0
     let failedCount = 0
+    let skippedCount = 0
 
     for (const recipient of recipients) {
+      if (suppressed.has(normalizePhone(recipient.phone))) {
+        results.push({
+          phone: recipient.phone,
+          status: 'skipped',
+          error: 'Contact opted out of marketing',
+        })
+        skippedCount++
+        continue
+      }
+
       const sanitized = sanitizePhoneForMeta(recipient.phone)
 
       if (!isValidE164(sanitized)) {
@@ -187,7 +234,7 @@ export async function POST(request: Request) {
             phoneNumberId: config.phone_number_id,
             accessToken,
             to: variant,
-            templateName: template_name,
+            templateName: template_name as string,
             language: template_language || 'en_US',
             template: templateRow ?? undefined,
             messageParams: recipient.messageParams,
@@ -234,6 +281,7 @@ export async function POST(request: Request) {
       total: recipients.length,
       sent: sentCount,
       failed: failedCount,
+      skipped: skippedCount,
       results,
     })
   } catch (error) {

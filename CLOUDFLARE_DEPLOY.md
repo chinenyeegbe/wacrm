@@ -28,6 +28,7 @@ In **Cloudflare → your project → Settings → Variables and Secrets**, add
 | `ENCRYPTION_KEY` | ✅ | 64 hex chars: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 | `META_APP_SECRET` | ✅ | Meta → App Settings → Basic |
 | `NEXT_PUBLIC_SITE_URL` | recommended | e.g. `https://app.moldlane.com` |
+| `AUTOMATION_CRON_SECRET` | ✅ if using automations/flows | Shared secret for the scheduler endpoints (see §4). Any long random string: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 
 > Mark the non-`NEXT_PUBLIC_*` ones as **encrypted/secret**.
 
@@ -76,7 +77,75 @@ Reference: <https://opennext.js.org/cloudflare>
 
 ---
 
-## 4. Verify
+## 4. Provision the scheduler (cron)
+
+Automations and Flows depend on two endpoints being hit on a schedule —
+the app **cannot** fire them itself:
+
+| Endpoint | Job |
+| --- | --- |
+| `GET /api/automations/cron` | Drains due automation `wait` steps so paused automations resume. |
+| `GET /api/flows/cron` | Sweeps abandoned flow runs past their timeout. Without it, a stale run pins the one-active-run-per-contact index and blocks new triggers for that contact **forever**. |
+
+Both require the `x-cron-secret` header to equal `AUTOMATION_CRON_SECRET`
+(constant-time checked) and return `503` if the secret is unset. A
+5-minute cadence is ample (flow timeouts default to 24h).
+
+Pick **one** scheduler:
+
+**Option A — GitHub Actions (simplest).** The repo ships
+`.github/workflows/cron.yml`. Add two repository secrets and it runs on
+GitHub's schedule:
+
+- `APP_URL` — e.g. `https://app.moldlane.com` (no trailing slash)
+- `AUTOMATION_CRON_SECRET` — the same value set in the app's env
+
+**Option B — Cloudflare Workers Cron Triggers (most robust).** Requires
+a custom Worker entrypoint that adds a `scheduled()` handler wrapping the
+OpenNext-generated `.open-next/worker.js` default export, plus a
+`triggers.crons` array in `wrangler.jsonc`. This keeps the schedule on
+the same platform as the app but changes the build entrypoint — validate
+it against a preview deploy before relying on it. See
+<https://opennext.js.org/cloudflare> for the current custom-worker
+pattern.
+
+**Option C — any external cron / uptime pinger** hitting the two URLs
+with the `x-cron-secret` header on a 5-minute interval.
+
+---
+
+## 5. Optional: cross-isolate rate limiting (KV)
+
+The per-user API rate limits (`/api/whatsapp/send`, `/broadcast`,
+`/react`) default to an **in-memory** counter. On Cloudflare Workers
+each isolate has its own memory, so under load the limit is enforced
+per-isolate, not globally.
+
+To share the counter across every isolate, bind a KV namespace named
+`RATE_LIMIT_KV`. The app auto-detects the binding and switches to it; if
+it's absent (or KV errors), it falls back to the in-memory limiter, so
+this is purely opt-in.
+
+```bash
+npx wrangler kv namespace create RATE_LIMIT_KV
+```
+
+Then add the returned id to `wrangler.jsonc`:
+
+```jsonc
+"kv_namespaces": [
+  { "binding": "RATE_LIMIT_KV", "id": "<the-id-wrangler-printed>" }
+]
+```
+
+> Best-effort by design: KV has no atomic increment, so two exactly
+> simultaneous requests can under-count by one. That's fine for coarse
+> abuse limits; the failure mode is slightly permissive, never a
+> lockout.
+
+---
+
+## 6. Verify
 
 - `https://app.moldlane.com/` → **marketing landing page** (business).
 - `https://app.moldlane.com/agents` → **agent program** page.

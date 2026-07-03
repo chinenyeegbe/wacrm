@@ -8,6 +8,14 @@ import {
   rateLimitResponse,
   RATE_LIMITS,
 } from '@/lib/rate-limit';
+import { z } from 'zod';
+import { parseJsonBody } from '@/lib/api/validation';
+
+// `emoji` may be an empty string — that's how a reaction is removed.
+const reactSchema = z.object({
+  message_id: z.string().min(1),
+  emoji: z.string(),
+});
 
 /**
  * POST /api/whatsapp/react
@@ -31,23 +39,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const limit = checkRateLimit(`react:${user.id}`, RATE_LIMITS.react);
+    const limit = await checkRateLimit(`react:${user.id}`, RATE_LIMITS.react);
     if (!limit.success) {
       return rateLimitResponse(limit);
     }
 
-    const body = await request.json();
-    const { message_id, emoji } = body as {
-      message_id?: string;
-      emoji?: string;
-    };
-
-    if (!message_id || typeof emoji !== 'string') {
-      return NextResponse.json(
-        { error: 'message_id and emoji are required' },
-        { status: 400 },
-      );
-    }
+    const parsed = await parseJsonBody(request, reactSchema);
+    if (!parsed.ok) return parsed.response;
+    const { message_id, emoji } = parsed.data;
 
     // Resolve target message + its conversation; verify ownership.
     const { data: targetMessage, error: msgError } = await supabase

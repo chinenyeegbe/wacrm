@@ -1,8 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { captureError } from '@/lib/observability'
+import { isUniqueViolation } from '@/lib/db-errors'
 import { decrypt, encrypt, isLegacyFormat } from '@/lib/whatsapp/encryption'
 import { getMediaUrl, downloadMedia } from '@/lib/whatsapp/meta-api'
 import { normalizePhone, phonesMatch } from '@/lib/whatsapp/phone-utils'
+import { detectOptOutIntent } from '@/lib/whatsapp/opt-out'
 import { verifyMetaWebhookSignature } from '@/lib/whatsapp/webhook-signature'
 import { runAutomationsForTrigger } from '@/lib/automations/engine'
 import { dispatchInboundToFlows } from '@/lib/flows/engine'
@@ -181,10 +184,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  // Process asynchronously so we can ack Meta within their timeout.
-  processWebhook(body).catch((error) => {
-    console.error('Error processing webhook:', error)
-  })
+  // Ack Meta within their timeout, but process the event AFTER the
+  // response is sent. `after()` registers the work with the platform's
+  // `waitUntil`, so serverless runtimes (Cloudflare Workers via
+  // OpenNext) keep the invocation alive until processing finishes
+  // instead of tearing down the isolate the moment we return — which a
+  // bare floating promise would let happen, silently dropping the
+  // message.
+  after(() =>
+    processWebhook(body).catch((error) => {
+      captureError('webhook.process_failed', error)
+    }),
+  )
 
   return NextResponse.json({ status: 'received' }, { status: 200 })
 }
@@ -525,6 +536,27 @@ async function processMessage(
   const { contentText, mediaUrl, mediaType, interactiveReplyId } =
     await parseMessageContent(message, accessToken)
 
+  // Honour marketing opt-out / opt-in keywords (STOP / START). We still
+  // store the message below — this only flips the contact's marketing
+  // consent, which broadcasts respect. WhatsApp policy + UK PECR/GDPR.
+  const optOutIntent = detectOptOutIntent(contentText)
+  if (optOutIntent) {
+    const { error: optOutError } = await supabaseAdmin()
+      .from('contacts')
+      .update({
+        marketing_opted_out_at:
+          optOutIntent === 'stop' ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', contactRecord.id)
+    if (optOutError) {
+      captureError('webhook.opt_out_update_failed', optOutError, {
+        contact_id: contactRecord.id,
+        intent: optOutIntent,
+      })
+    }
+  }
+
   // Resolve swipe-reply context if present. A missing parent is fine —
   // we just store NULL and the UI renders the message without a quote.
   let replyToInternalId: string | null = null
@@ -593,7 +625,17 @@ async function processMessage(
   })
 
   if (msgError) {
-    console.error('Error inserting message:', msgError)
+    // The partial unique index on (conversation_id, message_id) rejects
+    // a re-delivered Meta wamid we've already stored. Meta retries
+    // webhooks, so treat the duplicate as an already-processed no-op:
+    // skip the conversation update and flow/automation dispatch below
+    // rather than double-handling the same inbound message.
+    if (isUniqueViolation(msgError)) {
+      return
+    }
+    captureError('webhook.message_insert_failed', msgError, {
+      conversation_id: conversation.id,
+    })
     return
   }
 
@@ -855,19 +897,44 @@ async function findOrCreateContact(
   phone: string,
   name: string
 ): Promise<ContactOutcome | null> {
-  // Look up existing contacts for this user
-  const { data: contacts, error: contactsError } = await supabaseAdmin()
+  const normalized = normalizePhone(phone)
+
+  // Fast path: indexed exact match on the normalized phone (migration
+  // 018). Covers virtually every inbound message without scanning the
+  // whole contact list.
+  const { data: exactMatch, error: exactError } = await supabaseAdmin()
     .from('contacts')
     .select('*')
     .eq('user_id', userId)
+    .eq('phone_normalized', normalized)
+    .limit(1)
+    .maybeSingle()
 
-  if (contactsError) {
-    console.error('Error fetching contacts:', contactsError)
+  if (exactError) {
+    console.error('Error looking up contact:', exactError)
     return null
   }
 
-  // Use phonesMatch for flexible matching
-  const existingContact = contacts?.find((c: ContactRow) => phonesMatch(c.phone, phone))
+  let existingContact: ContactRow | null = exactMatch ?? null
+
+  // Fallback: trunk-prefix fuzzy match (e.g. a stored number that
+  // differs only by a leading 0). Rare, so the full scan only runs
+  // when the exact lookup misses. `phonesMatch` is a superset of exact
+  // equality, so this never changes which contact an exact hit maps to.
+  if (!existingContact) {
+    const { data: contacts, error: contactsError } = await supabaseAdmin()
+      .from('contacts')
+      .select('*')
+      .eq('user_id', userId)
+
+    if (contactsError) {
+      console.error('Error fetching contacts:', contactsError)
+      return null
+    }
+
+    existingContact =
+      contacts?.find((c: ContactRow) => phonesMatch(c.phone, phone)) ?? null
+  }
 
   if (existingContact) {
     // Update name if it changed
