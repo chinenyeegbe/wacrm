@@ -12,11 +12,21 @@ and polish.
 ## [Unreleased]
 
 Reliability and security hardening for message ingestion and the
-internal schedulers, plus the first customer-lifecycle primitives.
-**Migrations required (017 and 018).**
+internal schedulers, the first customer-lifecycle primitives, and a
+server-side broadcast runner. **Migrations required (017, 018, 019).**
 
 ### Added
 
+- **Server-side broadcast runner.** Broadcasts previously sent from a
+  loop running in the wizard browser tab — closing the tab stopped the
+  campaign, and `scheduled_at` never fired. The wizard now only
+  *enqueues* (persists recipients, marks the broadcast `queued`); a new
+  scheduled endpoint `GET /api/broadcasts/cron` sends to Meta
+  server-side, resumably, skips opted-out contacts, and finalizes the
+  broadcast. Honours `scheduled_at`. (`src/lib/broadcasts/runner.ts`,
+  migration 019 adds the `queued` / `skipped` states. Provision the
+  endpoint alongside the other cron jobs — see `CLOUDFLARE_DEPLOY.md`
+  §4.)
 - **Marketing opt-out (STOP / START).** Inbound `STOP`-family keywords
   now set `contacts.marketing_opted_out_at`; broadcasts skip opted-out
   contacts and report them as `skipped`. `START` re-subscribes. Required
@@ -86,11 +96,13 @@ internal schedulers, plus the first customer-lifecycle primitives.
 ### Migration required
 
 - Apply `supabase/migrations/017_message_hardening.sql` (RLS fix +
-  dedup + unique index) **and**
-  `supabase/migrations/018_contacts_lifecycle.sql` (normalized phone +
-  opt-out + job-record fields) before deploying this version.
-- Set `AUTOMATION_CRON_SECRET` and provision a scheduler (see
-  `CLOUDFLARE_DEPLOY.md` §4) if you use Automations or Flows.
+  dedup + unique index), `supabase/migrations/018_contacts_lifecycle.sql`
+  (normalized phone + opt-out + job-record fields), **and**
+  `supabase/migrations/019_broadcast_queue.sql` (broadcast queue states)
+  before deploying this version.
+- Set `AUTOMATION_CRON_SECRET` and provision the schedulers (see
+  `CLOUDFLARE_DEPLOY.md` §4) — now including `/api/broadcasts/cron`, or
+  **broadcasts will not send**.
 
 ## [0.2.2] — 2026-05-29
 

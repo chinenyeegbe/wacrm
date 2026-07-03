@@ -5,6 +5,7 @@ name: Cron
 #
 #   /api/automations/cron — drains due automation `wait` steps
 #   /api/flows/cron        — sweeps abandoned (timed-out) flow runs
+#   /api/broadcasts/cron   — sends queued / scheduled broadcasts
 #
 # Without a scheduler hitting these, `wait` steps never resume and
 # stale flow runs pin the one-active-run-per-contact index forever,
@@ -42,10 +43,19 @@ jobs:
             "${{ secrets.APP_URL }}/api/automations/cron"
 
       - name: Sweep stale flow runs
-        # Run even if the automations ping failed — the two endpoints
-        # are independent operations.
+        # Run even if the automations ping failed — the endpoints are
+        # independent operations.
         if: ${{ always() }}
         run: |
           curl --fail --silent --show-error --max-time 60 \
             -H "x-cron-secret: ${{ secrets.AUTOMATION_CRON_SECRET }}" \
             "${{ secrets.APP_URL }}/api/flows/cron"
+
+      - name: Send queued broadcasts
+        if: ${{ always() }}
+        # Broadcasts can take longer (many Meta sends per tick), so allow
+        # a wider timeout than the sweep endpoints.
+        run: |
+          curl --fail --silent --show-error --max-time 120 \
+            -H "x-cron-secret: ${{ secrets.AUTOMATION_CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/broadcasts/cron"
