@@ -27,7 +27,9 @@ interface Step4Props {
   onNameChange: (name: string) => void;
   template: MessageTemplate;
   audience: AudienceConfig;
-  onSend: () => void;
+  /** `scheduledAt` is an ISO string when the user picks "Schedule for
+   *  later", otherwise null for immediate send. */
+  onSend: (scheduledAt: string | null) => void;
   onSaveDraft?: () => void;
   onBack: () => void;
   isProcessing: boolean;
@@ -48,6 +50,20 @@ export function Step4ScheduleSend({
   const [showConfirm, setShowConfirm] = useState(false);
   const [estimatedReach, setEstimatedReach] = useState<number>(0);
   const [loadingReach, setLoadingReach] = useState(true);
+  const [mode, setMode] = useState<'now' | 'later'>('now');
+  // `datetime-local` value (local time, no timezone suffix).
+  const [scheduleAt, setScheduleAt] = useState('');
+
+  // Resolve the chosen schedule to an ISO string, or null for "send now"
+  // / an incomplete selection.
+  const scheduledIso =
+    mode === 'later' && scheduleAt ? new Date(scheduleAt).toISOString() : null;
+  const scheduleInPast =
+    mode === 'later' && scheduleAt
+      ? new Date(scheduleAt).getTime() <= Date.now()
+      : false;
+  const canSubmit = !!name.trim() && !isProcessing && !scheduleInPast &&
+    !(mode === 'later' && !scheduleAt);
 
   useEffect(() => {
     async function calculateReach() {
@@ -142,6 +158,55 @@ export function Step4ScheduleSend({
         </div>
       </div>
 
+      {/* Schedule */}
+      <div className="rounded-xl border border-border bg-card/50 p-4">
+        <p className="mb-3 text-sm font-medium text-foreground">When to send</p>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant={mode === 'now' ? 'default' : 'outline'}
+            onClick={() => setMode('now')}
+            disabled={isProcessing}
+            className={
+              mode === 'now'
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                : 'border-border text-foreground'
+            }
+          >
+            Send now
+          </Button>
+          <Button
+            type="button"
+            variant={mode === 'later' ? 'default' : 'outline'}
+            onClick={() => setMode('later')}
+            disabled={isProcessing}
+            className={
+              mode === 'later'
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                : 'border-border text-foreground'
+            }
+          >
+            Schedule for later
+          </Button>
+        </div>
+        {mode === 'later' && (
+          <div className="mt-3">
+            <Input
+              type="datetime-local"
+              value={scheduleAt}
+              onChange={(e) => setScheduleAt(e.target.value)}
+              disabled={isProcessing}
+              className="border-border bg-secondary text-foreground"
+            />
+            {scheduleInPast && (
+              <p className="mt-1.5 text-xs text-red-400">
+                Pick a time in the future.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Processing overlay */}
       {isProcessing && (
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
@@ -189,23 +254,45 @@ export function Step4ScheduleSend({
           <DialogTrigger
             render={
               <Button
-                disabled={!name.trim() || isProcessing}
+                disabled={!canSubmit}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               />
             }
           >
             <Send className="h-4 w-4" />
-            Send Broadcast
+            {scheduledIso ? 'Schedule Broadcast' : 'Send Broadcast'}
           </DialogTrigger>
           <DialogContent className="border-border bg-card sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-foreground">Confirm Broadcast</DialogTitle>
+              <DialogTitle className="text-foreground">
+                {scheduledIso ? 'Confirm Schedule' : 'Confirm Broadcast'}
+              </DialogTitle>
               <DialogDescription className="text-muted-foreground">
-                You are about to send this broadcast to{' '}
-                <span className="font-medium text-foreground">{estimatedReach.toLocaleString()}</span>{' '}
-                contacts using the{' '}
-                <span className="font-medium text-foreground">{template.name}</span> template.
-                This action cannot be undone.
+                {scheduledIso ? (
+                  <>
+                    This broadcast will be sent to{' '}
+                    <span className="font-medium text-foreground">
+                      {estimatedReach.toLocaleString()}
+                    </span>{' '}
+                    contacts using the{' '}
+                    <span className="font-medium text-foreground">{template.name}</span>{' '}
+                    template on{' '}
+                    <span className="font-medium text-foreground">
+                      {new Date(scheduledIso).toLocaleString()}
+                    </span>
+                    .
+                  </>
+                ) : (
+                  <>
+                    You are about to send this broadcast to{' '}
+                    <span className="font-medium text-foreground">
+                      {estimatedReach.toLocaleString()}
+                    </span>{' '}
+                    contacts using the{' '}
+                    <span className="font-medium text-foreground">{template.name}</span>{' '}
+                    template. This action cannot be undone.
+                  </>
+                )}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -219,12 +306,12 @@ export function Step4ScheduleSend({
               <Button
                 onClick={() => {
                   setShowConfirm(false);
-                  onSend();
+                  onSend(scheduledIso);
                 }}
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <Send className="h-4 w-4" />
-                Confirm & Send
+                {scheduledIso ? 'Confirm & Schedule' : 'Confirm & Send'}
               </Button>
             </DialogFooter>
           </DialogContent>

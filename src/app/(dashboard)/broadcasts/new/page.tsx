@@ -41,7 +41,7 @@ export default function NewBroadcastPage() {
   >({});
   const [name, setName] = useState('');
 
-  async function handleSend() {
+  async function handleSend(scheduledAt: string | null) {
     if (!template) return;
 
     try {
@@ -56,6 +56,7 @@ export default function NewBroadcastPage() {
           excludeTagIds: audience.excludeTagIds,
         },
         variables,
+        scheduledAt,
       });
       router.push(`/broadcasts/${broadcastId}`);
     } catch (err) {
