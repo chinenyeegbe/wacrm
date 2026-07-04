@@ -29,6 +29,7 @@ import { SkeletonCard } from '@/components/dashboard/skeleton'
 import { QuickActions } from '@/components/dashboard/quick-actions'
 import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist'
 import { ConversationsChart } from '@/components/dashboard/conversations-chart'
+import { RecoveredRevenueCard } from '@/components/dashboard/recovered-revenue-card'
 import { PipelineDonut } from '@/components/dashboard/pipeline-donut'
 import { ResponseTimeChart } from '@/components/dashboard/response-time-chart'
 import { ActivityFeed } from '@/components/dashboard/activity-feed'
@@ -179,6 +180,9 @@ export default function DashboardPage() {
           </>
         )}
       </div>
+
+      {/* Recovered revenue — the number the product exists for */}
+      <RecoveredRevenueCard />
 
       {/* Quick actions */}
       <QuickActions />
