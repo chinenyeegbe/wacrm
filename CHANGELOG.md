@@ -17,6 +17,14 @@ server-side broadcast runner. **Migrations required (017, 018, 019).**
 
 ### Added
 
+- **Playbook audiences.** The broadcast wizard can now target existing
+  customers for repeat revenue instead of blasting everyone: **Service
+  due soon** (`next_due_date` within a window), **Recently served**
+  (`last_service_date` within a window — for review asks), and
+  **Dormant customers** (no conversation activity for N days — win-back).
+  Each has a configurable window; resolution is shared between the
+  estimate and the send so they can't drift.
+  (`src/lib/broadcasts/audience.ts`.)
 - **Broadcast scheduling.** The send step now offers "Send now" or
   "Schedule for later" with a date/time picker; scheduled broadcasts are
   created `scheduled` and the runner sends them once due. New `queued` /

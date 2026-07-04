@@ -15,12 +15,13 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { ArrowLeft, Send, Loader2, Users, Save } from 'lucide-react';
-
-interface AudienceConfig {
-  type: string;
-  tagIds?: string[];
-  csvContacts?: { phone: string; name?: string }[];
-}
+import {
+  SMART_AUDIENCES,
+  isSmartAudience,
+  resolveSmartAudienceIds,
+  smartWindowDays,
+  type AudienceConfig,
+} from '@/lib/broadcasts/audience';
 
 interface Step4Props {
   name: string;
@@ -86,6 +87,13 @@ export function Step4ScheduleSend({
           setEstimatedReach(uniqueIds.size);
         } else if (audience.type === 'csv' && audience.csvContacts) {
           setEstimatedReach(audience.csvContacts.length);
+        } else if (isSmartAudience(audience.type)) {
+          const ids = await resolveSmartAudienceIds(
+            supabase,
+            audience.type,
+            smartWindowDays(audience),
+          );
+          setEstimatedReach(ids.length);
         } else {
           setEstimatedReach(0);
         }
@@ -97,6 +105,9 @@ export function Step4ScheduleSend({
     calculateReach();
   }, [audience]);
 
+  const smartLabel = isSmartAudience(audience.type)
+    ? SMART_AUDIENCES.find((a) => a.type === audience.type)?.label
+    : undefined;
   const audienceLabel =
     audience.type === 'all'
       ? 'All Contacts'
@@ -104,7 +115,7 @@ export function Step4ScheduleSend({
         ? `Tags (${audience.tagIds?.length ?? 0} selected)`
         : audience.type === 'csv'
           ? 'CSV Upload'
-          : 'Custom';
+          : (smartLabel ?? 'Custom');
 
   return (
     <div className="space-y-6">
