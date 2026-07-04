@@ -4,27 +4,24 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Contact, MessageTemplate } from '@/types';
 import type { VariableMapping } from '@/lib/broadcasts/variables';
+import {
+  isSmartAudience,
+  resolveSmartAudienceIds,
+  smartWindowDays,
+  type AudienceConfig,
+  type CustomFieldFilter,
+} from '@/lib/broadcasts/audience';
 
 // Re-exported for existing consumers that import these from the hook.
 export type { VariableMapping } from '@/lib/broadcasts/variables';
 export { resolveVariables } from '@/lib/broadcasts/variables';
-
-export type CustomFieldOperator = 'is' | 'is_not' | 'contains';
-
-export interface CustomFieldFilter {
-  fieldId: string;
-  operator: CustomFieldOperator;
-  value: string;
-}
-
-export interface AudienceConfig {
-  type: 'all' | 'tags' | 'custom_field' | 'csv';
-  tagIds?: string[];
-  customField?: CustomFieldFilter;
-  csvContacts?: { phone: string; name?: string }[];
-  /** Contacts carrying any of these tags are subtracted from the result. */
-  excludeTagIds?: string[];
-}
+export type {
+  AudienceConfig,
+  AudienceType,
+  CustomFieldFilter,
+  CustomFieldOperator,
+  SmartAudienceType,
+} from '@/lib/broadcasts/audience';
 
 interface BroadcastPayload {
   name: string;
@@ -89,6 +86,23 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
       contacts = await resolveCustomFieldAudience(supabase, audience.customField);
     } else if (audience.type === 'csv' && audience.csvContacts) {
       contacts = await upsertCsvContacts(supabase, audience.csvContacts);
+    } else if (isSmartAudience(audience.type)) {
+      // Playbook audiences (service-due / recently-served / dormant).
+      const ids = await resolveSmartAudienceIds(
+        supabase,
+        audience.type,
+        smartWindowDays(audience),
+      );
+      if (ids.length > 0) {
+        const PAGE = 500;
+        for (let i = 0; i < ids.length; i += PAGE) {
+          const { data } = await supabase
+            .from('contacts')
+            .select('*')
+            .in('id', ids.slice(i, i + PAGE));
+          contacts.push(...((data ?? []) as Contact[]));
+        }
+      }
     }
 
     // Apply exclude tags (works across all contact-derived audience

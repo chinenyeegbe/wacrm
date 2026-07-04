@@ -13,24 +13,21 @@ import {
   ArrowRight,
   ArrowLeft,
   X,
+  CalendarClock,
+  Star,
+  Clock,
 } from 'lucide-react';
-
-type AudienceType = 'all' | 'tags' | 'custom_field' | 'csv';
-type CustomFieldOperator = 'is' | 'is_not' | 'contains';
-
-interface CustomFieldFilter {
-  fieldId: string;
-  operator: CustomFieldOperator;
-  value: string;
-}
-
-interface AudienceConfig {
-  type: AudienceType;
-  tagIds?: string[];
-  customField?: CustomFieldFilter;
-  csvContacts?: { phone: string; name?: string }[];
-  excludeTagIds?: string[];
-}
+import {
+  SMART_AUDIENCES,
+  isSmartAudience,
+  resolveSmartAudienceIds,
+  smartWindowDays,
+  type AudienceConfig,
+  type AudienceType,
+  type CustomFieldFilter,
+  type CustomFieldOperator,
+  type SmartAudienceType,
+} from '@/lib/broadcasts/audience';
 
 interface Step2Props {
   audience: AudienceConfig;
@@ -70,6 +67,13 @@ const audienceOptions: {
     icon: Upload,
   },
 ];
+
+// Playbook audiences — target existing customers for repeat revenue.
+const SMART_ICONS: Record<SmartAudienceType, typeof Users> = {
+  service_due: CalendarClock,
+  recently_completed: Star,
+  dormant: Clock,
+};
 
 const OPERATOR_OPTIONS: { value: CustomFieldOperator; label: string }[] = [
   { value: 'is', label: 'is' },
@@ -167,6 +171,13 @@ export function Step2SelectAudience({
       ) {
         setEstimatedCount(audience.csvContacts.length);
         return;
+      } else if (isSmartAudience(audience.type)) {
+        const ids = await resolveSmartAudienceIds(
+          supabase,
+          audience.type,
+          smartWindowDays(audience),
+        );
+        baseIds = new Set(ids);
       } else {
         // Partially-configured audience — wait for the user to finish.
         setEstimatedCount(null);
@@ -199,13 +210,7 @@ export function Step2SelectAudience({
     } finally {
       setLoadingCount(false);
     }
-  }, [
-    audience.type,
-    audience.tagIds,
-    audience.customField,
-    audience.csvContacts,
-    audience.excludeTagIds,
-  ]);
+  }, [audience]);
 
   useEffect(() => {
     fetchEstimatedCount();
@@ -238,6 +243,7 @@ export function Step2SelectAudience({
 
   const isValid =
     audience.type === 'all' ||
+    isSmartAudience(audience.type) ||
     (audience.type === 'tags' && audience.tagIds && audience.tagIds.length > 0) ||
     (audience.type === 'custom_field' &&
       !!audience.customField?.fieldId &&
@@ -275,6 +281,7 @@ export function Step2SelectAudience({
                       : undefined,
                   csvContacts:
                     option.type === 'csv' ? audience.csvContacts : undefined,
+                  smartWindowDays: undefined,
                 })
               }
               className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all ${
@@ -302,6 +309,78 @@ export function Step2SelectAudience({
           );
         })}
       </div>
+
+      {/* Playbook audiences — target existing customers for repeat revenue */}
+      <div>
+        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Playbook audiences
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {SMART_AUDIENCES.map((option) => {
+            const isSelected = audience.type === option.type;
+            const Icon = SMART_ICONS[option.type];
+            return (
+              <button
+                key={option.type}
+                onClick={() =>
+                  onUpdate({
+                    type: option.type,
+                    excludeTagIds: audience.excludeTagIds,
+                    smartWindowDays: option.defaultWindowDays,
+                  })
+                }
+                className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all ${
+                  isSelected
+                    ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
+                    : 'border-border bg-card/50 hover:border-border'
+                }`}
+              >
+                <div
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                    isSelected
+                      ? 'bg-primary/10 text-primary'
+                      : 'bg-secondary text-muted-foreground'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    {option.label}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {option.description}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {isSmartAudience(audience.type) && (
+        <div className="rounded-xl border border-border bg-card/50 p-4">
+          {SMART_AUDIENCES.filter((a) => a.type === audience.type).map((a) => (
+            <label key={a.type} className="block">
+              <span className="mb-1.5 block text-sm font-medium text-foreground">
+                {a.windowLabel}
+              </span>
+              <input
+                type="number"
+                min={1}
+                value={smartWindowDays(audience)}
+                onChange={(e) =>
+                  onUpdate({
+                    ...audience,
+                    smartWindowDays: Math.max(1, Number(e.target.value) || 1),
+                  })
+                }
+                className="h-9 w-32 rounded-lg border border-border bg-secondary px-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              />
+            </label>
+          ))}
+        </div>
+      )}
 
       {audience.type === 'tags' && (
         <div className="rounded-xl border border-border bg-card/50 p-4">
