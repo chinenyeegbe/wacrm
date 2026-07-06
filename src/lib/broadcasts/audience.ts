@@ -102,14 +102,19 @@ function ymd(date: Date): string {
 }
 
 /**
- * Resolve a smart audience to the matching contact IDs. Uses the caller's
- * (RLS-scoped) Supabase client, so it only ever returns the current
- * user's contacts. Shared by the estimate and the send path.
+ * Resolve a smart audience to the matching contact IDs.
+ *
+ * With an RLS-scoped client (the browser client), pass no `userId` — RLS
+ * limits results to the current user. With a service-role client (the
+ * playbook/broadcast cron), pass `userId` to scope explicitly, since the
+ * service role bypasses RLS. Shared by the estimate, the send path, and
+ * the playbook engine so they always agree on who matches.
  */
 export async function resolveSmartAudienceIds(
   supabase: SupabaseClient,
   type: SmartAudienceType,
   windowDays: number,
+  userId?: string,
 ): Promise<string[]> {
   const now = new Date();
 
@@ -117,32 +122,38 @@ export async function resolveSmartAudienceIds(
     // Service due between today and today+window (upcoming, not overdue-
     // forever). Uses idx_contacts_next_due_date.
     const until = new Date(now.getTime() + windowDays * 86_400_000);
-    const { data } = await supabase
+    let q = supabase
       .from('contacts')
       .select('id')
       .not('next_due_date', 'is', null)
       .gte('next_due_date', ymd(now))
       .lte('next_due_date', ymd(until));
+    if (userId) q = q.eq('user_id', userId);
+    const { data } = await q;
     return (data ?? []).map((r) => r.id as string);
   }
 
   if (type === 'recently_completed') {
     const since = new Date(now.getTime() - windowDays * 86_400_000);
-    const { data } = await supabase
+    let q = supabase
       .from('contacts')
       .select('id')
       .not('last_service_date', 'is', null)
       .gte('last_service_date', ymd(since));
+    if (userId) q = q.eq('user_id', userId);
+    const { data } = await q;
     return (data ?? []).map((r) => r.id as string);
   }
 
   // dormant — a contact whose most recent conversation activity is older
   // than the window. Deduped across conversations.
   const cutoff = new Date(now.getTime() - windowDays * 86_400_000);
-  const { data } = await supabase
+  let q = supabase
     .from('conversations')
     .select('contact_id')
     .not('last_message_at', 'is', null)
     .lt('last_message_at', cutoff.toISOString());
+  if (userId) q = q.eq('user_id', userId);
+  const { data } = await q;
   return [...new Set((data ?? []).map((r) => r.contact_id as string))];
 }

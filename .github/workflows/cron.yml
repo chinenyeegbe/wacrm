@@ -6,6 +6,7 @@ name: Cron
 #   /api/automations/cron — drains due automation `wait` steps
 #   /api/flows/cron        — sweeps abandoned (timed-out) flow runs
 #   /api/broadcasts/cron   — sends queued / scheduled broadcasts
+#   /api/playbooks/cron    — runs automated playbooks (enqueues broadcasts)
 #
 # Without a scheduler hitting these, `wait` steps never resume and
 # stale flow runs pin the one-active-run-per-contact index forever,
@@ -50,6 +51,15 @@ jobs:
           curl --fail --silent --show-error --max-time 60 \
             -H "x-cron-secret: ${{ secrets.AUTOMATION_CRON_SECRET }}" \
             "${{ secrets.APP_URL }}/api/flows/cron"
+
+      - name: Run automated playbooks
+        if: ${{ always() }}
+        # Runs before broadcasts so a playbook's freshly-enqueued campaign
+        # can be picked up by the broadcast step in the same tick.
+        run: |
+          curl --fail --silent --show-error --max-time 120 \
+            -H "x-cron-secret: ${{ secrets.AUTOMATION_CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/playbooks/cron"
 
       - name: Send queued broadcasts
         if: ${{ always() }}

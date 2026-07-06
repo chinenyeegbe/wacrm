@@ -13,10 +13,17 @@ and polish.
 
 Reliability and security hardening for message ingestion and the
 internal schedulers, the first customer-lifecycle primitives, and a
-server-side broadcast runner. **Migrations required (017–020).**
+server-side broadcast runner. **Migrations required (017–021).**
 
 ### Added
 
+- **Automated playbooks.** Save a smart audience + template as a
+  recurring **Playbook** (new page) — it runs daily, resolves the
+  audience, skips anyone the same playbook messaged within a cooldown,
+  and enqueues a broadcast (the broadcast runner sends it). Off by
+  default; turn each one on deliberately. New `playbooks` table
+  (migration 021) and `GET /api/playbooks/cron` — provision it just
+  before the broadcasts endpoint (see `CLOUDFLARE_DEPLOY.md` §4).
 - **Recovered-revenue counter.** The dashboard now shows the number the
   product exists for: revenue recovered from existing customers this
   month. Campaign replies (already attributed by the webhook) appear in
@@ -117,8 +124,9 @@ server-side broadcast runner. **Migrations required (017–020).**
 - Apply `supabase/migrations/017_message_hardening.sql` (RLS fix +
   dedup + unique index), `018_contacts_lifecycle.sql` (normalized phone
   + opt-out + job-record fields), `019_broadcast_queue.sql` (broadcast
-  queue states), **and** `020_recovered_revenue.sql` (recovered-revenue
-  attribution) before deploying this version.
+  queue states), `020_recovered_revenue.sql` (recovered-revenue
+  attribution), **and** `021_playbooks.sql` (automated playbooks) before
+  deploying this version.
 - Set `AUTOMATION_CRON_SECRET` and provision the schedulers (see
   `CLOUDFLARE_DEPLOY.md` §4) — now including `/api/broadcasts/cron`, or
   **broadcasts will not send**.
