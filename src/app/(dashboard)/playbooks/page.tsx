@@ -31,18 +31,19 @@ export default function PlaybooksPage() {
   const [creating, setCreating] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(() => {
     const db = createClient();
-    const [{ data: pbs }, { data: tpls }] = await Promise.all([
+    return Promise.all([
       db.from('playbooks').select('*').order('created_at', { ascending: false }),
       db
         .from('message_templates')
         .select('*')
         .eq('status', 'APPROVED')
         .order('created_at', { ascending: false }),
-    ]);
-    setPlaybooks((pbs ?? []) as Playbook[]);
-    setTemplates((tpls ?? []) as MessageTemplate[]);
+    ]).then(([{ data: pbs }, { data: tpls }]) => {
+      setPlaybooks((pbs ?? []) as Playbook[]);
+      setTemplates((tpls ?? []) as MessageTemplate[]);
+    });
   }, []);
 
   useEffect(() => {
@@ -181,12 +182,6 @@ function CreatePlaybookForm({
   const [cooldownDays, setCooldownDays] = useState(30);
   const [saving, setSaving] = useState(false);
 
-  // Default the window to the audience's suggested value on change.
-  useEffect(() => {
-    const def = SMART_AUDIENCES.find((a) => a.type === audienceType);
-    if (def) setWindowDays(def.defaultWindowDays);
-  }, [audienceType]);
-
   const chosenTemplate = useMemo(
     () => templates.find((t) => t.name === templateName),
     [templates, templateName],
@@ -250,7 +245,16 @@ function CreatePlaybookForm({
           </label>
           <select
             value={audienceType}
-            onChange={(e) => setAudienceType(e.target.value as SmartAudienceType)}
+            onChange={(e) => {
+              const next = e.target.value as SmartAudienceType;
+              setAudienceType(next);
+              // Reset the window to the new audience's suggested value —
+              // done here (not via an effect keyed on audienceType) so
+              // both updates land in the same render, per React's
+              // guidance on adjusting state from an event vs an effect.
+              const def = SMART_AUDIENCES.find((a) => a.type === next);
+              if (def) setWindowDays(def.defaultWindowDays);
+            }}
             className="h-9 w-full rounded-lg border border-border bg-secondary px-2.5 text-sm text-foreground outline-none focus:border-primary"
           >
             {SMART_AUDIENCES.map((a) => (
