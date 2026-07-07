@@ -87,6 +87,7 @@ the app **cannot** fire them itself:
 | `GET /api/automations/cron` | Drains due automation `wait` steps so paused automations resume. |
 | `GET /api/flows/cron` | Sweeps abandoned flow runs past their timeout. Without it, a stale run pins the one-active-run-per-contact index and blocks new triggers for that contact **forever**. |
 | `GET /api/broadcasts/cron` | Sends queued and scheduled broadcasts. The wizard only enqueues; without this endpoint running, broadcasts never send. |
+| `GET /api/playbooks/cron` | Runs automated playbooks (daily): resolves each playbook's audience, skips cooldown contacts, and enqueues a broadcast. Run it just before the broadcasts endpoint. |
 
 Both require the `x-cron-secret` header to equal `AUTOMATION_CRON_SECRET`
 (constant-time checked) and return `503` if the secret is unset. A
